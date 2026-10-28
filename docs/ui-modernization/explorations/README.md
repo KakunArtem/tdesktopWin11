@@ -1,8 +1,9 @@
 # Soft Panels, readable (exploration)
 
-Date: 2026-10-28. Status: proposal, not yet reviewed by the user. The
-[approved reference](../reference/README.md) remains the baseline and is
-unchanged.
+Date: 2026-10-28. Status: chosen by the user on 2026-10-28 as the appearance
+target, with Acrylic as the working guideline for the native material. It
+refines the [approved reference](../reference/README.md), which stays
+unchanged as the earlier baseline.
 
 This exploration applies the [readability check](../design-directions.md#readability-check-of-the-approved-reference)
 and the [gaps against Telegram behavior](../design-directions.md#gaps-against-current-telegram-behavior)

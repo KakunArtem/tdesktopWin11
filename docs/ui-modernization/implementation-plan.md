@@ -10,8 +10,9 @@
 
 Date: 2026-10-28. Status: proposal for review. Inputs: the
 [approved reference](reference/README.md) and the
-[readable exploration](explorations/README.md), which is not yet approved;
-this roadmap assumes its material values and contrast requirement.
+[readable exploration](explorations/README.md), which the user chose as the
+appearance target. Acrylic is the working guideline for the native material;
+native work aims to match the mockup, not a particular material.
 
 ---
 
@@ -204,18 +205,23 @@ Phases 1–3 are sequential; 4–7 can run in parallel; 8–9 follow.
 | Rebase conflicts from many paint-site edits. | One-line helper calls, new files, one area per commit. |
 | Submodule changes have no home. | Fork `lib_ui` (and `lib_base` if needed) before Phase 3. |
 
-## Decisions needed
+## Decisions
 
-1. Approve the readable exploration as the target, or adjust it.
-2. Acrylic (desktop visible) or Mica (wallpaper tint only). The approved look
-   implies Acrylic.
-3. Minimum Windows build for material; proposed: Windows 11 22H2 (22621).
-4. Fork `lib_ui` and `lib_base` under your account before Phase 3.
-5. Whether transparency is on by default, and the default chat background in
+Made on 2026-10-28:
+
+- The readable mockup is the appearance target.
+- Acrylic is the working guideline for the native material. Mica stays an
+  alternative if Acrylic cannot match the mockup.
+
+Still needed:
+
+1. Minimum Windows build for material; proposed: Windows 11 22H2 (22621).
+2. Fork `lib_ui` and `lib_base` under your account before Phase 3.
+3. Whether transparency is on by default, and the default chat background in
    material mode.
-6. Whether the Soft Panels layout applies on macOS and Linux or stays
+4. Whether the Soft Panels layout applies on macOS and Linux or stays
    Windows-only.
-7. Whether material is disabled when the native window frame is on. Phase 1
+5. Whether material is disabled when the native window frame is on. Phase 1
    assumes yes.
 
 ## Execution handoff

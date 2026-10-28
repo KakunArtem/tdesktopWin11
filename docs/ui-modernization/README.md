@@ -19,9 +19,13 @@ Windows 11 as the design target.
 - Keep message content and inputs readable against the material.
 - Use the user's existing Windhawk theme setup as a visual reference for the
   desired Windows appearance.
+- Use the [readable Soft Panels mockup](explorations/README.md) as the
+  appearance target, rather than choosing between Acrylic and Mica first.
+  Acrylic is the working guideline for now (2026-10-28).
 
-Use the saved reference as the appearance baseline. Detailed element states,
-native materials and implementation details remain under discussion.
+The approved reference remains the earlier baseline; the readable mockup
+refines it. Detailed element states, the final native material and
+implementation details remain under discussion.
 
 ## Supplied reference
 
@@ -45,8 +49,8 @@ requests.
 - Which macOS client screens and elements should guide the redesign.
 - Which Telegram surfaces should change first. A proposed order is in
   [the design directions](design-directions.md).
-- The native Windows material (Acrylic or Mica), tint strength and technical
-  implementation. The overall appearance is approved.
+- The final native Windows material, tint strength and technical
+  implementation. The mockup is the target and Acrylic the working guideline.
 - Minimum text contrast and material fill behind text; the reference falls
   short in places, as the [readability check](design-directions.md#readability-check-of-the-approved-reference)
   records.

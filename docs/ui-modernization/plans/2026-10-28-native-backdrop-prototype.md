@@ -974,6 +974,7 @@ Paste the `Material:` and `QRhi-Check [material]` lines from `log.txt`.
 | --- | --- | --- |
 | Option off is unchanged | `Test-Backdrop.ps1 -Expect Opaque` |  |
 | Backdrop visible | `Test-Backdrop.ps1 -Expect Transparent` |  |
+| Matches the mockup | Put a similar blue wallpaper behind the window and compare the strip with `docs/ui-modernization/explorations/soft-panels-readable-light.png` and `-dark.png`: similar tint, blur and visibility of the desktop |  |
 | Light and dark | Toggle night mode; backdrop tint follows |  |
 | Maximized | Maximize, rerun the transparent check |  |
 | Snapped | Snap left with Win+Left, look at the strip |  |
@@ -1014,6 +1015,12 @@ back on.
 Fill in "Decision". Go requires: the backdrop check passes, no holes, and
 maximized and full-screen states draw correctly. Anything else is a
 conditional go or a no-go.
+
+The mockup is the target and Acrylic only the working guideline. If the
+"Matches the mockup" row fails while everything else passes, compare Mica:
+temporarily set `kDWMSBT_TRANSIENTWINDOW` in `window_material_win.cpp` to
+`DWORD(2)` (the Mica value), rebuild, repeat that row, record both results
+under "Decision", and restore `DWORD(3)` without committing the change.
 
 - [ ] **Step 5: Link the record from the design docs**
 

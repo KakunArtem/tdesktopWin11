@@ -85,8 +85,10 @@ surfaces. That compatibility needs a later, explicitly requested prototype.
 The user initially selected chrome and navigation translucency with a calm
 message canvas, then revised that scope after reviewing the visual examples.
 The current direction is Soft Panels with thinner borders and translucent
-contact and conversation panels. Acrylic versus Mica, tint strength and the
-technical implementation remain undecided.
+contact and conversation panels. The user then made the readable mockup the
+appearance target, with Acrylic as the working guideline rather than a final
+choice over Mica. Tint strength and the technical implementation remain
+undecided.
 
 The approved reference is therefore closest to approach 3. Its message and
 composer fills stay dense, but list, header and metadata text sits directly
@@ -95,8 +97,9 @@ on the material; see the
 
 ## Questions reserved for the next phase
 
-- Acrylic versus Mica and tint strength for chrome, contacts and conversation
-  surfaces, plus their relationship to chat wallpapers.
+- Whether Acrylic, the working guideline, or Mica best reproduces the mockup,
+  and tint strength for chrome, contacts and conversation surfaces, plus their
+  relationship to chat wallpapers.
 - Which macOS Telegram client screens and elements should guide the shapes,
   spacing and grouping. No macOS layout study has been done in this pass.
 - Supported Windows versions, opaque fallback behavior and custom-theme policy.
