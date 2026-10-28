@@ -19,8 +19,10 @@ approved snapshot.
   ideas and visual examples.
 - Read supplied references and relevant project code. Cite findings, and label
   proposed visual treatments and technical approaches as proposals.
-- Visual concept mockups are now in scope. Keep implementation plans, product
-  source changes and builds for later requests.
+- Visual concept mockups are now in scope.
+- Implementation planning is in scope: the general plan in
+  `implementation-plan.md`, then smaller per-phase plans. Keep product source
+  changes and builds for later requests.
 
 ## Maintaining the documents
 

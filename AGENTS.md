@@ -15,9 +15,10 @@ using Windows 11-style translucency in place of Liquid Glass.
 - Start UI modernization work with [the project brief](docs/ui-modernization/README.md).
 - Keep the fork's design documentation in `docs/ui-modernization/`, following
   that directory's `AGENTS.md`.
-- The current phase includes reference research, high-level UI planning and
-  visual concept exploration. Keep findings and proposals in the design docs;
-  product implementation and builds are deferred until requested.
+- The current phase includes reference research, visual concept exploration
+  and implementation planning. Keep findings, proposals and plans in the
+  design docs; product implementation and builds are deferred until
+  requested.
 - The user's Windhawk setup and Translucent Explorer11 theme are visual
   references. No dependency, rendering approach or specific Windows material
   has been selected.
