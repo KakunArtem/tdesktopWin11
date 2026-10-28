@@ -432,6 +432,28 @@ class WorkspaceTest(unittest.TestCase):
 			self.assertFalse((worktrees / "macbook-twork").exists())
 			self.assertNotIn("slot_worktree", config)
 
+	def test_checkout_tag_lowercases_folder(self):
+		with tempfile.TemporaryDirectory() as temporary:
+			root = Path(temporary)
+			source = root / "TWork"
+			source.mkdir()
+			git(source, "init", "--initial-branch=master")
+			build = source / "Telegram" / "build"
+			build.mkdir(parents=True)
+			(build / "ai-machine-tag").write_text("macbook\n", encoding="utf-8")
+			main = root / "ai-main"
+			main.mkdir()
+			git(main, "init", "--initial-branch=master")
+			args = SimpleNamespace(
+				source_root=str(source),
+				ai_main=str(main),
+				worktrees_root=str(root / "worktrees"),
+			)
+
+			config = workspace.repository_config(args)
+
+			self.assertEqual(config["checkout_tag"], "macbook-twork")
+
 	def test_inbox_lifecycle_ignores_dirty_task_slot(self):
 		with tempfile.TemporaryDirectory() as temporary:
 			root = Path(temporary)

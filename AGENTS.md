@@ -26,6 +26,10 @@ using Windows 11-style translucency in place of Liquid Glass.
   a later request explicitly includes behavior changes.
 - For this native Windows checkout, use PowerShell and Windows paths. The WSL
   guidance below applies when working from an actual WSL checkout.
+- The `../ai-tdesktop` queue described under AI Tasks is a local repository
+  created for this fork, with no remote and no `ai.py` browser. Workflow
+  helpers call `python3`, which must resolve to a real Python 3 interpreter
+  rather than the Microsoft Store alias.
 
 ## AI Tasks
 
@@ -66,8 +70,9 @@ done | sort
   `split-required`, then ready `todo` (no `claimed_by`, and every `depends_on`
   already `approved`), then `todo` still waiting on a dependency. Say who owns
   claimed work. This checkout's tag is the `Telegram/build/ai-machine-tag` value
-  plus the checkout folder name, such as `macbook-tdesktop`, and work claimed by
-  another checkout is never taken over without an explicit human reassignment.
+  plus the lowercased checkout folder name, such as `macbook-tdesktop`, and
+  work claimed by another checkout is never taken over without an explicit
+  human reassignment.
 - Browsing is read-only. Listing, summarizing, comparing, or recommending tasks
   never edits `state.yaml`, publishes a lifecycle commit, or starts
   implementation, no matter how small the task looks.

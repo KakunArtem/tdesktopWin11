@@ -168,7 +168,7 @@ def read_machine_tag(root):
 def repository_config(args, create=False):
 	root = source_root(args.source_root)
 	machine = read_machine_tag(root)
-	checkout = root.name
+	checkout = root.name.lower()
 	if not TAG_PATTERN.fullmatch(checkout):
 		raise WorkspaceError(
 			f"Invalid checkout folder {checkout!r}; use lowercase letters, digits, and hyphens."
