@@ -2,6 +2,31 @@
 
 This guide defines repository-wide instructions for coding agents working with the Telegram Desktop codebase.
 
+## Windows 11 UI fork
+
+This repository is a fork of the official Telegram Desktop client. Its product
+direction is a more modern UI inspired by Telegram's macOS client elements,
+using Windows 11-style translucency in place of Liquid Glass.
+
+- The user selected Soft Panels with thinner borders and translucent contact
+  and conversation panels. Keep message content and inputs readable.
+- Use the [approved visual reference](docs/ui-modernization/reference/README.md)
+  as the baseline when refining UI elements.
+- Start UI modernization work with [the project brief](docs/ui-modernization/README.md).
+- Keep the fork's design documentation in `docs/ui-modernization/`, following
+  that directory's `AGENTS.md`.
+- The current phase includes reference research, high-level UI planning and
+  visual concept exploration. Keep findings and proposals in the design docs;
+  product implementation and builds are deferred until requested.
+- The user's Windhawk setup and Translucent Explorer11 theme are visual
+  references. No dependency, rendering approach or specific Windows material
+  has been selected.
+- Keep confirmed user direction separate from proposals and unverified
+  assumptions. Preserve Telegram behavior while changing presentation unless
+  a later request explicitly includes behavior changes.
+- For this native Windows checkout, use PowerShell and Windows paths. The WSL
+  guidance below applies when working from an actual WSL checkout.
+
 ## AI Tasks
 
 In this repository "task" is a specific term. It always means one work record in

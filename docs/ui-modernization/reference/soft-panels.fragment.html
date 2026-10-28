@@ -1,0 +1,463 @@
+<style>
+#telegram-directions {
+  --tg-desktop-image: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg);
+  position: relative;
+  isolation: isolate;
+  padding: 26px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #122b5b;
+}
+#telegram-directions [data-desktop-backdrop] { position: absolute; inset: 0; background: var(--tg-desktop-image); }
+#telegram-directions > section { position: relative; z-index: 1; }
+#telegram-directions .tg-app {
+  --tg-text: light-dark(#192b3f, #e8eef6);
+  --tg-secondary: light-dark(#52657b, #a2b2c5);
+  --tg-faint: light-dark(#6a7b8e, #95a5b9);
+  --tg-accent: light-dark(#0564b6, #81c3ff);
+  --tg-selected: light-dark(#cbdff4, #284661);
+  --tg-line: light-dark(#2339551c, #ffffff13);
+  --tg-canvas: light-dark(#f3f6fa, #121c28);
+  --tg-surface: light-dark(#ffffff, #233141);
+  --tg-surface-hover: light-dark(#e6edf6, #304257);
+  --tg-outgoing: light-dark(#d5e8fa, #214766);
+  --tg-outgoing-text: light-dark(#163957, #e8f4ff);
+  --tg-glow: light-dark(#97c7f8, #235987);
+  --tg-other-glow: light-dark(#c9c7ea, #3d385e);
+  --tg-base: light-dark(#e9eef5, #1b2838);
+  --tg-window-edge: light-dark(#ffffffb8, #ffffff20);
+  --tg-round: 12px;
+  --tg-tint: 45%;
+  --tg-row: 72px;
+  --tg-message-gap: 13px;
+  color: var(--tg-text);
+  font: 400 14px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  width: 100%;
+  height: 674px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 10% 8%, color-mix(in srgb, var(--tg-glow) var(--tg-tint), transparent), transparent 66%),
+    radial-gradient(ellipse at 32% 90%, color-mix(in srgb, var(--tg-other-glow) var(--tg-tint), transparent), transparent 63%),
+    var(--tg-base);
+  border: 1px solid var(--tg-window-edge);
+  border-radius: 12px;
+  overflow: hidden;
+  isolation: isolate;
+}
+#telegram-directions .tg-app *, #telegram-directions .tg-app *::before, #telegram-directions .tg-app *::after { box-sizing: border-box; }
+#telegram-directions .tg-app button, #telegram-directions .tg-app input { font: inherit; color: inherit; }
+#telegram-directions .tg-app button { border: 0; background: none; padding: 0; }
+#telegram-directions .tg-app button:focus-visible, #telegram-directions .tg-app input:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: -2px; }
+#telegram-directions .tg-app [hidden] { display: none !important; }
+#telegram-directions .tg-icon { width: 19px; height: 19px; display: block; flex-shrink: 0; stroke-width: 1.6; }
+#telegram-directions .tg-titlebar { height: 36px; flex-shrink: 0; display: flex; align-items: center; padding-left: 16px; gap: 8px; }
+#telegram-directions .tg-brand-icon { width: 14px; height: 14px; color: var(--tg-accent); }
+#telegram-directions .tg-brand { font-size: 12px; }
+#telegram-directions .tg-caption { margin-left: auto; display: flex; align-self: stretch; }
+#telegram-directions .tg-caption button { width: 45px; display: grid; place-items: center; }
+#telegram-directions .tg-caption .tg-icon { width: 12px; height: 12px; }
+#telegram-directions .tg-caption button:hover { background: var(--tg-line); }
+#telegram-directions .tg-caption button:last-child:hover { background: light-dark(#f5d9de, #823b48); }
+#telegram-directions .tg-workspace { display: grid; grid-template-columns: 64px 264px minmax(0, 1fr); flex: 1; min-height: 0; }
+#telegram-directions .tg-rail { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 14px 6px 10px; border-right: 1px solid var(--tg-line); }
+#telegram-directions .tg-rail button { min-height: 57px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border-radius: 10px; color: var(--tg-secondary); position: relative; }
+#telegram-directions .tg-rail button .tg-icon { width: 21px; height: 21px; }
+#telegram-directions .tg-rail button span { font-size: 11px; }
+#telegram-directions .tg-rail button:hover { background: var(--tg-line); }
+#telegram-directions .tg-rail button[aria-pressed="true"] { background: var(--tg-selected); color: var(--tg-accent); }
+#telegram-directions .tg-rail button[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; height: 19px; width: 3px; border-radius: 2px; background: var(--tg-accent); }
+#telegram-directions .tg-rail .tg-rail-bottom { margin-top: auto; }
+#telegram-directions .tg-avatar { height: 42px; width: 42px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 14px; font-weight: 500; background: light-dark(#c4d8ec, #40576f); color: light-dark(#294a69, #e6f1fc); }
+#telegram-directions .tg-avatar[data-tone="lilac"] { background: light-dark(#d9d1e8, #554b6b); color: light-dark(#57416c, #e9e0ff); }
+#telegram-directions .tg-avatar[data-tone="sage"] { background: light-dark(#ccdeda, #3c5a57); color: light-dark(#355b53, #def5ec); }
+#telegram-directions .tg-avatar[data-tone="sand"] { background: light-dark(#e7d6c7, #665344); color: light-dark(#704d30, #f8e8d5); }
+#telegram-directions .tg-rail .tg-avatar { width: 30px; height: 30px; font-size: 11px; }
+#telegram-directions .tg-sidebar { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--tg-line); }
+#telegram-directions .tg-list-heading { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px 5px; min-height: 44px; }
+#telegram-directions .tg-list-heading strong { font-size: 19px; font-weight: 500; letter-spacing: -.35px; }
+#telegram-directions .tg-icon-button { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; color: var(--tg-secondary) !important; }
+#telegram-directions .tg-icon-button:hover { background: var(--tg-line); }
+#telegram-directions .tg-search { height: 35px; display: flex; align-items: center; gap: 8px; margin: 7px 12px 11px; padding: 0 10px; border: 1px solid var(--tg-line); border-radius: 7px; background: color-mix(in srgb, var(--tg-surface) 51%, transparent); color: var(--tg-secondary); }
+#telegram-directions .tg-search .tg-icon { width: 16px; height: 16px; }
+#telegram-directions .tg-search input { background: transparent; border: 0; min-width: 0; width: 100%; height: 100%; font-size: 13px; }
+#telegram-directions .tg-app input::placeholder { color: var(--tg-secondary); opacity: 1; }
+#telegram-directions .tg-folder-tabs { display: none; }
+#telegram-directions .tg-list-label { padding: 5px 17px 8px; color: var(--tg-secondary); font-size: 11px; letter-spacing: .6px; }
+#telegram-directions .tg-chat-list { display: flex; flex-direction: column; padding: 0 7px; gap: 3px; }
+#telegram-directions .tg-chat-row { display: flex; align-items: center; gap: 10px; min-height: var(--tg-row); text-align: left; padding: 10px 9px !important; border-radius: var(--tg-round); position: relative; width: 100%; }
+#telegram-directions .tg-chat-row:hover { background: var(--tg-line); }
+#telegram-directions .tg-chat-row[aria-pressed="true"] { background: var(--tg-selected); }
+#telegram-directions .tg-chat-copy { flex: 1; min-width: 0; display: block; }
+#telegram-directions .tg-chat-top { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; }
+#telegram-directions .tg-chat-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#telegram-directions .tg-chat-time { margin-left: auto; font-size: 11px; color: var(--tg-secondary); white-space: nowrap; }
+#telegram-directions .tg-chat-bottom { display: flex; align-items: center; gap: 6px; }
+#telegram-directions .tg-chat-preview { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; color: var(--tg-secondary); font-size: 12px; flex: 1; }
+#telegram-directions .tg-unread { min-width: 19px; height: 19px; display: grid; place-items: center; background: var(--tg-accent); color: light-dark(#ffffff, #102337); border-radius: 12px; font-size: 11px; padding: 0 5px; }
+#telegram-directions .tg-muted-icon { width: 13px; height: 13px; color: var(--tg-secondary); }
+#telegram-directions .tg-sidebar-footer { margin-top: auto; padding: 12px 16px; display: flex; gap: 9px; align-items: center; border-top: 1px solid var(--tg-line); color: var(--tg-secondary); font-size: 12px; }
+#telegram-directions .tg-sidebar-footer .tg-icon { width: 15px; height: 15px; }
+#telegram-directions .tg-conversation { background: var(--tg-canvas); position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+#telegram-directions .tg-chat-header { height: 68px; flex-shrink: 0; display: flex; align-items: center; gap: 11px; padding: 0 22px; border-bottom: 1px solid var(--tg-line); background: var(--tg-canvas); }
+#telegram-directions .tg-chat-header .tg-avatar { width: 38px; height: 38px; font-size: 12px; }
+#telegram-directions .tg-heading-copy { flex: 1; min-width: 0; }
+#telegram-directions .tg-heading-copy strong { display: block; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#telegram-directions .tg-status { display: block; color: var(--tg-secondary); font-size: 12px; margin-top: 2px; }
+#telegram-directions .tg-header-actions { display: flex; gap: 5px; }
+#telegram-directions .tg-back { display: none; }
+#telegram-directions .tg-pinned { display: flex; align-items: center; gap: 10px; padding: 9px 22px; font-size: 12px; border-bottom: 1px solid var(--tg-line); }
+#telegram-directions .tg-pinned .tg-icon { width: 15px; height: 15px; color: var(--tg-accent); }
+#telegram-directions .tg-pinned-copy { min-width: 0; display: flex; flex-direction: column; }
+#telegram-directions .tg-pinned-copy strong { font-weight: 500; font-size: 11px; color: var(--tg-accent); }
+#telegram-directions .tg-pinned-copy span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#telegram-directions .tg-messages { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--tg-message-gap); padding: 16px 26px 19px; }
+#telegram-directions .tg-date { align-self: center; font-size: 11px; color: var(--tg-secondary); padding: 4px 11px; border-radius: 15px; background: light-dark(#e5ebf2, #243141); margin-bottom: 2px; }
+#telegram-directions .tg-message-line { display: flex; align-items: flex-end; gap: 8px; }
+#telegram-directions .tg-message-line > .tg-avatar { width: 28px; height: 28px; font-size: 11px; }
+#telegram-directions .tg-bubble { max-width: 86%; background: var(--tg-surface); padding: 9px 12px 7px; border-radius: var(--tg-round) var(--tg-round) var(--tg-round) 4px; box-shadow: 0 1px 1px var(--tg-line); min-width: 0; }
+#telegram-directions .tg-bubble p { margin: 3px 0 0; font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+#telegram-directions .tg-sender { font-weight: 500; font-size: 12px; color: var(--tg-accent); }
+#telegram-directions .tg-meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 3px; font-size: 11px; color: var(--tg-secondary); }
+#telegram-directions .tg-meta .tg-icon { width: 14px; height: 14px; }
+#telegram-directions .tg-message-line.tg-out { justify-content: flex-end; }
+#telegram-directions .tg-out .tg-bubble { background: var(--tg-outgoing); color: var(--tg-outgoing-text); max-width: 80%; border-radius: var(--tg-round) var(--tg-round) 4px var(--tg-round); }
+#telegram-directions .tg-out .tg-meta { color: light-dark(#426784, #a6c6df); }
+#telegram-directions .tg-file { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+#telegram-directions .tg-file-icon { height: 39px; width: 35px; border-radius: 8px; background: var(--tg-selected); color: var(--tg-accent); display: grid; place-items: center; }
+#telegram-directions .tg-file-copy strong { font-weight: 500; font-size: 13px; display: block; }
+#telegram-directions .tg-file-copy span { color: var(--tg-secondary); font-size: 11px; display: block; margin-top: 3px; }
+#telegram-directions .tg-reaction { display: inline-flex; gap: 5px; align-items: center; font-size: 11px !important; margin-top: 7px; border-radius: 12px; padding: 3px 7px !important; background: var(--tg-selected) !important; color: var(--tg-accent) !important; }
+#telegram-directions .tg-reaction .tg-icon { width: 13px; height: 13px; }
+#telegram-directions .tg-reaction[aria-pressed="true"] .tg-icon { fill: currentColor; }
+#telegram-directions .tg-composer-wrap { padding: 0 21px 17px; }
+#telegram-directions .tg-composer { height: 53px; display: flex; align-items: center; gap: 7px; padding: 0 8px; background: var(--tg-surface); border: 1px solid var(--tg-line); border-radius: 10px; box-shadow: 0 2px 6px color-mix(in srgb, var(--tg-text) 3%, transparent); }
+#telegram-directions .tg-composer input { height: 100%; flex: 1; min-width: 0; border: 0; background: transparent; font-size: 14px; }
+#telegram-directions .tg-composer .tg-send { width: 35px; height: 35px; display: grid; place-items: center; border-radius: 9px; background: var(--tg-accent); color: light-dark(#ffffff, #102337); flex-shrink: 0; }
+#telegram-directions .tg-info { position: absolute; right: 10px; top: 61px; width: 244px; border: 1px solid var(--tg-line); background: var(--tg-surface); border-radius: 13px; box-shadow: 0 12px 42px color-mix(in srgb, var(--tg-text) 17%, transparent); padding: 18px; z-index: 4; }
+#telegram-directions .tg-info .tg-close-info { position: absolute; right: 5px; top: 5px; }
+#telegram-directions .tg-info > .tg-avatar { height: 56px; width: 56px; font-size: 18px; margin: 8px auto 12px; }
+#telegram-directions .tg-info strong { display: block; text-align: center; font-size: 16px; font-weight: 500; }
+#telegram-directions .tg-info p { text-align: center; color: var(--tg-secondary); margin: 5px 0 16px; font-size: 12px; }
+#telegram-directions .tg-info-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 13px; border-top: 1px solid var(--tg-line); }
+#telegram-directions .tg-info-row .tg-icon { color: var(--tg-secondary); width: 17px; height: 17px; }
+#telegram-directions .tg-quiet .tg-composer { border-radius: 9px; }
+#telegram-directions .tg-quiet .tg-chat-row { border-radius: 8px; }
+#telegram-directions .tg-explorer { --tg-glow: light-dark(#78b3f8, #1d63b2); --tg-other-glow: light-dark(#b8b1ed, #463274); }
+#telegram-directions .tg-explorer .tg-workspace { grid-template-columns: 292px minmax(0, 1fr); }
+#telegram-directions .tg-explorer .tg-rail { display: none; }
+#telegram-directions .tg-explorer .tg-list-heading { padding: 15px 17px 3px; }
+#telegram-directions .tg-explorer .tg-search { margin: 10px 15px 6px; height: 36px; border-radius: 5px; border-bottom: 1px solid color-mix(in srgb, var(--tg-text) 20%, transparent); }
+#telegram-directions .tg-explorer .tg-folder-tabs { display: flex; margin: 5px 12px 10px; gap: 3px; border-bottom: 1px solid var(--tg-line); }
+#telegram-directions .tg-explorer .tg-folder-tabs button { height: 36px; flex: 1; font-size: 12px; position: relative; color: var(--tg-secondary); }
+#telegram-directions .tg-explorer .tg-folder-tabs button[aria-pressed="true"] { color: var(--tg-text); }
+#telegram-directions .tg-explorer .tg-folder-tabs button[aria-pressed="true"]::after { content: ""; position: absolute; bottom: 0; left: 26%; right: 26%; height: 3px; border-radius: 3px; background: var(--tg-accent); }
+#telegram-directions .tg-explorer .tg-list-label { display: none; }
+#telegram-directions .tg-explorer .tg-chat-row { border-radius: 5px; }
+#telegram-directions .tg-explorer .tg-chat-row[aria-pressed="true"] { background: color-mix(in srgb, var(--tg-accent) 17%, transparent); }
+#telegram-directions .tg-explorer .tg-chat-row[aria-pressed="true"]::before { content: ""; position: absolute; left: 0; width: 3px; height: 28px; border-radius: 2px; background: var(--tg-accent); }
+#telegram-directions .tg-explorer .tg-chat-header { height: 64px; }
+#telegram-directions .tg-explorer .tg-composer-wrap { padding: 12px 17px; background: var(--tg-surface); border-top: 1px solid var(--tg-line); }
+#telegram-directions .tg-explorer .tg-composer { background: var(--tg-canvas); border-radius: 7px; box-shadow: none; }
+#telegram-directions .tg-soft {
+  --tg-contact-opacity: 0%;
+  --tg-canvas-opacity: 10%;
+  --tg-window-opacity: 64%;
+  --tg-blur: 12px;
+  --tg-bubble-opacity: 94%;
+  --tg-composer-opacity: 94%;
+  --tg-composer-radius: 18px;
+  --tg-frame-inset: 5px;
+  --tg-edge-strength: 7%;
+  --tg-line: color-mix(in srgb, var(--tg-text) var(--tg-edge-strength), transparent);
+  --tg-glow: light-dark(#96bff1, #315c89);
+  --tg-other-glow: light-dark(#c9bddf, #504066);
+  border: 0;
+  box-shadow: inset 0 0 0 .5px var(--tg-line);
+  background: color-mix(in srgb, var(--tg-base) var(--tg-window-opacity), transparent);
+  backdrop-filter: blur(var(--tg-blur)) saturate(1.12);
+  -webkit-backdrop-filter: blur(var(--tg-blur)) saturate(1.12);
+}
+#telegram-directions .tg-soft .tg-workspace { grid-template-columns: 56px 256px minmax(0, 1fr); padding: 1px var(--tg-frame-inset) var(--tg-frame-inset) 0; gap: 4px; }
+#telegram-directions .tg-soft .tg-rail { border-right: 0; padding: 12px 4px 4px; }
+#telegram-directions .tg-soft .tg-sidebar { border-right: 0; padding-right: 3px; border-radius: 12px; background: color-mix(in srgb, var(--tg-base) var(--tg-contact-opacity), transparent); }
+#telegram-directions .tg-soft .tg-search { border: 0; box-shadow: inset 0 0 0 .5px var(--tg-line); background: color-mix(in srgb, var(--tg-surface) 38%, transparent); border-radius: 9px; }
+#telegram-directions .tg-soft .tg-conversation { border-radius: 15px; border: 0; box-shadow: inset 0 0 0 .5px var(--tg-line); background: color-mix(in srgb, var(--tg-canvas) var(--tg-canvas-opacity), transparent); }
+#telegram-directions .tg-soft .tg-chat-header { margin: 4px 6px 0; padding: 0 12px; height: 63px; border-bottom: 0; background: transparent; }
+#telegram-directions .tg-soft .tg-pinned { margin: 0 16px; padding: 7px 10px; border: 0; background: color-mix(in srgb, var(--tg-surface) 56%, transparent); border-radius: 9px; }
+#telegram-directions .tg-soft .tg-bubble { background: color-mix(in srgb, var(--tg-surface) var(--tg-bubble-opacity), transparent); box-shadow: 0 .5px 0 var(--tg-line); }
+#telegram-directions .tg-soft .tg-out .tg-bubble { background: color-mix(in srgb, var(--tg-outgoing) var(--tg-bubble-opacity), transparent); }
+#telegram-directions .tg-soft .tg-composer-wrap { padding: 0 20px 17px; }
+#telegram-directions .tg-soft .tg-composer { height: 55px; border: 0; background: color-mix(in srgb, var(--tg-surface) var(--tg-composer-opacity), transparent); border-radius: var(--tg-composer-radius); box-shadow: inset 0 0 0 .5px var(--tg-line), 0 3px 12px color-mix(in srgb, var(--tg-text) 5%, transparent); padding: 0 10px; }
+#telegram-directions .tg-soft .tg-composer .tg-send { border-radius: 50%; }
+#telegram-directions .tg-soft .tg-chat-row { border-radius: var(--tg-row-radius, 10px); }
+#telegram-directions .tg-soft .tg-chat-row[aria-pressed="true"] { background: color-mix(in srgb, var(--tg-selected) 78%, transparent); }
+#telegram-directions .tg-soft .tg-sidebar-footer { border-top: 0; }
+@media (max-width: 850px) {
+  #telegram-directions .tg-workspace { grid-template-columns: 54px 230px minmax(0, 1fr); }
+  #telegram-directions .tg-explorer .tg-workspace { grid-template-columns: 252px minmax(0, 1fr); }
+  #telegram-directions .tg-soft .tg-workspace { grid-template-columns: 50px 221px minmax(0, 1fr); gap: 3px; padding-right: var(--tg-frame-inset); }
+  #telegram-directions .tg-chat-header { padding: 0 15px; gap: 8px; }
+  #telegram-directions .tg-chat-header .tg-avatar { display: none; }
+  #telegram-directions .tg-header-actions { gap: 0; }
+  #telegram-directions .tg-messages { padding: 14px 15px 17px; }
+  #telegram-directions .tg-composer-wrap { padding: 0 12px 14px; }
+  #telegram-directions .tg-bubble { max-width: 91%; }
+  #telegram-directions .tg-out .tg-bubble { max-width: 89%; }
+  #telegram-directions .tg-soft .tg-composer-wrap { padding: 0 13px 15px; }
+  #telegram-directions .tg-app { height: 712px; }
+}
+@media (max-width: 620px) {
+  #telegram-directions { padding: 12px; border-radius: 14px; }
+  #telegram-directions .tg-app { height: 712px; }
+  #telegram-directions .tg-workspace, #telegram-directions .tg-explorer .tg-workspace, #telegram-directions .tg-soft .tg-workspace { grid-template-columns: minmax(0, 1fr); padding: 0; gap: 0; }
+  #telegram-directions .tg-sidebar, #telegram-directions .tg-rail { display: none; }
+  #telegram-directions .tg-back { display: grid; margin-left: -6px; }
+  #telegram-directions .tg-soft .tg-conversation { border-radius: 0; border: 0; }
+  #telegram-directions .tg-chat-header, #telegram-directions .tg-soft .tg-chat-header { padding: 0 12px; gap: 5px; margin: 0; }
+  #telegram-directions .tg-header-actions [data-info] { display: none; }
+  #telegram-directions .tg-conversation .tg-header-actions .tg-call { display: none; }
+  #telegram-directions .tg-pinned { padding: 9px 15px; }
+  #telegram-directions .tg-message-line > .tg-avatar { display: none; }
+  #telegram-directions .tg-composer .tg-emoji { display: none; }
+  #telegram-directions .tg-app[data-view="list"] .tg-sidebar { display: flex; border-right: 0; }
+  #telegram-directions .tg-app[data-view="list"] .tg-conversation { display: none; }
+  #telegram-directions .tg-app[data-view="list"] .tg-list-heading { padding-top: 16px; }
+  #telegram-directions .tg-app[data-view="list"] .tg-folder-tabs { display: flex; gap: 6px; padding: 4px 14px 12px; }
+  #telegram-directions .tg-app[data-view="list"] .tg-folder-tabs button { padding: 7px 13px; border-radius: 7px; font-size: 12px; }
+  #telegram-directions .tg-app[data-view="list"] .tg-folder-tabs button[aria-pressed="true"] { background: var(--tg-selected); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #telegram-directions .tg-chat-row, #telegram-directions .tg-icon-button { transition: background-color 100ms ease; }
+}
+</style>
+<div id="telegram-directions" aria-label="Soft Panels element design">
+  <div data-desktop-backdrop aria-hidden="true"></div>
+  <section aria-label="Refined Soft Panels Telegram concept"></section>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('telegram-directions');
+  const icon = (name, extra = '') => `<i data-lucide="${name}" class="tg-icon ${extra}" aria-hidden="true"></i>`;
+  const avatar = (letters, tone = '') => `<span class="tg-avatar" data-tone="${tone}" aria-hidden="true">${letters}</span>`;
+  const iconButton = (name, label, extra = '') => `<button type="button" class="tg-icon-button cursor-interaction" aria-label="${label}" ${extra}>${icon(name)}</button>`;
+  const contacts = [
+    { name: 'Weekend crew', initials: 'WC', tone: 'sage', preview: 'James: Here is the trail map', time: '10:44', folder: 'Personal', unread: 0 },
+    { name: 'Maya Chen', initials: 'MC', tone: 'lilac', preview: 'That sounds lovely, see you there!', time: '10:32', folder: 'Personal', unread: 2 },
+    { name: 'Design team', initials: 'DT', tone: '', preview: 'Alex: Looking good to me', time: '09:58', folder: 'Work', unread: 5 },
+    { name: 'Oliver', initials: 'O', tone: 'sand', preview: 'Voice message', time: '09:21', folder: 'Personal', unread: 0 },
+    { name: 'Saved Messages', initials: 'SM', tone: '', preview: 'A few things for later', time: 'Yesterday', folder: 'All', unread: 0 },
+    { name: 'Photography', initials: 'P', tone: 'sage', preview: 'Sofia: The light was incredible', time: 'Yesterday', folder: 'Personal', unread: 0 }
+  ];
+  const saved = window.openai?.widgetState?.privateContent?.backdropPanelSettings || {};
+  const settings = {};
+  const wallpapers = {
+    'Blue folds': 'conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg)',
+    'Warm shapes': 'radial-gradient(ellipse at 72% 28%, #f5c49a 0 18%, transparent 19%), linear-gradient(145deg, #323765 0 32%, #ce8270 33% 55%, #7f9aaf 56% 76%, #243d66 77%)'
+  };
+  const configs = [
+    { key: 'soft', name: 'Soft Panels', tint: 64, radius: 17, density: 'Comfortable' }
+  ];
+  function initialSettings(config) {
+    const value = saved[config.key] || {};
+    const number = (key, fallback, min, max) => typeof value[key] === 'number' ? Math.min(max, Math.max(min, value[key])) : fallback;
+    return {
+      tint: typeof value.tint === 'number' ? Math.min(90, Math.max(10, value.tint)) : config.tint,
+      radius: typeof value.radius === 'number' ? Math.min(22, Math.max(6, value.radius)) : config.radius,
+      density: ['Compact', 'Comfortable'].includes(value.density) ? value.density : config.density,
+      appearance: ['System', 'Light', 'Dark'].includes(value.appearance) ? value.appearance : 'System',
+      wallpaper: Object.hasOwn(wallpapers, value.wallpaper) ? value.wallpaper : 'Blue folds',
+      windowOpacity: number('windowOpacity', 64, 20, 100),
+      blur: number('blur', 12, 0, 30),
+      contactOpacity: number('contactOpacity', 0, 0, 70),
+      canvasOpacity: number('canvasOpacity', 10, 0, 85),
+      bubbleOpacity: number('bubbleOpacity', 94, 85, 100),
+      composerOpacity: number('composerOpacity', 94, 80, 100),
+      composerRadius: number('composerRadius', 18, 8, 24),
+      rowRadius: number('rowRadius', 10, 4, 16),
+      frameInset: number('frameInset', 5, 3, 10),
+      edgeStrength: number('edgeStrength', 7, 3, 14)
+    };
+  }
+  function saveSettings() {
+    if (window.openai?.setWidgetState) {
+      window.openai.setWidgetState({
+        modelContent: { product: 'Telegram Windows 11', design: 'Soft Panels', scope: 'Desktop backdrop visible through the window, contacts and conversation; readable messages and inputs', backdropPanelSettings: settings },
+        privateContent: { backdropPanelSettings: settings }
+      }).catch(() => {});
+    }
+  }
+  function updateIcons() {
+    if (globalThis.lucide) globalThis.lucide.createIcons();
+  }
+  configs.forEach((config, index) => {
+    const section = root.querySelectorAll(':scope > section')[index];
+    const state = initialSettings(config);
+    settings[config.key] = state;
+    section.innerHTML = `
+      <div class="tg-app tg-${config.key}" data-view="chat" aria-label="${config.name} appearance">
+        <div class="tg-titlebar">
+          ${icon('send', 'tg-brand-icon')}<span class="tg-brand">Telegram</span>
+          <div class="tg-caption" aria-label="Window controls">
+            <button type="button" aria-label="Minimize window preview" class="cursor-interaction">${icon('minus')}</button>
+            <button type="button" aria-label="Maximize window preview" class="cursor-interaction">${icon('square')}</button>
+            <button type="button" aria-label="Close window preview" class="cursor-interaction">${icon('x')}</button>
+          </div>
+        </div>
+        <div class="tg-workspace">
+          <nav class="tg-rail" aria-label="Chat folders">
+            <button type="button" class="cursor-interaction" data-folder="All" aria-pressed="true">${icon('messages-square')}<span>All chats</span></button>
+            <button type="button" class="cursor-interaction" data-folder="Personal" aria-pressed="false">${icon('users')}<span>Personal</span></button>
+            <button type="button" class="cursor-interaction" data-folder="Work" aria-pressed="false">${icon('briefcase-business')}<span>Work</span></button>
+            <button type="button" class="tg-rail-bottom cursor-interaction" aria-label="Your account">${avatar('AK')}<span>Account</span></button>
+          </nav>
+          <aside class="tg-sidebar" aria-label="Chats">
+            <div class="tg-list-heading"><strong>Chats</strong>${iconButton('square-pen', 'New message', 'data-focus-search')}</div>
+            <label class="tg-search">${icon('search')}<input type="search" placeholder="Search" aria-label="Search chats"></label>
+            <nav class="tg-folder-tabs" aria-label="Chat folders">
+              <button type="button" data-folder="All" aria-pressed="true" class="cursor-interaction">All chats</button>
+              <button type="button" data-folder="Personal" aria-pressed="false" class="cursor-interaction">Personal</button>
+              <button type="button" data-folder="Work" aria-pressed="false" class="cursor-interaction">Work</button>
+            </nav>
+            <div class="tg-list-label">MESSAGES</div>
+            <div class="tg-chat-list" aria-label="Conversations">
+              ${contacts.map((contact, i) => `<button type="button" class="tg-chat-row cursor-interaction" data-chat="${i}" aria-pressed="${i === 0}">
+                ${avatar(contact.initials, contact.tone)}
+                <span class="tg-chat-copy"><span class="tg-chat-top"><span class="tg-chat-name">${contact.name}</span><span class="tg-chat-time">${contact.time}</span></span>
+                <span class="tg-chat-bottom"><span class="tg-chat-preview">${contact.preview}</span>${contact.unread ? `<span class="tg-unread" aria-label="${contact.unread} unread">${contact.unread}</span>` : (i === 0 ? icon('pin', 'tg-muted-icon') : '')}</span></span>
+              </button>`).join('')}
+            </div>
+            <div class="tg-sidebar-footer">${icon('archive')}<span>Archived chats</span></div>
+          </aside>
+          <main class="tg-conversation" aria-label="Conversation preview">
+            <header class="tg-chat-header">
+              ${iconButton('arrow-left', 'Back to chats', 'data-back').replace('tg-icon-button', 'tg-icon-button tg-back')}
+              <span data-header-avatar>${avatar('WC', 'sage')}</span>
+              <div class="tg-heading-copy"><strong data-chat-title>Weekend crew</strong><span class="tg-status" data-chat-status>5 members, 2 online</span></div>
+              <div class="tg-header-actions">
+                ${iconButton('search', 'Search in conversation')}
+                ${iconButton('phone', 'Call').replace('tg-icon-button', 'tg-icon-button tg-call')}
+                ${iconButton('panel-right', 'Group details', 'data-info')}
+                ${iconButton('ellipsis', 'More actions')}
+              </div>
+            </header>
+            <div class="tg-pinned">${icon('pin')}<span class="tg-pinned-copy"><strong>Pinned message</strong><span>Saturday · 09:30 at North Coffee</span></span></div>
+            <div class="tg-messages" aria-label="Example messages">
+              <div class="tg-date">Today</div>
+              <div class="tg-message-line">${avatar('S', 'lilac')}<div class="tg-bubble"><span class="tg-sender">Sofia</span><p>Found a quieter trail by the lake. About 2 hours, nothing too steep.</p><div class="tg-meta">10:38</div></div></div>
+              <div class="tg-message-line tg-out" data-demo-message><div class="tg-bubble"><p>Perfect. Coffee at 9:30, then we can head out together.</p><div class="tg-meta"><span data-message-time>10:40</span> ${icon('check-check')}</div></div></div>
+              <div class="tg-message-line">${avatar('J', 'sand')}<div class="tg-bubble"><span class="tg-sender">James</span><div class="tg-file"><span class="tg-file-icon">${icon('file-text')}</span><span class="tg-file-copy"><strong>Lakeside trail.pdf</strong><span>1.8 MB · PDF document</span></span></div><button type="button" class="tg-reaction cursor-interaction" aria-label="Like trail map" aria-pressed="false">${icon('heart')}<span>2</span></button><div class="tg-meta">10:44</div></div></div>
+            </div>
+            <div class="tg-composer-wrap"><form class="tg-composer" aria-label="Message composer preview">
+              ${iconButton('paperclip', 'Attach a file')}
+              <input type="text" placeholder="Write a message…" aria-label="Write a preview message" maxlength="140" autocomplete="off">
+              ${iconButton('smile', 'Emoji preview', 'data-emoji').replace('tg-icon-button', 'tg-icon-button tg-emoji')}
+              <button type="submit" class="tg-send cursor-interaction" aria-label="Send preview message">${icon('send')}</button>
+            </form></div>
+            <section class="tg-info" aria-label="Group details preview" hidden>
+              ${iconButton('x', 'Close details', 'data-close-info').replace('tg-icon-button', 'tg-icon-button tg-close-info')}
+              ${avatar('WC', 'sage')}<strong data-info-title>Weekend crew</strong><p>5 members</p>
+              <div class="tg-info-row">${icon('image')}<span>Shared media</span></div>
+              <div class="tg-info-row">${icon('file-text')}<span>Files</span></div>
+              <div class="tg-info-row">${icon('bell')}<span>Notifications enabled</span></div>
+            </section>
+          </main>
+        </div>
+      </div>`;
+    const app = section.querySelector('.tg-app');
+    const search = app.querySelector('.tg-search input');
+    const messageInput = app.querySelector('.tg-composer input');
+    const info = app.querySelector('.tg-info');
+    let folder = 'All';
+    function renderSettings() {
+      app.style.setProperty('--tg-tint', `${state.tint}%`);
+      root.style.setProperty('--tg-desktop-image', wallpapers[state.wallpaper]);
+      app.style.setProperty('--tg-window-opacity', `${state.windowOpacity}%`);
+      app.style.setProperty('--tg-blur', `${state.blur}px`);
+      app.style.setProperty('--tg-round', `${state.radius}px`);
+      app.style.setProperty('--tg-row', state.density === 'Compact' ? '65px' : '72px');
+      app.style.setProperty('--tg-message-gap', state.density === 'Compact' ? '10px' : '14px');
+      app.style.setProperty('--tg-contact-opacity', `${state.contactOpacity}%`);
+      app.style.setProperty('--tg-canvas-opacity', `${state.canvasOpacity}%`);
+      app.style.setProperty('--tg-bubble-opacity', `${state.bubbleOpacity}%`);
+      app.style.setProperty('--tg-composer-opacity', `${state.composerOpacity}%`);
+      app.style.setProperty('--tg-composer-radius', `${state.composerRadius}px`);
+      app.style.setProperty('--tg-row-radius', `${state.rowRadius}px`);
+      app.style.setProperty('--tg-frame-inset', `${state.frameInset}px`);
+      app.style.setProperty('--tg-edge-strength', `${state.edgeStrength}%`);
+      app.style.colorScheme = state.appearance === 'System' ? 'inherit' : state.appearance.toLowerCase();
+    }
+    function filterChats() {
+      const query = search.value.toLowerCase().trim();
+      app.querySelectorAll('[data-chat]').forEach(row => {
+        const contact = contacts[Number(row.dataset.chat)];
+        row.hidden = !contact.name.toLowerCase().includes(query) || (folder !== 'All' && contact.folder !== folder);
+      });
+    }
+    app.querySelectorAll('[data-folder]').forEach(button => button.addEventListener('click', () => {
+      folder = button.dataset.folder;
+      app.querySelectorAll('[data-folder]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.folder === folder)));
+      filterChats();
+    }));
+    search.addEventListener('input', filterChats);
+    app.querySelectorAll('[data-chat]').forEach(button => button.addEventListener('click', () => {
+      const contact = contacts[Number(button.dataset.chat)];
+      app.querySelectorAll('[data-chat]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      app.querySelector('[data-chat-title]').textContent = contact.name;
+      app.querySelector('[data-info-title]').textContent = contact.name;
+      app.querySelector('[data-header-avatar]').innerHTML = avatar(contact.initials, contact.tone);
+      app.querySelector('[data-chat-status]').textContent = contact.name === 'Weekend crew' ? '5 members, 2 online' : 'last seen recently';
+      app.dataset.view = 'chat';
+    }));
+    app.querySelector('[data-back]').addEventListener('click', () => { app.dataset.view = 'list'; });
+    app.querySelector('[data-focus-search]').addEventListener('click', () => search.focus());
+    app.querySelectorAll('[data-info]').forEach(button => button.addEventListener('click', () => {
+      info.hidden = !info.hidden;
+      if (!info.hidden) info.querySelector('[data-close-info]').focus();
+    }));
+    app.querySelector('[data-close-info]').addEventListener('click', () => { info.hidden = true; });
+    app.addEventListener('keydown', event => { if (event.key === 'Escape') info.hidden = true; });
+    app.querySelector('[data-emoji]').addEventListener('click', () => { messageInput.value += ' 🙂'; messageInput.focus(); });
+    app.querySelector('.tg-reaction').addEventListener('click', event => {
+      const button = event.currentTarget;
+      const active = button.getAttribute('aria-pressed') !== 'true';
+      button.setAttribute('aria-pressed', String(active));
+      button.querySelector('span').textContent = active ? '3' : '2';
+    });
+    app.querySelector('.tg-composer').addEventListener('submit', event => {
+      event.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const message = app.querySelector('[data-demo-message]');
+      message.querySelector('p').textContent = text;
+      message.querySelector('[data-message-time]').textContent = 'Just now';
+      message.parentElement.appendChild(message);
+      messageInput.value = '';
+    });
+    renderSettings();
+    if (globalThis.Tweak) {
+      const onChange = () => { renderSettings(); saveSettings(); };
+      const windowControls = new Tweak({ container: app, onChange });
+      windowControls.addSelect(state, 'appearance', { label: 'Appearance', options: ['System', 'Light', 'Dark'] });
+      windowControls.addSelect(state, 'wallpaper', { label: 'Desktop backdrop', options: Object.keys(wallpapers) });
+      windowControls.addSlider(state, 'windowOpacity', { label: 'Window tint opacity', min: 20, max: 100, unit: '%', reference: '--tg-window-opacity' });
+      windowControls.addSlider(state, 'blur', { label: 'Backdrop blur', min: 0, max: 30, unit: 'px', reference: '--tg-blur' });
+      windowControls.addSlider(state, 'frameInset', { label: 'Outer frame', min: 3, max: 10, unit: 'px', reference: '--tg-frame-inset' });
+      windowControls.addSlider(state, 'edgeStrength', { label: 'Border contrast', min: 3, max: 14, unit: '%', reference: '--tg-edge-strength' });
+      const contactControls = new Tweak({ container: app.querySelector('.tg-sidebar'), onChange });
+      contactControls.addSlider(state, 'contactOpacity', { label: 'Panel opacity', min: 0, max: 70, unit: '%', reference: '--tg-contact-opacity' });
+      contactControls.addSlider(state, 'rowRadius', { label: 'Row corners', min: 4, max: 16, unit: 'px', reference: '--tg-row-radius' });
+      contactControls.addSelect(state, 'density', { label: 'Density', options: ['Compact', 'Comfortable'] });
+      const messageControls = new Tweak({ container: app.querySelector('.tg-conversation'), onChange });
+      messageControls.addSlider(state, 'canvasOpacity', { label: 'Panel opacity', min: 0, max: 85, unit: '%', reference: '--tg-canvas-opacity' });
+      messageControls.addSlider(state, 'bubbleOpacity', { label: 'Bubble opacity', min: 85, max: 100, unit: '%', reference: '--tg-bubble-opacity' });
+      messageControls.addSlider(state, 'radius', { label: 'Bubble corners', min: 6, max: 22, unit: 'px', reference: '--tg-round' });
+      const composerControls = new Tweak({ container: app.querySelector('.tg-composer'), onChange });
+      composerControls.addSlider(state, 'composerOpacity', { label: 'Input opacity', min: 80, max: 100, unit: '%', reference: '--tg-composer-opacity' });
+      composerControls.addSlider(state, 'composerRadius', { label: 'Input corners', min: 8, max: 24, unit: 'px', reference: '--tg-composer-radius' });
+    }
+  });
+  updateIcons();
+})();
+</script>
