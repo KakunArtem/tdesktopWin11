@@ -20,8 +20,10 @@ using Windows 11-style translucency in place of Liquid Glass.
   design docs; product implementation and builds are deferred until
   requested.
 - The user's Windhawk setup and Translucent Explorer11 theme are visual
-  references. No dependency, rendering approach or specific Windows material
-  has been selected.
+  references. No dependency or rendering approach has been selected.
+- The readable Soft Panels mockup in `docs/ui-modernization/explorations/` is
+  the appearance target. Acrylic is the working guideline for the native
+  material, not a final choice between Acrylic and Mica.
 - Keep confirmed user direction separate from proposals and unverified
   assumptions. Preserve Telegram behavior while changing presentation unless
   a later request explicitly includes behavior changes.
