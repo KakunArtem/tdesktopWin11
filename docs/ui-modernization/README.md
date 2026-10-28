@@ -1,8 +1,9 @@
 # Telegram Desktop UI modernization
 
 Status: the Soft Panels visual baseline is approved and
-[saved in the repository](reference/README.md). Product implementation has not
-started.
+[saved in the repository](reference/README.md). An
+[implementation architecture and phased plan](implementation-plan.md) is
+proposed; product implementation has not started.
 
 ## Purpose
 
@@ -35,7 +36,8 @@ Windhawk is a visual reference; no new runtime dependency has been selected.
 Refine the selected concept into visual elements, starting with translucent
 panels, contacts/search, conversation chrome, messages and the composer. The
 user explicitly chose visual refinement before changes to the Qt client.
-Implementation plans, product source changes and builds remain for later
+The user then requested a general implementation plan, to be split into
+smaller plans later. Product source changes and builds remain for later
 requests.
 
 ## Decisions for later
@@ -63,6 +65,7 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Approved Soft Panels reference, preview and screenshots](reference/README.md).
 - [Readable Soft Panels exploration](explorations/README.md), a proposal that
   addresses the readability check and behavior gaps.
+- [Implementation architecture and phased plan](implementation-plan.md).
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.
