@@ -80,6 +80,9 @@ Proposed requirement, not yet confirmed by the user:
 - Check bright, dark and busy backdrops in light, dark and solid-fallback
   appearances.
 
+The [readable exploration](explorations/README.md) applies this requirement
+and passes it on four test wallpapers.
+
 ## Gaps against current Telegram behavior
 
 The reference is a visual baseline, not a behavior specification. Element
@@ -95,6 +98,6 @@ refinement should restore these Telegram behaviors, which it omits:
   in the [lib_ui palette](../../Telegram/lib_ui/ui/colors.palette)).
 - Message text is 16 px and the list 14 px, while Telegram's base font is
   13 px (`fsize` in [basic.style](../../Telegram/lib_ui/ui/basic.style)).
-  Sizes must follow the interface scale and the user's chat font setting.
+  Sizes must follow the interface scale and font family settings.
 - Chat wallpapers and custom themes have no defined behavior on the
   translucent conversation canvas.

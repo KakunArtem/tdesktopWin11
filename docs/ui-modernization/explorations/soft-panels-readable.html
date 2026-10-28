@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soft Panels Readable</title>
+<style>
+:root {
+  color-scheme: light;
+  --page-bg: #eef1f5;
+  --page-fg: #1b2735;
+  --page-muted: #4a5868;
+  --page-line: #d5dce5;
+  --page-card: #ffffff;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #0f141b;
+  --page-fg: #e6ecf3;
+  --page-muted: #a7b4c3;
+  --page-line: #2a3441;
+  --page-card: #171e27;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 14px/1.45 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.page { max-width: 1280px; margin: 0 auto; padding: 24px 16px 40px; }
+.page-head h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.page-head p { margin: 0; color: var(--page-muted); max-width: 72ch; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 16px 0; padding: 12px 14px; background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; }
+.controls label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--page-muted); }
+.controls select { font: inherit; font-size: 13px; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--page-line); background: var(--page-bg); color: var(--page-fg); min-width: 128px; }
+.stage-scroll { overflow-x: auto; border-radius: 16px; }
+.stage { position: relative; isolation: isolate; padding: 28px; border-radius: 16px; overflow: hidden; width: max-content; min-width: 100%; }
+.desk { position: absolute; inset: 0; z-index: -1; background: var(--wall); }
+.stage[data-wallpaper="folds"] { --wall: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.stage[data-wallpaper="warm"] { --wall: radial-gradient(ellipse at 72% 28%, #f5c49a 0 18%, transparent 19%), linear-gradient(145deg, #323765 0 32%, #ce8270 33% 55%, #7f9aaf 56% 76%, #243d66 77%); }
+.stage[data-wallpaper="sky"] { --wall: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+.stage[data-wallpaper="night"] { --wall: radial-gradient(ellipse at 70% 30%, #1f2f5a 0, transparent 55%), linear-gradient(160deg, #070b16, #0d1428 60%, #050811); }
+.changes { margin: 18px 0 0; padding-left: 20px; color: var(--page-muted); max-width: 90ch; }
+.changes li { margin: 3px 0; }
+.changes strong { color: var(--page-fg); font-weight: 600; }
+body.bare .page { padding: 0; max-width: none; }
+body.bare .page-head, body.bare .controls, body.bare .changes { display: none; }
+body.bare .stage, body.bare .stage-scroll { border-radius: 0; }
+
+.frame { position: relative; width: calc(900px * var(--s)); height: calc(600px * var(--s)); }
+.app {
+  --win: 72%; --nav: 20%; --canvas-fill: 24%; --blur: 32px;
+  position: absolute; left: 0; top: 0; width: 900px; height: 600px;
+  transform: scale(var(--s)); transform-origin: 0 0;
+  display: flex; flex-direction: column; overflow: hidden; isolation: isolate;
+  border-radius: 10px;
+  color: var(--text);
+  font: 400 13px/1.38 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse at 10% 8%, color-mix(in srgb, var(--glow) 30%, transparent), transparent 66%),
+    radial-gradient(ellipse at 32% 90%, color-mix(in srgb, var(--other-glow) 30%, transparent), transparent 63%),
+    color-mix(in srgb, var(--base) var(--win), transparent);
+  backdrop-filter: blur(var(--blur)) saturate(1.45);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.45);
+  box-shadow: inset 0 0 0 .5px var(--edge), 0 18px 50px rgba(0, 0, 0, .28);
+}
+.app[data-mode="light"] {
+  --text: #132335; --secondary: #3a4b5f; --accent: #004a8f; --accent-fill: #0564b6; --on-accent: #ffffff;
+  --selected: #cbdff4; --base: #e9eef5; --surface: #ffffff; --canvas: #f3f6fa;
+  --outgoing: #d5e8fa; --outgoing-text: #163957; --outgoing-meta: #3a5d79;
+  --glow: #96bff1; --other-glow: #c9bddf; --muted-fill: #dde4ec; --muted-text: #3b4b5d;
+  --close-hover: #f5d9de; --edge: rgba(21, 38, 58, .1); --hover: rgba(21, 38, 58, .06);
+  --peer-lilac: #6b3fa0; --peer-sage: #2f6b4f; --peer-sand: #8a4b1d;
+  --chat-wall-a: #dbe8cf; --chat-wall-b: #b9d3c2;
+}
+.app[data-mode="dark"] {
+  --win: 74%; --nav: 30%; --canvas-fill: 28%;
+  --text: #f2f6fb; --secondary: #c2cfdd; --accent: #9ad3ff; --accent-fill: #8ccbff; --on-accent: #0d1f33;
+  --selected: #284661; --base: #1b2838; --surface: #233141; --canvas: #121c28;
+  --outgoing: #214766; --outgoing-text: #e8f4ff; --outgoing-meta: #a6c6df;
+  --glow: #315c89; --other-glow: #504066; --muted-fill: #3a4a5c; --muted-text: #dbe4ee;
+  --close-hover: #823b48; --edge: rgba(238, 243, 249, .1); --hover: rgba(238, 243, 249, .07);
+  --peer-lilac: #c9b3ff; --peer-sage: #9fdcbf; --peer-sand: #f1c08f;
+  --chat-wall-a: #1d2b33; --chat-wall-b: #16222b;
+}
+.app[data-material="approved"] { --win: 64%; --nav: 0%; --canvas-fill: 10%; --blur: 12px; }
+.app[data-material="approved"][data-mode="light"] { --text: #192b3f; --secondary: #52657b; --accent: #0564b6; }
+.app[data-material="approved"][data-mode="dark"] { --text: #e8eef6; --secondary: #a2b2c5; --accent: #81c3ff; }
+.app[data-solid] { --win: 100%; --nav: 100%; --canvas-fill: 100%; backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+.app button, .app input { font: inherit; color: inherit; }
+.app button { border: 0; background: none; padding: 0; cursor: pointer; }
+.app button:focus-visible, .app input:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.app [hidden] { display: none !important; }
+.icon { width: 20px; height: 20px; display: block; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.icon .dot { fill: currentColor; stroke: none; }
+
+.titlebar { height: 32px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding-left: 14px; }
+.titlebar .brand-icon { width: 15px; height: 15px; color: var(--accent); }
+.titlebar .brand { font-size: 12px; }
+.caption { margin-left: auto; display: flex; align-self: stretch; }
+.caption button { width: 46px; display: grid; place-items: center; }
+.caption .icon { width: 13px; height: 13px; stroke-width: 1.4; }
+.caption button:hover { background: var(--hover); }
+.caption button:last-child:hover { background: var(--close-hover); }
+
+.workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 4px; padding: 0 6px 6px 0; }
+.nav { display: grid; grid-template-columns: 64px minmax(0, 1fr); min-height: 0; border-radius: 0 12px 12px 0; background: color-mix(in srgb, var(--base) var(--nav), transparent); }
+
+.rail { display: flex; flex-direction: column; gap: 4px; padding: 4px 6px 8px; min-height: 0; }
+.rail button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 54px; border-radius: 10px; color: var(--secondary); }
+.rail button:hover { background: var(--hover); }
+.rail .menu-button { min-height: 44px; margin-bottom: 4px; }
+.rail .icon { width: 22px; height: 22px; }
+.rail .label { font-size: 12px; line-height: 1.2; }
+.rail button[aria-pressed="true"] { background: var(--selected); color: var(--text); }
+.rail button[aria-pressed="true"] .icon { color: var(--accent); }
+.rail button[aria-pressed="true"]::before { content: ""; position: absolute; left: -6px; width: 3px; height: 20px; border-radius: 2px; background: var(--accent); }
+.rail .folder-badge { position: absolute; top: 2px; left: 35px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; line-height: 1; background: var(--accent-fill); color: var(--on-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--base) 90%, transparent); }
+.rail .folder-badge[data-muted] { background: var(--muted-fill); color: var(--muted-text); }
+.rail .edit-button { margin-top: auto; }
+
+.sidebar { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding-right: 4px; }
+.list-heading { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px 4px 12px; }
+.list-heading strong { font-size: 18px; font-weight: 600; letter-spacing: -.2px; }
+.icon-button { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; color: var(--secondary); }
+.icon-button:hover { background: var(--hover); }
+.search { height: 34px; display: flex; align-items: center; gap: 8px; margin: 6px 8px 8px 10px; padding: 0 10px; border-radius: 9px; background: color-mix(in srgb, var(--surface) 62%, transparent); box-shadow: inset 0 0 0 .5px var(--edge); color: var(--secondary); }
+.search .icon { width: 17px; height: 17px; }
+.search input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; font-size: 13px; }
+.search input::placeholder { color: var(--secondary); opacity: 1; }
+.chat-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 0 2px 0 6px; scrollbar-width: thin; }
+.chat-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 62px; padding: 8px 10px !important; border-radius: 10px; text-align: left; }
+.chat-row:hover { background: var(--hover); }
+.chat-row[aria-pressed="true"] { background: color-mix(in srgb, var(--selected) 85%, transparent); }
+.avatar { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: 15px; font-weight: 600; background: #c4d8ec; color: #213f5c; }
+.app[data-mode="dark"] .avatar { background: #40576f; color: #eef5fc; }
+.avatar[data-tone="lilac"] { background: #d9d1e8; color: #4b345f; }
+.avatar[data-tone="sage"] { background: #ccdeda; color: #2b4f47; }
+.avatar[data-tone="sand"] { background: #e7d6c7; color: #63401f; }
+.avatar[data-tone="saved"] { background: var(--accent-fill); color: var(--on-accent); }
+.app[data-mode="dark"] .avatar[data-tone="lilac"] { background: #554b6b; color: #f1eaff; }
+.app[data-mode="dark"] .avatar[data-tone="sage"] { background: #3c5a57; color: #e6f8f1; }
+.app[data-mode="dark"] .avatar[data-tone="sand"] { background: #665344; color: #fbeedd; }
+.app[data-mode="dark"] .avatar[data-tone="saved"] { background: var(--accent-fill); color: var(--on-accent); }
+.avatar .icon { width: 22px; height: 22px; }
+.chat-copy { flex: 1; min-width: 0; }
+.chat-top, .chat-bottom { display: flex; align-items: center; gap: 5px; }
+.chat-top { margin-bottom: 3px; }
+.chat-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-top .icon { width: 14px; height: 14px; color: var(--secondary); }
+.chat-time { margin-left: auto; padding-left: 4px; font-size: 13px; color: var(--secondary); white-space: nowrap; display: flex; align-items: center; gap: 3px; }
+.chat-time .icon { width: 16px; height: 16px; color: var(--accent); }
+.chat-preview { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; color: var(--secondary); }
+.chat-preview .from { color: var(--text); }
+.unread { min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; display: grid; place-items: center; font-size: 12px; font-weight: 700; line-height: 1; background: var(--accent-fill); color: var(--on-accent); }
+.unread[data-muted] { background: var(--muted-fill); color: var(--muted-text); }
+.chat-bottom > .icon { width: 15px; height: 15px; color: var(--secondary); }
+.archive-row { display: flex; align-items: center; gap: 10px; margin: 4px 6px 8px 6px; padding: 9px 12px !important; border-radius: 10px; font-size: 13px; color: var(--secondary); }
+.archive-row:hover { background: var(--hover); }
+.archive-row .icon { width: 18px; height: 18px; }
+
+.conversation { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; border-radius: 14px; box-shadow: inset 0 0 0 .5px var(--edge); background: color-mix(in srgb, var(--canvas) var(--canvas-fill), transparent); overflow: hidden; }
+.chat-header { height: 56px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 10px 0 16px; }
+.chat-header .avatar { width: 38px; height: 38px; font-size: 13px; }
+.heading-copy { flex: 1; min-width: 0; }
+.heading-copy strong { display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status { display: block; font-size: 13px; color: var(--secondary); }
+.header-actions { display: flex; gap: 2px; }
+.pinned { display: flex; align-items: center; gap: 10px; margin: 0 12px 4px; padding: 6px 12px; border-radius: 9px; background: color-mix(in srgb, var(--surface) 72%, transparent); box-shadow: inset 0 0 0 .5px var(--edge); }
+.pinned::before { content: ""; width: 2px; align-self: stretch; border-radius: 1px; background: var(--accent); }
+.pinned-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pinned-copy strong { font-size: 13px; font-weight: 600; color: var(--accent); }
+.pinned-copy span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pinned .icon { width: 17px; height: 17px; color: var(--secondary); }
+
+.chat-area { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.app[data-background="pattern"] .chat-area {
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent) 0 1.6px, transparent 2.4px) 0 0 / 26px 26px,
+    radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent) 0 1.2px, transparent 2px) 13px 13px / 26px 26px,
+    linear-gradient(160deg, color-mix(in srgb, var(--chat-wall-a) 88%, transparent), color-mix(in srgb, var(--chat-wall-b) 88%, transparent));
+}
+.messages { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 12px 20px 12px; scrollbar-width: thin; }
+.messages > :first-child { margin-top: auto; }
+.date { align-self: center; padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--secondary); background: color-mix(in srgb, var(--surface) 80%, transparent); box-shadow: inset 0 0 0 .5px var(--edge); }
+.message-line { display: flex; align-items: flex-end; gap: 8px; }
+.message-line > .avatar { width: 33px; height: 33px; font-size: 12px; }
+.message-line.out { justify-content: flex-end; }
+.bubble { max-width: min(78%, 420px); min-width: 0; padding: 7px 11px 6px; border-radius: 14px 14px 14px 5px; background: color-mix(in srgb, var(--surface) 96%, transparent); box-shadow: 0 .5px 1px var(--edge); }
+.out .bubble { border-radius: 14px 14px 5px 14px; background: color-mix(in srgb, var(--outgoing) 96%, transparent); color: var(--outgoing-text); }
+.sender { display: block; font-size: 13px; font-weight: 600; color: var(--accent); }
+.sender[data-tone="lilac"] { color: var(--peer-lilac); }
+.sender[data-tone="sage"] { color: var(--peer-sage); }
+.sender[data-tone="sand"] { color: var(--peer-sand); }
+.bubble p { margin: 2px 0 0; overflow-wrap: anywhere; }
+.meta { display: flex; justify-content: flex-end; align-items: center; gap: 3px; margin-top: 2px; font-size: 13px; color: var(--secondary); }
+.out .meta { color: var(--outgoing-meta); }
+.meta .icon { width: 16px; height: 16px; }
+.file { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
+.file-icon { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-fill); color: var(--on-accent); }
+.file-copy strong { display: block; font-weight: 600; }
+.file-copy span { display: block; font-size: 13px; color: var(--secondary); }
+.reaction { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; padding: 3px 9px !important; border-radius: 12px; font-size: 13px; font-weight: 600; background: color-mix(in srgb, var(--accent-fill) 14%, transparent); color: var(--accent) !important; }
+.reaction .icon { width: 14px; height: 14px; }
+.reaction[aria-pressed="true"] { background: var(--accent-fill); color: var(--on-accent) !important; }
+.reaction[aria-pressed="true"] .icon { fill: currentColor; }
+
+.composer-wrap { padding: 0 16px 14px; }
+.composer { height: 50px; display: flex; align-items: center; gap: 4px; padding: 0 7px; border-radius: 18px; background: color-mix(in srgb, var(--surface) 96%, transparent); box-shadow: inset 0 0 0 .5px var(--edge), 0 3px 12px rgba(0, 0, 0, .08); }
+.composer input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; padding: 0 6px; font-size: 13px; }
+.composer input::placeholder { color: var(--secondary); opacity: 1; }
+.composer .send { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; color: var(--secondary); transition: background-color 120ms ease; }
+.composer .send:hover { background: var(--hover); }
+.composer .send[data-state="send"] { background: var(--accent-fill); color: var(--on-accent); }
+.composer .send .icon { width: 21px; height: 21px; }
+
+.details { position: absolute; right: 10px; top: 52px; width: 240px; padding: 18px 16px 8px; border-radius: 13px; z-index: 4; background: color-mix(in srgb, var(--surface) 97%, transparent); box-shadow: inset 0 0 0 .5px var(--edge), 0 12px 40px rgba(0, 0, 0, .22); }
+.details > .avatar { width: 64px; height: 64px; margin: 2px auto 10px; font-size: 20px; }
+.details strong { display: block; text-align: center; font-size: 15px; font-weight: 600; }
+.details > span { display: block; text-align: center; color: var(--secondary); margin-bottom: 12px; }
+.details .close { position: absolute; right: 6px; top: 6px; }
+.detail-row { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-top: .5px solid var(--edge); }
+.detail-row .icon { color: var(--secondary); width: 18px; height: 18px; }
+.detail-row span:last-child { margin-left: auto; color: var(--secondary); }
+
+.menu-layer { position: absolute; inset: 32px 0 0 0; z-index: 10; background: rgba(5, 12, 22, .28); }
+.main-menu { position: absolute; left: 0; top: 0; bottom: 0; width: 272px; display: flex; flex-direction: column; padding: 16px 8px 10px; border-radius: 0 14px 14px 0; background: color-mix(in srgb, var(--surface) 97%, transparent); box-shadow: 8px 0 40px rgba(0, 0, 0, .2); }
+.account { display: flex; align-items: center; gap: 12px; padding: 4px 10px 14px; margin-bottom: 6px; border-bottom: .5px solid var(--edge); }
+.account .avatar { width: 48px; height: 48px; }
+.account strong { display: block; font-size: 14px; font-weight: 600; }
+.account span { color: var(--secondary); }
+.menu-item { display: flex; align-items: center; gap: 14px; width: 100%; padding: 9px 12px !important; border-radius: 8px; text-align: left; font-size: 14px; }
+.menu-item:hover { background: var(--hover); }
+.menu-item .icon { color: var(--secondary); }
+.menu-item .switch { margin-left: auto; width: 34px; height: 20px; border-radius: 10px; background: var(--muted-fill); position: relative; box-shadow: inset 0 0 0 1px var(--edge); }
+.menu-item .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--secondary); transition: transform 120ms ease; }
+.menu-item[aria-checked="true"] .switch { background: var(--accent-fill); }
+.menu-item[aria-checked="true"] .switch::after { transform: translateX(14px); background: var(--on-accent); }
+.menu-footer { margin-top: auto; padding: 8px 12px 0; font-size: 12px; color: var(--secondary); }
+
+.measure, .measure * { color: transparent !important; caret-color: transparent; text-shadow: none !important; }
+.measure input::placeholder { color: transparent !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app *, .app *::after { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-chats" viewBox="0 0 24 24"><path d="M5 5h11a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-6l-4 3v-3H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/></symbol>
+  <symbol id="i-work" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-compose" viewBox="0 0 24 24"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M17.5 3.5l3 3L12 15l-4 1 1-4z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle class="dot" cx="6" cy="12" r="1.5"/><circle class="dot" cx="12" cy="12" r="1.5"/><circle class="dot" cx="18" cy="12" r="1.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6zM12 13v7"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l8.2-8.2a3.4 3.4 0 0 1 4.8 4.8l-8.1 8.1a1.7 1.7 0 0 1-2.4-2.4l7.4-7.4"/></symbol>
+  <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><circle class="dot" cx="9.3" cy="10" r="1"/><circle class="dot" cx="14.7" cy="10" r="1"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5zM11.5 13.5L20 4"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5 8.5v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9M10 12.5h4"/></symbol>
+  <symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4zM16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M2.5 12.5l3.5 3.5 7-8M10 15l1 1 7-8"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5zM14 3.5v5h5M8.5 13h7M8.5 16.5h5"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 19.5s-7.5-4.4-7.5-9.6A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6z"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10v16l-5-3.5L7 20z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.8"/><circle cx="12" cy="12" r="6.6"/><path d="M12 2.6v2.8M12 18.6v2.8M2.6 12h2.8M18.6 12h2.8M5.4 5.4l2 2M16.6 16.6l2 2M5.4 18.6l2-2M16.6 7.4l2-2"/></symbol>
+  <symbol id="i-contacts" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19c.9-3.2 3-4.8 5.5-4.8s4.6 1.6 5.5 4.8M15.5 5.6a3 3 0 0 1 0 5.8M17 14.4c1.9.5 3 2 3.5 4.6"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16V10.5a5.5 5.5 0 0 1 11 0V16l1.5 2H5zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8.5 8.5"/></symbol>
+</svg>
+
+<div class="page">
+  <header class="page-head">
+    <h1>Soft Panels, readable</h1>
+    <p>An exploration based on the approved Soft Panels reference. It addresses the readability check and the missing Telegram behaviors. Sizes follow Telegram's style values at the selected interface scale. The approved snapshot is unchanged and remains the baseline.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="Exploration controls">
+    <label>Appearance <select data-control="appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+    <label>Desktop wallpaper <select data-control="wallpaper"><option value="folds">Blue folds</option><option value="warm">Warm shapes</option><option value="sky">Bright sky</option><option value="night">Night</option></select></label>
+    <label>Interface scale <select data-control="scale"><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option></select></label>
+    <label>Material <select data-control="material"><option value="readable">Readable (this proposal)</option><option value="approved">Approved values</option></select></label>
+    <label>Transparency <select data-control="transparency"><option value="on">On</option><option value="off">Off (solid fallback)</option></select></label>
+    <label>Chat background <select data-control="background"><option value="material">Material</option><option value="pattern">Wallpaper pattern</option></select></label>
+  </div>
+
+  <div class="stage-scroll">
+    <div class="stage" data-wallpaper="folds">
+      <div class="desk" aria-hidden="true"></div>
+      <div class="frame">
+        <div class="app" data-mode="light" data-material="readable" data-background="material" role="application" aria-label="Telegram window preview">
+          <div class="titlebar">
+            <svg class="icon brand-icon" aria-hidden="true"><use href="#i-send"/></svg><span class="brand">Telegram</span>
+            <div class="caption" aria-label="Window controls">
+              <button type="button" aria-label="Minimize"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button>
+              <button type="button" aria-label="Maximize"><svg class="icon" aria-hidden="true"><use href="#i-square"/></svg></button>
+              <button type="button" aria-label="Close"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+            </div>
+          </div>
+          <div class="workspace">
+            <div class="nav">
+              <nav class="rail" aria-label="Chat folders">
+                <button type="button" class="menu-button" aria-label="Main menu" aria-haspopup="dialog" data-open-menu><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+                <div data-folders></div>
+                <button type="button" class="edit-button" aria-label="Edit folders"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg><span class="label">Edit</span></button>
+              </nav>
+              <aside class="sidebar" aria-label="Chats">
+                <div class="list-heading"><strong>Chats</strong><button type="button" class="icon-button" aria-label="New message"><svg class="icon" aria-hidden="true"><use href="#i-compose"/></svg></button></div>
+                <label class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input type="search" placeholder="Search" aria-label="Search chats"></label>
+                <div class="chat-list" data-chat-list aria-label="Conversations"></div>
+                <button type="button" class="archive-row"><svg class="icon" aria-hidden="true"><use href="#i-archive"/></svg><span>Archived chats</span></button>
+              </aside>
+            </div>
+            <main class="conversation" aria-label="Conversation">
+              <header class="chat-header">
+                <span data-header-avatar></span>
+                <div class="heading-copy"><strong data-title></strong><span class="status" data-status></span></div>
+                <div class="header-actions">
+                  <button type="button" class="icon-button" aria-label="Search in chat"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></button>
+                  <button type="button" class="icon-button" aria-label="Call"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></button>
+                  <button type="button" class="icon-button" aria-label="Chat details" aria-expanded="false" data-toggle-details><svg class="icon" aria-hidden="true"><use href="#i-panel"/></svg></button>
+                  <button type="button" class="icon-button" aria-label="More actions"><svg class="icon" aria-hidden="true"><use href="#i-more"/></svg></button>
+                </div>
+              </header>
+              <div class="pinned" data-pinned><div class="pinned-copy"><strong>Pinned message</strong><span>Saturday · 09:30 at North Coffee</span></div><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></div>
+              <div class="chat-area">
+                <div class="messages" data-messages aria-live="polite"></div>
+                <div class="composer-wrap">
+                  <form class="composer" data-composer>
+                    <button type="button" class="icon-button" aria-label="Attach file"><svg class="icon" aria-hidden="true"><use href="#i-clip"/></svg></button>
+                    <input type="text" placeholder="Write a message…" aria-label="Message" data-input autocomplete="off">
+                    <button type="button" class="icon-button" aria-label="Emoji, stickers and GIFs"><svg class="icon" aria-hidden="true"><use href="#i-smile"/></svg></button>
+                    <button type="submit" class="send" data-send data-state="record" aria-label="Record voice message"><svg class="icon" aria-hidden="true"><use href="#i-mic"/></svg></button>
+                  </form>
+                </div>
+              </div>
+              <div class="details" data-details hidden role="dialog" aria-label="Chat details">
+                <button type="button" class="icon-button close" aria-label="Close details" data-toggle-details><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+                <span data-details-avatar></span>
+                <strong data-details-title></strong>
+                <span data-details-status></span>
+                <div class="detail-row"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg><span>Notifications</span><span data-details-notify></span></div>
+                <div class="detail-row"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg><span>Shared media</span><span>24</span></div>
+              </div>
+            </main>
+          </div>
+          <div class="menu-layer" data-menu-layer hidden>
+            <div class="main-menu" role="dialog" aria-label="Main menu" aria-modal="true">
+              <div class="account"><span class="avatar" data-tone="lilac" aria-hidden="true">AK</span><div><strong>Alex Kim</strong><span>@alexkim</span></div></div>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>My Profile</button>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg>New Group</button>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg>Contacts</button>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>Calls</button>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-bookmark"/></svg>Saved Messages</button>
+              <button type="button" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>Settings</button>
+              <button type="button" class="menu-item" role="switch" aria-checked="false" data-night><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg>Night Mode<span class="switch" aria-hidden="true"></span></button>
+              <div class="menu-footer">Telegram Desktop · design preview</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="changes" aria-label="Changes from the approved reference">
+    <li><strong>Readable material:</strong> the folder rail and chat list share one panel fill, and the conversation canvas is denser, so small text reaches 4.5:1 on every test wallpaper. Text colors are slightly stronger.</li>
+    <li><strong>Telegram behavior:</strong> the main menu returns at the top of the rail, folders show unread counts, muted chats use grey badges plus a muted icon, and the composer switches between voice recording and send.</li>
+    <li><strong>Sizes:</strong> Telegram's style values (13 px text, 46 px avatars, 62 px rows, 19 px badges) scaled by the interface scale; 125% is close to the approved sizes.</li>
+    <li><strong>Chat wallpaper:</strong> a chat wallpaper fills the message area below the header, while the header, pinned bar and bubbles keep their own fills.</li>
+  </ul>
+</div>
+<pre id="rects" hidden></pre>
+
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const pick = (key, allowed, fallback) => allowed.includes(params.get(key)) ? params.get(key) : fallback;
+  const state = {
+    appearance: pick('appearance', ['system', 'light', 'dark'], 'system'),
+    wallpaper: pick('wallpaper', ['folds', 'warm', 'sky', 'night'], 'folds'),
+    scale: pick('scale', ['100', '125', '150'], '125'),
+    material: pick('material', ['readable', 'approved'], 'readable'),
+    transparency: pick('transparency', ['on', 'off'], 'on'),
+    background: pick('background', ['material', 'pattern'], 'material'),
+  };
+  if (params.get('bare') === '1') document.body.classList.add('bare');
+
+  const app = document.querySelector('.app');
+  const stage = document.querySelector('.stage');
+  const frame = document.querySelector('.frame');
+  const $ = (selector) => app.querySelector(selector);
+  const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const avatar = (chat) => `<span class="avatar" data-tone="${chat.tone}" aria-hidden="true">${chat.icon ? icon(chat.icon) : chat.initials}</span>`;
+  const escape = (text) => text.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+  const folders = [
+    { id: 'all', label: 'All chats', icon: 'chats' },
+    { id: 'personal', label: 'Personal', icon: 'user' },
+    { id: 'work', label: 'Work', icon: 'work' },
+  ];
+  const chats = [
+    { id: 'weekend', name: 'Weekend crew', initials: 'WC', tone: 'sage', from: 'James', preview: 'Here is the trail map', time: '10:44', folders: ['all', 'personal'], unread: 0, pinned: true, status: '5 members, 2 online', messages: [
+      { date: 'Today' },
+      { from: 'Sofia', tone: 'lilac', initials: 'S', text: 'Found a quieter trail by the lake. About 2 hours, nothing too steep.', time: '10:38' },
+      { out: true, text: 'Perfect. Coffee at 9:30, then we can head out together.', time: '10:40' },
+      { from: 'James', tone: 'sand', initials: 'J', file: { name: 'Lakeside trail.pdf', size: '1.8 MB · PDF document' }, reaction: 2, time: '10:44' },
+    ] },
+    { id: 'maya', name: 'Maya Chen', initials: 'MC', tone: 'lilac', preview: 'That sounds lovely, see you there!', time: '10:32', folders: ['all', 'personal'], unread: 2, status: 'online', messages: [
+      { date: 'Today' },
+      { out: true, text: 'Dinner on Friday at the new place?', time: '10:20' },
+      { from: 'Maya Chen', tone: 'lilac', text: 'That sounds lovely, see you there!', time: '10:32' },
+    ] },
+    { id: 'design', name: 'Design team', initials: 'DT', tone: '', from: 'Alex', preview: 'Looking good to me', time: '09:58', folders: ['all', 'work'], unread: 5, muted: true, status: '12 members', messages: [
+      { date: 'Today' },
+      { from: 'Priya', tone: 'sage', initials: 'P', text: 'Updated the panel spacing in the latest mockup.', time: '09:51' },
+      { from: 'Alex', tone: 'sand', initials: 'A', text: 'Looking good to me', time: '09:58' },
+    ] },
+    { id: 'oliver', name: 'Oliver', initials: 'O', tone: 'sand', preview: 'Voice message', time: '09:21', folders: ['all', 'personal'], unread: 0, read: true, status: 'last seen recently', messages: [
+      { date: 'Today' },
+      { from: 'Oliver', tone: 'sand', text: 'Voice message · 0:42', time: '09:21' },
+    ] },
+    { id: 'saved', name: 'Saved Messages', initials: '', icon: 'bookmark', tone: 'saved', preview: 'A few things for later', time: 'Yesterday', folders: ['all'], unread: 0, status: '', messages: [
+      { date: 'Yesterday' },
+      { out: true, text: 'A few things for later', time: '18:05' },
+    ] },
+    { id: 'photo', name: 'Photography', initials: 'P', tone: 'sage', from: 'Sofia', preview: 'The light was incredible', time: 'Yesterday', folders: ['all', 'work'], unread: 0, muted: true, status: '2,410 subscribers', messages: [
+      { date: 'Yesterday' },
+      { from: 'Sofia', tone: 'lilac', text: 'The light was incredible', time: '19:12' },
+    ] },
+  ];
+  let folder = 'all';
+  let current = 'weekend';
+
+  function folderBadge(id) {
+    const list = chats.filter((chat) => chat.folders.includes(id) && chat.unread);
+    const loud = list.filter((chat) => !chat.muted).reduce((sum, chat) => sum + chat.unread, 0);
+    if (loud) return `<span class="folder-badge" aria-label="${loud} unread">${loud}</span>`;
+    const quiet = list.reduce((sum, chat) => sum + chat.unread, 0);
+    return quiet ? `<span class="folder-badge" data-muted aria-label="${quiet} unread in muted chats">${quiet}</span>` : '';
+  }
+
+  function renderFolders() {
+    $('[data-folders]').outerHTML = `<div data-folders style="display:contents">${folders.map((item) => `<button type="button" data-folder="${item.id}" aria-pressed="${item.id === folder}">${icon(item.icon)}<span class="label">${item.label}</span>${folderBadge(item.id)}</button>`).join('')}</div>`;
+  }
+
+  function renderList() {
+    $('[data-chat-list]').innerHTML = chats.filter((chat) => chat.folders.includes(folder)).map((chat) => {
+      const trailing = chat.unread
+        ? `<span class="unread"${chat.muted ? ' data-muted' : ''} aria-label="${chat.unread} unread">${chat.unread}</span>`
+        : (chat.pinned ? icon('pin') : '');
+      return `<button type="button" class="chat-row" data-chat="${chat.id}" aria-pressed="${chat.id === current}">
+        ${avatar(chat)}
+        <span class="chat-copy">
+          <span class="chat-top"><span class="chat-name">${chat.name}</span>${chat.muted ? `<span role="img" aria-label="Muted">${icon('muted')}</span>` : ''}<span class="chat-time">${chat.read ? icon('read') : ''}${chat.time}</span></span>
+          <span class="chat-bottom"><span class="chat-preview">${chat.from ? `<span class="from">${chat.from}: </span>` : ''}${chat.preview}</span>${trailing}</span>
+        </span>
+      </button>`;
+    }).join('');
+  }
+
+  function messageHtml(item) {
+    if (item.date) return `<div class="date">${item.date}</div>`;
+    if (item.out) {
+      return `<div class="message-line out"><div class="bubble"><p>${escape(item.text)}</p><div class="meta"><span>${item.time}</span>${icon('read')}</div></div></div>`;
+    }
+    const chat = chats.find((entry) => entry.id === current);
+    const group = !!item.initials;
+    const body = item.file
+      ? `<div class="file"><span class="file-icon">${icon('file')}</span><span class="file-copy"><strong>${item.file.name}</strong><span>${item.file.size}</span></span></div>${item.reaction ? `<button type="button" class="reaction" aria-pressed="false" aria-label="Heart reaction, ${item.reaction}">${icon('heart')}<span>${item.reaction}</span></button>` : ''}`
+      : `<p>${escape(item.text)}</p>`;
+    return `<div class="message-line">${group ? `<span class="avatar" data-tone="${item.tone}" aria-hidden="true">${item.initials}</span>` : ''}<div class="bubble">${group ? `<span class="sender" data-tone="${item.tone}">${item.from}</span>` : ''}${body}<div class="meta"><span>${item.time}</span></div></div></div>`;
+  }
+
+  function renderChat() {
+    const chat = chats.find((entry) => entry.id === current);
+    $('[data-header-avatar]').innerHTML = avatar(chat);
+    $('[data-title]').textContent = chat.name;
+    $('[data-status]').textContent = chat.status;
+    $('[data-status]').hidden = !chat.status;
+    $('[data-pinned]').hidden = chat.id !== 'weekend';
+    $('[data-messages]').innerHTML = chat.messages.map(messageHtml).join('');
+    $('[data-details-avatar]').innerHTML = avatar(chat);
+    $('[data-details-title]').textContent = chat.name;
+    $('[data-details-status]').textContent = chat.status;
+    $('[data-details-notify]').textContent = chat.muted ? 'Muted' : 'On';
+    const list = $('[data-messages]');
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function resolvedMode() {
+    if (state.appearance !== 'system') return state.appearance;
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function apply() {
+    const mode = resolvedMode();
+    app.dataset.mode = mode;
+    document.documentElement.dataset.theme = mode;
+    app.dataset.material = state.material;
+    app.dataset.background = state.background;
+    app.toggleAttribute('data-solid', state.transparency === 'off');
+    stage.dataset.wallpaper = state.wallpaper;
+    frame.style.setProperty('--s', Number(state.scale) / 100);
+    $('[data-night]').setAttribute('aria-checked', String(mode === 'dark'));
+    document.querySelectorAll('[data-control]').forEach((select) => { select.value = state[select.dataset.control]; });
+  }
+
+  function syncUrl() {
+    try {
+      const next = new URLSearchParams(location.search);
+      Object.entries(state).forEach(([key, value]) => next.set(key, value));
+      history.replaceState(null, '', `${location.pathname}?${next}`);
+    } catch (error) {
+      // Some file:// contexts refuse history updates; the controls still work.
+    }
+  }
+
+  document.querySelectorAll('[data-control]').forEach((select) => {
+    select.addEventListener('change', () => { state[select.dataset.control] = select.value; apply(); syncUrl(); });
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+
+  const menuLayer = $('[data-menu-layer]');
+  const menuButton = $('[data-open-menu]');
+  const setMenu = (open) => {
+    menuLayer.hidden = !open;
+    if (open) menuLayer.querySelector('.menu-item').focus(); else menuButton.focus();
+  };
+  const details = $('[data-details]');
+  const setDetails = (open) => {
+    details.hidden = !open;
+    app.querySelectorAll('[data-toggle-details]').forEach((button) => button.setAttribute('aria-expanded', String(open)));
+  };
+
+  app.addEventListener('click', (event) => {
+    const folderButton = event.target.closest('[data-folder]');
+    const chatButton = event.target.closest('[data-chat]');
+    const reaction = event.target.closest('.reaction');
+    if (folderButton) {
+      folder = folderButton.dataset.folder;
+      const visible = chats.filter((chat) => chat.folders.includes(folder));
+      if (!visible.some((chat) => chat.id === current)) current = visible[0].id;
+      renderFolders(); renderList(); renderChat();
+    } else if (chatButton) {
+      current = chatButton.dataset.chat;
+      renderList(); renderChat();
+    } else if (reaction) {
+      const pressed = reaction.getAttribute('aria-pressed') === 'true';
+      const count = reaction.querySelector('span');
+      count.textContent = Number(count.textContent) + (pressed ? -1 : 1);
+      reaction.setAttribute('aria-pressed', String(!pressed));
+    } else if (event.target.closest('[data-open-menu]')) {
+      setMenu(true);
+    } else if (event.target === menuLayer) {
+      setMenu(false);
+    } else if (event.target.closest('[data-night]')) {
+      state.appearance = resolvedMode() === 'dark' ? 'light' : 'dark';
+      apply(); syncUrl();
+    } else if (event.target.closest('[data-toggle-details]')) {
+      setDetails(details.hidden);
+    }
+  });
+  app.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (!menuLayer.hidden) setMenu(false);
+    else if (!details.hidden) setDetails(false);
+  });
+
+  const input = $('[data-input]');
+  const send = $('[data-send]');
+  const updateSend = () => {
+    const typing = input.value.trim().length > 0;
+    send.dataset.state = typing ? 'send' : 'record';
+    send.setAttribute('aria-label', typing ? 'Send message' : 'Record voice message');
+    send.innerHTML = icon(typing ? 'send' : 'mic');
+  };
+  input.addEventListener('input', updateSend);
+  $('[data-composer]').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    const chat = chats.find((entry) => entry.id === current);
+    chat.messages.push({ out: true, text, time: '10:45' });
+    input.value = '';
+    updateSend();
+    renderChat();
+  });
+
+  renderFolders();
+  renderList();
+  renderChat();
+  apply();
+
+  const measure = () => {
+    const scale = Number(state.scale) / 100;
+    const items = [];
+    const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 1 && r.height > 1; };
+    app.querySelectorAll('*').forEach((el) => {
+      if (el.closest('[hidden]') || !visible(el)) return;
+      const style = getComputedStyle(el);
+      const ownText = [...el.childNodes].some((node) => node.nodeType === 3 && node.textContent.trim());
+      const r = el.getBoundingClientRect();
+      if (ownText) {
+        items.push({ kind: 'text', name: el.textContent.trim().slice(0, 32), color: style.color, px: parseFloat(style.fontSize) * scale, weight: Number(style.fontWeight), x: r.x, y: r.y, w: r.width, h: r.height });
+      } else if (el.matches('input')) {
+        items.push({ kind: 'text', name: `placeholder: ${el.placeholder}`, color: getComputedStyle(el, '::placeholder').color, px: parseFloat(style.fontSize) * scale, weight: 400, x: r.x, y: r.y, w: Math.min(r.width, 120 * scale), h: r.height });
+      } else if (el.matches('svg.icon')) {
+        items.push({ kind: 'icon', name: el.querySelector('use')?.getAttribute('href') || 'icon', color: style.color, px: 0, weight: 0, x: r.x, y: r.y, w: r.width, h: r.height });
+      }
+    });
+    app.classList.add('measure');
+    document.getElementById('rects').textContent = JSON.stringify(items);
+  };
+  if (params.get('measure') === '1') {
+    // Colors are read after theme transitions settle, not mid-animation.
+    document.fonts.ready.then(() => setTimeout(measure, 400));
+  }
+})();
+</script>
+</body>
+</html>

@@ -61,6 +61,8 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Proposed UI element map and redesign sequence](element-map.md).
 - [Visual concept alternatives](design-directions.md).
 - [Approved Soft Panels reference, preview and screenshots](reference/README.md).
+- [Readable Soft Panels exploration](explorations/README.md), a proposal that
+  addresses the readability check and behavior gaps.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.
