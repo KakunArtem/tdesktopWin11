@@ -73,7 +73,7 @@ surfaces. That compatibility needs a later, explicitly requested prototype.
 
 1. **Explorer-inspired selective Acrylic:** a common translucent shell and
    navigation surface, with a stable message canvas and readable content fills.
-   This is the recommended starting point because it retains the supplied
+   This was the initial recommendation because it retains the supplied
    reference's character while protecting long reading sessions.
 2. **Conservative Fluent:** Mica for the long-lived shell, Acrylic for popups,
    and solid content surfaces. This follows Microsoft's general material
@@ -87,6 +87,11 @@ message canvas, then revised that scope after reviewing the visual examples.
 The current direction is Soft Panels with thinner borders and translucent
 contact and conversation panels. Acrylic versus Mica, tint strength and the
 technical implementation remain undecided.
+
+The approved reference is therefore closest to approach 3. Its message and
+composer fills stay dense, but list, header and metadata text sits directly
+on the material; see the
+[readability check](design-directions.md#readability-check-of-the-approved-reference).
 
 ## Questions reserved for the next phase
 

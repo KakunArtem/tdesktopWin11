@@ -41,8 +41,15 @@ requests.
 ## Decisions for later
 
 - Which macOS client screens and elements should guide the redesign.
-- Which Telegram surfaces should change first.
-- The desired translucency appearance and its technical implementation.
+- Which Telegram surfaces should change first. A proposed order is in
+  [the design directions](design-directions.md).
+- The native Windows material (Acrylic or Mica), tint strength and technical
+  implementation. The overall appearance is approved.
+- Minimum text contrast and material fill behind text; the reference falls
+  short in places, as the [readability check](design-directions.md#readability-check-of-the-approved-reference)
+  records.
+- Chat wallpaper and custom theme behavior on the translucent conversation
+  panel.
 - Supported Windows versions and behavior when translucency is unavailable or
   disabled.
 
