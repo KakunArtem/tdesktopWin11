@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, C16 and cross-cutting rules](../architecture.md#cross-cutting-rules); the [exploration's contrast method](../explorations/README.md#contrast-results); [plans README check rows](README.md#check-rows-used-by-element-plans).
 
+**Visual reference:** [C16 verification tooling](../component-references/c16-verification-tooling/README.md): the test wallpapers, the contrast self-test window, the worst-case backdrops and the region coordinates.
+
 **Depends on:** Phase 1 Task 5 (`Test-Backdrop.ps1`). Tasks 1–3 are needed before C3; Task 4 before C7.
 
 ## Global Constraints
@@ -48,7 +50,7 @@
 - [ ] **Step 2: Export and look**
 
 Run: `powershell -NoProfile -ExecutionPolicy Bypass -File docs\ui-modernization\tools\Export-Wallpapers.ps1`
-Expected: four PNGs; each matches the exploration's wallpaper control by eye.
+Expected: four PNGs; each matches panel A of the visual reference by eye.
 
 - [ ] **Step 3: Write `Show-Backdrop.ps1` and check focus**
 

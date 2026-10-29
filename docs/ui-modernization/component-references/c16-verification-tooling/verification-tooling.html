@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C16 Verification Reference</title>
+<style>
+:root {
+  --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff;
+  --mark-sample: #1565c0; --mark-bounds: #d9480f; --mark-invalid: #c2185b; --pass: #1b7f3b; --fail: #b3261e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+.out { margin: 10px 0 0; padding: 8px 10px; border-radius: 6px; background: #f3f5f8; border: 1px solid var(--page-line); white-space: pre; }
+
+/* A: test wallpapers, copied from explorations/soft-panels-readable.html. */
+.walls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.walls figure { margin: 0; }
+.walls figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+.wall { height: 150px; border-radius: 6px; border: 1px solid var(--page-line); background: var(--wall); }
+[data-wallpaper="folds"] { --wall: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+[data-wallpaper="warm"] { --wall: radial-gradient(ellipse at 72% 28%, #f5c49a 0 18%, transparent 19%), linear-gradient(145deg, #323765 0 32%, #ce8270 33% 55%, #7f9aaf 56% 76%, #243d66 77%); }
+[data-wallpaper="sky"] { --wall: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+[data-wallpaper="night"] { --wall: radial-gradient(ellipse at 70% 30%, #1f2f5a 0, transparent 55%), linear-gradient(160deg, #070b16, #0d1428 60%, #050811); }
+
+/* B: contrast self-test window. */
+.form { position: relative; width: 100%; border-radius: 8px; overflow: visible; border: 1px solid #c9d1db; box-shadow: 0 8px 24px rgba(0, 0, 0, .12); background: #f3f3f3; }
+.form .bar { height: 30px; display: flex; align-items: center; padding: 0 12px; font-size: 12px; border-bottom: 1px solid #e1e1e1; background: #ffffff; border-radius: 8px 8px 0 0; }
+.form .client { position: relative; padding: 14px; display: grid; gap: 10px; }
+.case { display: grid; grid-template-columns: 250px 1fr; gap: 12px; align-items: center; }
+.case .label { position: relative; padding: 10px 12px; border-radius: 4px; font-size: 13px; }
+.case .label::after { content: ""; position: absolute; inset: 4px; border: 1.5px dashed var(--mark-sample); border-radius: 3px; }
+.verdict { font-size: 12px; }
+.verdict b { display: inline-block; min-width: 54px; padding: 1px 6px; border-radius: 4px; color: #fff; text-align: center; margin-right: 6px; }
+.verdict .pass { background: var(--pass); }
+.verdict .fail { background: var(--fail); }
+.verdict .invalid { background: var(--mark-invalid); }
+.case.invalid .label { background: transparent; color: var(--page-muted); }
+.case.invalid .label::after { inset: 4px -40px 4px 150px; border-color: var(--mark-invalid); }
+
+/* C and D: the Phase 1 prototype window, as in the C1 reference. */
+.win {
+  --dialogs-bg: #ffffff; --history-bg: #dfe7ee; --placeholder: rgba(19, 35, 53, .12); --field: #f1f1f1; --divider: #e3e7eb; --text: #132335; --secondary: #3a4b5f;
+  position: relative; width: 240px; height: 150px; border-radius: 7px; overflow: hidden;
+  display: flex; flex-direction: column; color: var(--text); font-size: 10px;
+  box-shadow: inset 0 0 0 .5px rgba(21, 38, 58, .1), 0 10px 28px rgba(0, 0, 0, .3);
+  backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45);
+}
+.win[data-mode="dark"] { --dialogs-bg: #17212b; --history-bg: #0e1621; --placeholder: rgba(242, 246, 251, .12); --field: #242f3d; --divider: #0b131b; --text: #f2f6fb; --secondary: #c2cfdd; }
+.win .titlebar { height: 20px; flex-shrink: 0; display: flex; align-items: center; padding-left: 8px; background: var(--dialogs-bg); }
+.win .body { flex: 1; display: grid; grid-template-columns: 96px 1fr; min-height: 0; }
+.win .column { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--divider); }
+.win .strip { position: relative; height: 24px; flex-shrink: 0; display: flex; align-items: center; gap: 5px; padding: 0 5px; background: color-mix(in srgb, var(--dialogs-bg) 60%, transparent); }
+.win .strip .menu { width: 11px; height: 8px; border-top: 1.5px solid var(--secondary); border-bottom: 1.5px solid var(--secondary); }
+.win .strip .field { flex: 1; height: 15px; border-radius: 8px; background: var(--field); display: flex; align-items: center; padding-left: 6px; color: var(--secondary); font-size: 8.5px; }
+.win .list { flex: 1; display: flex; flex-direction: column; gap: 7px; padding: 6px 5px; background: var(--dialogs-bg); }
+.win .row { display: grid; grid-template-columns: 17px 1fr; gap: 5px; align-items: center; }
+.win .row b { width: 17px; height: 17px; border-radius: 50%; background: var(--placeholder); }
+.win .row span { height: 5px; border-radius: 3px; background: var(--placeholder); width: 80%; }
+.win .history { background: var(--history-bg); }
+.backdrops { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.backdrops figure { margin: 0; }
+.backdrops figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+.solid { height: 196px; border-radius: 6px; border: 1px solid var(--page-line); display: grid; place-items: center; }
+
+.annotated { position: relative; height: 300px; border-radius: 6px; border: 1px solid var(--page-line); display: grid; place-items: center; }
+.annotated .win { width: 400px; height: 250px; font-size: 12px; }
+.annotated .win .titlebar { height: 28px; }
+.annotated .win .body { grid-template-columns: 160px 1fr; }
+.annotated .win .strip { height: 36px; }
+.annotated .win .strip .field { height: 22px; font-size: 11px; }
+.annotated .win .list { gap: 10px; padding: 8px; }
+.annotated .win .row { grid-template-columns: 26px 1fr; }
+.annotated .win .row b { width: 26px; height: 26px; }
+.mark { position: absolute; pointer-events: none; font-size: 10.5px; }
+.mark span { position: absolute; white-space: nowrap; padding: 0 5px; border-radius: 4px; color: #fff; }
+.mark.bounds { left: 0; top: 28px; width: 160px; height: 36px; border: 2px solid var(--mark-bounds); }
+.mark.bounds span { left: 164px; top: -2px; background: var(--mark-bounds); }
+.mark.sample { left: 25px; top: 39px; width: 48px; height: 16px; border: 1.5px dashed var(--mark-sample); }
+.mark.sample span { left: 139px; top: 22px; background: var(--mark-sample); }
+.mark.origin { left: 0; top: 0; }
+.mark.origin::before { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--mark-bounds); }
+.mark.origin span { left: 6px; top: -22px; background: #37474f; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C16 Verification tooling: visual reference</h1>
+  <p>What the tools from the verification tooling plan show and measure. Browser renderings; coordinates and counts on this sheet are illustrative.</p>
+  <div class="panels">
+
+    <section class="panel">
+      <h2>A. Test wallpapers: Export-Wallpapers.ps1, Show-Backdrop.ps1 -Wallpaper</h2>
+      <p class="lead">wallpapers.html renders each one full-viewport with nothing else; exported at 2560×1440 and shown behind Telegram.</p>
+      <div class="walls">
+        <figure><div class="wall" data-wallpaper="folds"></div><figcaption><span class="mono">folds.png</span>: Blue folds, the default comparison</figcaption></figure>
+        <figure><div class="wall" data-wallpaper="warm"></div><figcaption><span class="mono">warm.png</span>: Warm shapes, hard color edges</figcaption></figure>
+        <figure><div class="wall" data-wallpaper="sky"></div><figcaption><span class="mono">sky.png</span>: Bright sky, hardest for dark text</figcaption></figure>
+        <figure><div class="wall" data-wallpaper="night"></div><figcaption><span class="mono">night.png</span>: Night, hardest for light text</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>B. Contrast self-test: Measure-Contrast.ps1 -SelfTest</h2>
+      <p class="lead">A WinForms window with two 13 px labels; dashed boxes are the sample rectangles. A third sample crosses the client edge.</p>
+      <div class="form">
+        <div class="bar">Measure-Contrast self-test</div>
+        <div class="client">
+          <div class="case"><div class="label" style="background:#e9eef5;color:#3a4b5f">Secondary #3a4b5f on #e9eef5</div><div class="verdict"><b class="pass">PASS</b>7.66:1, threshold 4.5:1</div></div>
+          <div class="case"><div class="label" style="background:#ffffff;color:#999999">Secondary #999999 on #ffffff</div><div class="verdict"><b class="fail">FAIL</b>2.85:1, threshold 4.5:1</div></div>
+          <div class="case invalid"><div class="label">Sample outside the client area</div><div class="verdict"><b class="invalid">INVALID</b>exit code 1, never a pass</div></div>
+        </div>
+      </div>
+      <div class="out mono">sample      backdrop  background  text     ratio  need  result
+secondary   #000000   #e9eef5     #3a4b5f  7.66   4.5   PASS
+secondary   #ffffff   #e9eef5     #3a4b5f  7.66   4.5   PASS
+default     #000000   #ffffff     #999999  2.85   4.5   FAIL
+default     #ffffff   #ffffff     #999999  2.85   4.5   FAIL
+outside     both      -           -        -      4.5   INVALID
+SELFTEST PASS</div>
+    </section>
+
+    <section class="panel">
+      <h2>C. Worst-case backdrops: Measure-Contrast.ps1 captures</h2>
+      <p class="lead">Each sample is measured twice, over Show-Backdrop -Color #000000 and -Color #ffffff; the lower ratio counts.</p>
+      <div class="backdrops" data-backdrops></div>
+    </section>
+
+    <section class="panel">
+      <h2>D. Regions and bounds: Test-Backdrop.ps1 -Region, samples JSON</h2>
+      <p class="lead">Coordinates are physical pixels relative to the client area. Changed bounds must lie inside the region the plan made translucent.</p>
+      <div class="annotated" data-wallpaper="folds" style="background: var(--wall)">
+        <div style="position:relative">
+          <div data-annotated></div>
+          <div class="mark origin"><span>client (0,0)</span></div>
+          <div class="mark bounds"><span>Changed bounds: 0,28,160,36</span></div>
+          <div class="mark sample"><span>sample "search placeholder", kind text</span></div>
+        </div>
+      </div>
+      <div class="out mono">PASS: backdrop shows what is behind the window
+Changed bounds: 0,28,160,36</div>
+    </section>
+
+  </div>
+</div>
+<script>
+(() => {
+  const rows = '<div class="row"><b></b><span></span></div>'.repeat(6);
+  const win = (mode) => `
+    <div class="win" data-mode="${mode}">
+      <div class="titlebar">Telegram</div>
+      <div class="body">
+        <div class="column">
+          <div class="strip"><div class="menu"></div><div class="field">Search</div></div>
+          <div class="list">${rows}</div>
+        </div>
+        <div class="history"></div>
+      </div>
+    </div>`;
+  const backdrops = document.querySelector('[data-backdrops]');
+  for (const [mode, color] of [['light', '#000000'], ['light', '#ffffff'], ['dark', '#000000'], ['dark', '#ffffff']]) {
+    backdrops.insertAdjacentHTML('beforeend', `
+      <figure><div class="solid" style="background:${color}">${win(mode)}</div>
+      <figcaption>${mode === 'light' ? 'Day' : 'Night'} theme over <span class="mono">-Color ${color}</span></figcaption></figure>`);
+  }
+  document.querySelector('[data-annotated]').outerHTML = win('light');
+})();
+</script>
+</body>
+</html>
