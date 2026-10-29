@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Surface roles (C4)](../architecture.md#surface-roles-c4) and [Phase 2](../implementation-plan.md#phase-2-material-foundation).
 
+**Visual reference:** [C4 surface roles](../component-references/c4-surface-roles/README.md): the role of every region in today's layout, the window with material on and off, and the repaint check for `CompositionMode_Source`.
+
 **Depends on:** [material state](2026-10-29-material-state.md) and [material fills](2026-10-29-material-fills.md) (`Active()`, `ActiveValue()`, `Fill(Surface)`, `FillsChanged()`).
 
 ## Global Constraints
@@ -143,7 +145,7 @@ In `Widget::startChatsFilterSlide`, use `SetOpaquePaint(canvas, true)` and `Pain
 - [ ] **Step 5: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
-With material active: the rail and list show the backdrop at the Navigation fill; moving the mouse across many rows and back leaves no darkened rows; scrolling leaves no stale pixels; switching folders animates without a black frame (an opaque frame is acceptable until C5).
+With material active: the rail and list show the backdrop at the Navigation fill, as in panel A of the visual reference; moving the mouse across many rows and back leaves no darkened rows; scrolling leaves no stale pixels; switching folders animates without a black frame (an opaque frame is acceptable until C5).
 
 - [ ] **Step 6: Commit**
 

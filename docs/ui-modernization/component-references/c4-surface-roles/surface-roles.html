@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C4 Surface Roles Reference</title>
+<style>
+:root {
+  --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff;
+  --role-window: #6b7a8c; --role-navigation: #1565c0; --role-conversation: #7b3fb0; --role-composer: #1b7f3b; --role-opaque: #b3261e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+figure { margin: 0; }
+figcaption { margin-top: 5px; font-size: 12px; color: var(--page-muted); }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.desk { position: relative; isolation: isolate; height: 360px; border-radius: 8px; overflow: hidden; display: grid; place-items: center; }
+.desk::before { content: ""; position: absolute; inset: 0; z-index: -1; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+
+/* Today's Telegram layout; the Soft Panels layout comes with C7. */
+.tg {
+  --solid: #ffffff; --fg: #000000; --sub: #535353; --title-bg: #ffffff; --line: #e7e7e7; --placeholder: rgba(0, 0, 0, .1); --field: #f1f1f1;
+  --wall-a: #dbe8cf; --wall-b: #b9d3c2; --bubble: #ffffff; --bubble-out: #effdde;
+  --window: 0.78; --navigation: 0.78; --conversation: 0.79; --composer: 0.96;
+  position: relative; width: 540px; height: 320px; border-radius: 8px; overflow: hidden; display: grid; grid-template-rows: 22px 1fr; color: var(--fg); font-size: 10.5px;
+  box-shadow: inset 0 0 0 .5px rgba(21, 38, 58, .12), 0 12px 32px rgba(0, 0, 0, .32);
+}
+.tg[data-mode="dark"] {
+  --solid: #17212b; --fg: #f5f5f5; --sub: #a6bcd2; --title-bg: #1f2936; --line: #0b131b; --placeholder: rgba(255, 255, 255, .1); --field: #242f3d;
+  --wall-a: #1d2b33; --wall-b: #16222b; --bubble: #182533; --bubble-out: #2b5278;
+  --window: 0.81; --navigation: 0.82; --conversation: 0.81; --composer: 0.96;
+}
+.tg[data-material] { backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: color-mix(in srgb, var(--solid) calc(var(--window) * 100%), transparent); }
+.tg:not([data-material]) { background: var(--solid); }
+.tg .titlebar { display: flex; align-items: center; padding-left: 8px; background: var(--title-bg); border-bottom: 1px solid var(--line); }
+.tg .body { display: grid; grid-template-columns: 52px 150px 1fr; min-height: 0; }
+.tg .rail, .tg .list { background: var(--solid); }
+.tg[data-material] .rail, .tg[data-material] .list { background: color-mix(in srgb, var(--solid) calc(var(--navigation) * 100%), transparent); }
+.tg .rail { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 8px; border-right: 1px solid var(--line); }
+.tg .rail i { width: 22px; height: 18px; border-radius: 5px; background: var(--placeholder); }
+.tg .rail i:first-child { height: 14px; background: none; border-top: 2px solid var(--sub); border-bottom: 2px solid var(--sub); border-radius: 0; width: 16px; }
+.tg .list { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
+.tg .search { height: 34px; display: flex; align-items: center; padding: 0 8px; }
+.tg .search span { flex: 1; height: 20px; border-radius: 10px; background: var(--field); color: var(--sub); padding-left: 8px; display: flex; align-items: center; font-size: 9.5px; }
+.tg .row { display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: center; padding: 5px 8px; }
+.tg .row b { width: 26px; height: 26px; border-radius: 50%; background: #c4d8ec; }
+.tg[data-mode="dark"] .row b { background: #40576f; }
+.tg .row span { display: flex; flex-direction: column; gap: 1px; line-height: 1.2; }
+.tg .row em { font-style: normal; color: var(--sub); }
+.tg .chat { display: grid; grid-template-rows: 34px 1fr 36px; min-width: 0; }
+.tg .header, .tg .composer { display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+.tg .header { background: var(--solid); border-bottom: 1px solid var(--line); flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; line-height: 1.2; }
+.tg .header em { font-style: normal; color: var(--sub); }
+.tg[data-material] .header { background: color-mix(in srgb, var(--solid) calc(var(--conversation) * 100%), transparent); }
+.tg .composer { background: var(--solid); border-top: 1px solid var(--line); color: var(--sub); }
+.tg[data-material] .composer { background: color-mix(in srgb, var(--solid) calc(var(--composer) * 100%), transparent); }
+.tg .composer span { flex: 1; }
+.tg .composer i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--sub); }
+.tg .wallpaper { background: linear-gradient(160deg, var(--wall-a), var(--wall-b)); display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; padding: 10px; }
+.tg .bubble { max-width: 60%; padding: 5px 8px; border-radius: 8px; background: var(--bubble); }
+.tg .bubble.out { align-self: flex-end; background: var(--bubble-out); }
+
+/* Role map overlay. */
+.map { position: absolute; inset: 0; display: grid; grid-template-rows: 22px 1fr; pointer-events: none; }
+.map .body { display: grid; grid-template-columns: 52px 150px 1fr; }
+.map .chat { display: grid; grid-template-rows: 34px 1fr 36px; }
+.zone { position: relative; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); }
+.zone span { position: absolute; left: 4px; top: 3px; padding: 0 5px; border-radius: 4px; background: var(--c); color: #fff; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.zone.hatch { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--c) 22%, transparent) 0 6px, transparent 6px 12px); }
+.zone.nav { --c: var(--role-navigation); grid-column: 1 / 3; }
+.zone.conv { --c: var(--role-conversation); }
+.zone.comp { --c: var(--role-composer); }
+.zone.opaque { --c: var(--role-opaque); }
+.zone.title { --c: var(--role-opaque); }
+.zone.title span { top: 1px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; background: var(--c); vertical-align: -1px; }
+
+/* Source versus SourceOver. */
+.passes { display: grid; grid-template-columns: 150px repeat(5, 1fr); gap: 8px; align-items: center; font-size: 12px; }
+.passes .head { font-size: 11px; color: var(--page-muted); font-weight: 600; text-align: center; }
+.strip { position: relative; isolation: isolate; height: 54px; border-radius: 6px; overflow: hidden; }
+.strip::before { content: ""; position: absolute; inset: 0; z-index: -1; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.strip div { position: absolute; inset: 0; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); display: flex; align-items: center; padding-left: 10px; color: #000; }
+.strip small { position: absolute; right: 6px; bottom: 3px; font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 10.5px; color: #000; opacity: .75; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C4 Surface roles: visual reference</h1>
+  <p>Telegram's current layout with each background painted through its role. Fills are the C3 values for the default day and night themes; the Soft Panels layout arrives with C7.</p>
+
+  <section class="panel">
+    <h2>A. Which role paints where</h2>
+    <p class="lead">Rail and chats list share the Navigation fill, the header uses Conversation, the composer and reply strip use Composer. The chat wallpaper, bubbles and title bar stay opaque in this phase.</p>
+    <div class="tiles">
+      <figure><div class="desk" data-tile="map"></div><figcaption>Role map over the day theme, material active</figcaption></figure>
+      <figure><div class="desk" data-tile="light"></div><figcaption>Day theme, material active: Window 0.78, Navigation 0.78, Conversation 0.79, Composer 0.96</figcaption></figure>
+      <figure><div class="desk" data-tile="dark"></div><figcaption>Night theme, material active: Window 0.81, Navigation 0.82, Conversation 0.81, Composer 0.96</figcaption></figure>
+      <figure><div class="desk" data-tile="off"></div><figcaption>Material off: every site paints the same style::color as before the plan</figcaption></figure>
+    </div>
+    <div class="legend">
+      <span style="--c: var(--role-navigation)">Navigation: Dialogs::Widget, InnerWidget, FiltersMenu::_outer</span>
+      <span style="--c: var(--role-conversation)">Conversation: TopBarWidget</span>
+      <span style="--c: var(--role-composer)">Composer: ComposeControls, HistoryWidget::drawField</span>
+      <span style="--c: var(--role-window)">Window: MainWindow body, visible only in gaps</span>
+      <span style="--c: var(--role-opaque)">Opaque: wallpaper (C11), title bar (C8)</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Painting the same fill again: Source replaces, SourceOver accumulates</h2>
+    <p class="lead">A chats list row repainted on every hover. PaintFill uses CompositionMode_Source, so the fifth repaint looks like the first. Blending with SourceOver piles each repaint on the last, until the row is opaque.</p>
+    <div class="passes" data-passes></div>
+  </section>
+</div>
+<script>
+(() => {
+  const rows = [
+    ['Saved Messages', 'Photo'],
+    ['Design team', 'Anna: new mockups'],
+    ['Alex', 'See you tomorrow'],
+    ['Family', 'Dinner at 7?'],
+    ['Telegram', 'Login code'],
+  ].map(([name, text]) => `<div class="row"><b></b><span>${name}<em>${text}</em></span></div>`).join('');
+  const win = (mode, material) => `
+    <div class="tg" data-mode="${mode}" ${material ? 'data-material' : ''}>
+      <div class="titlebar">Telegram</div>
+      <div class="body">
+        <div class="rail"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="list"><div class="search"><span>Search</span></div>${rows}</div>
+        <div class="chat">
+          <div class="header"><strong>Design team</strong><em>5 members</em></div>
+          <div class="wallpaper"><div class="bubble">Here are the new mockups</div><div class="bubble out">Looks great</div></div>
+          <div class="composer"><i></i><span>Write a message…</span><i></i></div>
+        </div>
+      </div>
+    </div>`;
+  const map = `
+    <div class="map">
+      <div class="zone title hatch"><span>Title bar: opaque until C8</span></div>
+      <div class="body">
+        <div class="zone nav"><span>Navigation</span></div>
+        <div class="chat">
+          <div class="zone conv"><span>Conversation</span></div>
+          <div class="zone opaque hatch"><span>Chat wallpaper: opaque until C11</span></div>
+          <div class="zone comp"><span>Composer</span></div>
+        </div>
+      </div>
+    </div>`;
+  document.querySelector('[data-tile="map"]').innerHTML = win('light', true).replace(/<\/div>\s*$/, map + '</div>');
+  document.querySelector('[data-tile="light"]').innerHTML = win('light', true);
+  document.querySelector('[data-tile="dark"]').innerHTML = win('dark', true);
+  document.querySelector('[data-tile="off"]').innerHTML = win('light', false);
+
+  const fill = 0.78;
+  const passes = document.querySelector('[data-passes]');
+  passes.innerHTML = '<span></span>' + [1, 2, 3, 4, 5].map((n) => `<span class="head">after ${n} repaint${n > 1 ? 's' : ''}</span>`).join('');
+  const strip = (alpha) => `<div class="strip"><div style="background: rgba(255, 255, 255, ${alpha})">Design team</div><small>alpha ${alpha.toFixed(2)}</small></div>`;
+  passes.insertAdjacentHTML('beforeend', '<span><strong>Source</strong> (PaintFill)</span>');
+  for (let n = 1; n <= 5; ++n) passes.insertAdjacentHTML('beforeend', strip(fill));
+  passes.insertAdjacentHTML('beforeend', '<span><strong>SourceOver</strong> (wrong)</span>');
+  for (let n = 1; n <= 5; ++n) passes.insertAdjacentHTML('beforeend', strip(1 - Math.pow(1 - fill, n)));
+})();
+</script>
+</body>
+</html>

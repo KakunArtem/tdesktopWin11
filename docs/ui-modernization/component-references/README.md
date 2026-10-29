@@ -14,4 +14,5 @@ These are proposals derived from the mockup. The
 | C1 Native backdrop | [native backdrop](c1-native-backdrop/README.md) |
 | C2 Material state | [material state](c2-material-state/README.md) |
 | C3 Material fills | [material fills](c3-material-fills/README.md) |
+| C4 Surface roles | [surface roles](c4-surface-roles/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
