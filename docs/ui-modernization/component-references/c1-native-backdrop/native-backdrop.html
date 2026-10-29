@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C1 Native Backdrop Reference</title>
+<style>
+:root {
+  --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5;
+}
+:root[data-theme="dark"] {
+  --page-bg: #0f141b; --page-fg: #e6ecf3; --page-muted: #a7b4c3; --page-line: #2a3441;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: max-content; padding: 20px 24px 24px; }
+.sheet h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet p { margin: 0 0 14px; color: var(--page-muted); }
+.grid { display: grid; grid-template-columns: 92px repeat(3, 360px); gap: 12px; align-items: center; }
+.col-title { font-size: 12px; font-weight: 600; color: var(--page-muted); }
+.row-title { font-size: 12px; font-weight: 600; color: var(--page-muted); }
+
+/* Desktop wallpapers, copied from explorations/soft-panels-readable.html. */
+.desk { position: relative; isolation: isolate; width: 360px; height: 240px; padding: 20px; border-radius: 12px; overflow: hidden; border: 1px solid var(--page-line); }
+.desk::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--wall); }
+.desk[data-wallpaper="folds"] { --wall: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.desk[data-wallpaper="warm"] { --wall: radial-gradient(ellipse at 72% 28%, #f5c49a 0 18%, transparent 19%), linear-gradient(145deg, #323765 0 32%, #ce8270 33% 55%, #7f9aaf 56% 76%, #243d66 77%); }
+.desk[data-wallpaper="sky"] { --wall: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+.desk[data-wallpaper="night"] { --wall: radial-gradient(ellipse at 70% 30%, #1f2f5a 0, transparent 55%), linear-gradient(160deg, #070b16, #0d1428 60%, #050811); }
+
+/* Window layer tokens from the readable mockup; Telegram palette values for the prototype. */
+.win {
+  --win: 72%; --blur: 32px;
+  --text: #132335; --secondary: #3a4b5f; --base: #e9eef5;
+  --glow: #96bff1; --other-glow: #c9bddf; --edge: rgba(21, 38, 58, .1);
+  --dialogs-bg: #ffffff; --history-bg: #dfe7ee; --placeholder: rgba(19, 35, 53, .12); --field: #f1f1f1; --divider: #e3e7eb;
+  position: relative; width: 320px; height: 200px; border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; color: var(--text);
+  box-shadow: inset 0 0 0 .5px var(--edge), 0 12px 32px rgba(0, 0, 0, .28);
+}
+[data-mode="dark"] .win {
+  --win: 74%;
+  --text: #f2f6fb; --secondary: #c2cfdd; --base: #1b2838;
+  --glow: #315c89; --other-glow: #504066; --edge: rgba(238, 243, 249, .1);
+  --dialogs-bg: #17212b; --history-bg: #0e1621; --placeholder: rgba(242, 246, 251, .12); --field: #242f3d; --divider: #0b131b;
+}
+.titlebar { height: 24px; flex-shrink: 0; display: flex; align-items: center; padding-left: 10px; font-size: 11px; }
+.caption { margin-left: auto; display: flex; gap: 14px; padding-right: 12px; }
+.caption i { width: 8px; height: 8px; border: 1px solid var(--secondary); border-width: 0 0 1px; display: block; }
+.caption i:nth-child(2) { border-width: 1px; }
+.caption i:nth-child(3) { border: 0; background: linear-gradient(45deg, transparent 45%, var(--secondary) 45% 55%, transparent 55%), linear-gradient(-45deg, transparent 45%, var(--secondary) 45% 55%, transparent 55%); }
+
+/* Target: the mockup's window layer alone, with no panels on top. */
+.win.target {
+  background:
+    radial-gradient(ellipse at 10% 8%, color-mix(in srgb, var(--glow) 30%, transparent), transparent 66%),
+    radial-gradient(ellipse at 32% 90%, color-mix(in srgb, var(--other-glow) 30%, transparent), transparent 63%),
+    color-mix(in srgb, var(--base) var(--win), transparent);
+  backdrop-filter: blur(var(--blur)) saturate(1.45);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.45);
+}
+.target .note { margin: auto; font-size: 11px; color: var(--secondary); }
+
+/* Prototype: today's layout, opaque except the strip above the chats list. */
+.win.proto { backdrop-filter: blur(var(--blur)) saturate(1.45); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.45); }
+.proto .titlebar, .proto .list, .proto .history { background: var(--dialogs-bg); }
+.proto .body { flex: 1; display: grid; grid-template-columns: 128px 1fr; min-height: 0; }
+.proto .column { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--divider); }
+.proto .strip { height: 30px; flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding: 0 6px; background: color-mix(in srgb, var(--dialogs-bg) 60%, transparent); }
+.proto .strip .menu { width: 14px; height: 10px; border-top: 2px solid var(--secondary); border-bottom: 2px solid var(--secondary); position: relative; }
+.proto .strip .menu::after { content: ""; position: absolute; left: 0; right: 0; top: 2px; border-top: 2px solid var(--secondary); }
+.proto .strip .field { flex: 1; height: 20px; border-radius: 10px; background: var(--field); }
+.proto .list { flex: 1; display: flex; flex-direction: column; gap: 9px; padding: 8px 6px; }
+.proto .row { display: grid; grid-template-columns: 22px 1fr; gap: 6px; align-items: center; }
+.proto .row b { width: 22px; height: 22px; border-radius: 50%; background: var(--placeholder); }
+.proto .row span { height: 6px; border-radius: 3px; background: var(--placeholder); box-shadow: 0 9px 0 -1px var(--placeholder); width: 80%; margin-top: -8px; }
+.proto .history { background: var(--history-bg); }
+.proto.off { backdrop-filter: none; -webkit-backdrop-filter: none; }
+.proto.off .strip { background: var(--dialogs-bg); }
+.callout { position: absolute; left: 132px; top: 26px; font-size: 10px; color: #fff; background: rgba(214, 40, 79, .92); padding: 1px 6px; border-radius: 6px; }
+.callout::before { content: ""; position: absolute; left: -6px; top: 5px; border: 3px solid transparent; border-right-color: rgba(214, 40, 79, .92); }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C1 Native backdrop: visual reference</h1>
+  <p data-subtitle></p>
+  <div class="grid" data-grid></div>
+</div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const requested = params.get('appearance');
+  const mode = ['light', 'dark'].includes(requested)
+    ? requested
+    : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = mode;
+  document.body.dataset.mode = mode;
+  document.querySelector('[data-subtitle]').textContent = (mode === 'light')
+    ? 'Light appearance. Browser approximation: blur 32 px, saturation 1.45, window fill 72% of #e9eef5. Prototype strip: 60% of dialogsBg #ffffff.'
+    : 'Dark appearance. Browser approximation: blur 32 px, saturation 1.45, window fill 74% of #1b2838. Prototype strip: 60% of night-theme dialogsBg #17212b.';
+
+  const wallpapers = [
+    ['folds', 'Blue folds'],
+    ['warm', 'Warm shapes'],
+    ['sky', 'Bright sky'],
+    ['night', 'Night'],
+  ];
+  const caption = '<div class="caption"><i></i><i></i><i></i></div>';
+  const titlebar = `<div class="titlebar">Telegram${caption}</div>`;
+  const rows = '<div class="row"><b></b><span></span></div>'.repeat(5);
+  const proto = (extra, callout) => `
+    <div class="win proto${extra}">
+      ${titlebar}
+      <div class="body">
+        <div class="column">
+          <div class="strip"><div class="menu"></div><div class="field"></div></div>
+          <div class="list">${rows}</div>
+        </div>
+        <div class="history"></div>
+      </div>
+      ${callout ? '<span class="callout">translucent strip</span>' : ''}
+    </div>`;
+  const cells = {
+    target: () => `<div class="win target">${titlebar}<span class="note">window backdrop only</span></div>`,
+    prototype: () => proto('', true),
+    off: () => proto(' off', false),
+  };
+
+  const grid = document.querySelector('[data-grid]');
+  grid.insertAdjacentHTML('beforeend', `
+    <span></span>
+    <span class="col-title">Target: mockup window layer</span>
+    <span class="col-title">Phase 1 prototype (option on)</span>
+    <span class="col-title">Option off or refused: unchanged</span>`);
+  for (const [id, name] of wallpapers) {
+    grid.insertAdjacentHTML('beforeend', `<span class="row-title">${name}</span>`);
+    for (const kind of ['target', 'prototype', 'off']) {
+      grid.insertAdjacentHTML('beforeend', `<div class="desk" data-wallpaper="${id}">${cells[kind]()}</div>`);
+    }
+  }
+})();
+</script>
+</body>
+</html>

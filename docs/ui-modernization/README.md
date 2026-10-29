@@ -76,6 +76,8 @@ This brief is the entry point for the redesign documentation. Current documents:
   contracts and dependencies, expanding the roadmap.
 - [Component plans](plans/README.md): one implementation plan per component,
   in execution order.
+- [Component visual references](component-references/README.md): what each
+  component changes, isolated from the mockup; C1 so far.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

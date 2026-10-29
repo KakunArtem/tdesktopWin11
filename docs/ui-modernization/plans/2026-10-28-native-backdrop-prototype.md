@@ -10,6 +10,8 @@
 
 **Roadmap:** Phase 1 of the [implementation roadmap](../implementation-plan.md).
 
+**Visual reference:** [C1 native backdrop](../component-references/c1-native-backdrop/README.md): the target backdrop, the expected prototype strip and the unchanged option-off window, light and dark, over four wallpapers.
+
 ---
 
 ## Ground rules for this repository
@@ -974,7 +976,7 @@ Paste the `Material:` and `QRhi-Check [material]` lines from `log.txt`.
 | --- | --- | --- |
 | Option off is unchanged | `Test-Backdrop.ps1 -Expect Opaque` |  |
 | Backdrop visible | `Test-Backdrop.ps1 -Expect Transparent` |  |
-| Matches the mockup | Put a similar blue wallpaper behind the window and compare the strip with `docs/ui-modernization/explorations/soft-panels-readable-light.png` and `-dark.png`: similar tint, blur and visibility of the desktop |  |
+| Matches the mockup | Put a similar blue wallpaper behind the window and compare the strip with the prototype column of `docs/ui-modernization/component-references/c1-native-backdrop/native-backdrop-light.png` and `-dark.png`, then with `docs/ui-modernization/explorations/soft-panels-readable-light.png` and `-dark.png`: similar tint, blur and visibility of the desktop |  |
 | Light and dark | Toggle night mode; backdrop tint follows |  |
 | Maximized | Maximize, rerun the transparent check |  |
 | Snapped | Snap left with Win+Left, look at the strip |  |
