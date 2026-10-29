@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C10 Chat List Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.row-layout { display: grid; grid-template-columns: 596px 1fr; gap: 14px; }
+.stack { display: grid; gap: 14px; align-content: start; }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+.crops { display: flex; gap: 10px; }
+.crop { width: 276px; height: 562px; border-radius: 6px; border: 1px solid var(--page-line); background-repeat: no-repeat; background-size: 956px 656px; background-position: -96px -60px; }
+
+/* Night theme on the Navigation fill (0.82) over Blue folds, text adjusted by C3. */
+.night { --nav: rgba(23, 33, 43, .82); --name: #f5f5f5; --text: #a8bbcf; --date: #abbbce; --service: #79bffc; --active: #2b5278; --active-fg: #ffffff; --hover: rgba(245, 245, 245, .07); --ripple: #25313d; --unread: #4082bc; --muted: #3e546a; --badge-fg: #ffffff; --placeholder: #afbbc7; --bar: rgba(23, 33, 43, .90); --edge: rgba(245, 245, 245, .10); --focus: #6396cb; }
+.desk { position: relative; isolation: isolate; border-radius: 6px; overflow: hidden; }
+.desk::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.desk .nav { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--nav); }
+.states { display: grid; grid-template-columns: 150px 1fr; gap: 6px 10px; align-items: center; }
+.states .label { font-size: 12px; }
+.states .label span { display: block; font-size: 11px; color: var(--page-muted); }
+.list-row { position: relative; width: 300px; height: 62px; color: var(--name); font-size: 13px; }
+.pill { position: absolute; left: 6px; top: 1px; right: 2px; bottom: 1px; border-radius: 10px; overflow: hidden; }
+.pill .ripple { position: absolute; width: 160px; height: 160px; border-radius: 50%; left: 40px; top: -50px; background: var(--ripple); }
+.list-row .avatar { position: absolute; left: 13px; top: 8px; width: 46px; height: 46px; border-radius: 50%; background: #40576f; color: #eef5fc; display: grid; place-items: center; font-weight: 600; font-size: 15px; }
+.list-row .name { position: absolute; left: 71px; top: 9px; font-weight: 600; }
+.list-row .date { position: absolute; right: 12px; top: 10px; font-size: 12px; color: var(--date); }
+.list-row .text { position: absolute; left: 71px; top: 32px; right: 40px; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-row .text b { font-weight: 400; color: var(--service); }
+.list-row .badge { position: absolute; right: 12px; top: 33px; min-width: 19px; height: 19px; padding: 0 6px; border-radius: 10px; background: var(--unread); color: var(--badge-fg); font-size: 11px; font-weight: 600; display: grid; place-items: center; }
+.list-row .badge.muted { background: var(--muted); }
+.list-row[data-state="active"] { color: var(--active-fg); }
+.list-row[data-state="active"] .date, .list-row[data-state="active"] .text, .list-row[data-state="active"] .text b { color: var(--active-fg); }
+.scaled { transform: scale(1.25); transform-origin: 0 0; }
+.cell { width: 375px; height: 78px; }
+
+.search-desk { width: 375px; height: 62px; }
+.search { position: absolute; left: 10px; right: 8px; top: 6px; height: 34px; border-radius: 9px; background: var(--bar); box-shadow: inset 0 0 0 1px var(--edge); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--placeholder); font-size: 13px; }
+.search.focused { box-shadow: inset 0 0 0 1px var(--focus); color: var(--name); }
+.search svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.search-wrap { display: grid; gap: 10px; }
+
+.diagram svg { display: block; width: 100%; height: auto; }
+svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C10 Chat list and search: visual reference</h1>
+  <p>Rounded row highlights inside Telegram's 62 px rows, a quiet hover, a search pill on the Bar role, and readable text on the navigation material. States use the night theme with C3's adjusted text colors.</p>
+  <div class="row-layout">
+    <section class="panel">
+      <h2>A. Mockup chats list at 100%</h2>
+      <p class="lead">Light and dark. Its selection is a light pill; Telegram keeps its dialogsBgActive pill (panel B) unless the user decides otherwise.</p>
+      <div class="crops">
+        <div class="crop" style="background-image:url(../c7-shell-layout/mockup-light.png)"></div>
+        <div class="crop" style="background-image:url(../c7-shell-layout/mockup-dark.png)"></div>
+      </div>
+    </section>
+    <div class="stack">
+      <section class="panel">
+        <h2>B. Row states, night theme on the Navigation fill, magnified 1.25 times</h2>
+        <p class="lead">Pill margins 6, 1, 2, 1 and radius 10 inside the unchanged row; the ripple is clipped to the pill.</p>
+        <div class="states" data-states></div>
+      </section>
+      <section class="panel">
+        <h2>C. Search pill and row geometry</h2>
+        <p class="lead">Search: height 34, margins 10, 6, 8, 8, radius 9, Bar fill (0.90) with Border(Bar); focus strokes activeLineFg. Placeholder adjusted from #6d7883 to #afbbc7.</p>
+        <div class="search-wrap">
+          <figure><div class="desk night search-desk"><div class="nav"></div><div class="scaled" style="position:absolute;inset:0;width:300px;height:50px"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Search</div></div></div><figcaption>Default</figcaption></figure>
+          <figure><div class="desk night search-desk"><div class="nav"></div><div class="scaled" style="position:absolute;inset:0;width:300px;height:50px"><div class="search focused"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Weekend</div></div></div><figcaption>Focused, with text</figcaption></figure>
+        </div>
+        <div class="diagram" style="margin-top:12px"><svg viewBox="0 0 760 150" data-geometry></svg></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const row = (state, extra = {}) => `
+    <div class="desk night cell"><div class="nav"></div><div class="scaled">
+      <div class="list-row" data-state="${state}">
+        ${state === 'default' ? '' : `<div class="pill" style="background:${state === 'active' ? 'var(--active)' : 'var(--hover)'}">${state === 'pressed' ? '<span class="ripple"></span>' : ''}</div>`}
+        <span class="avatar">WC</span><span class="name">Weekend crew</span><span class="date">10:44</span>
+        <span class="text"><b>James:</b> Here is the trail map</span>
+        ${extra.badge ? `<span class="badge ${extra.badge === 'muted' ? 'muted' : ''}">${extra.badge === 'muted' ? 4 : 2}</span>` : ''}
+      </div>
+    </div></div>`;
+  const states = [
+    ['Default', 'transparent row', row('default')],
+    ['Hover', 'text at 0.07', row('hover')],
+    ['Active', 'dialogsBgActive #2b5278', row('active')],
+    ['Pressed', 'dialogsRippleBg, clipped', row('pressed')],
+    ['Unread', 'dialogsUnreadBg #4082bc', row('default', { badge: 'unread' })],
+    ['Muted unread', 'dialogsUnreadBgMuted #3e546a', row('default', { badge: 'muted' })],
+  ];
+  document.querySelector('[data-states]').innerHTML = states.map(([name, sub, html]) => `<div class="label">${name}<span class="mono">${sub}</span></div>${html}`).join('');
+
+  const svg = document.querySelector('[data-geometry]');
+  svg.innerHTML = `
+    <text x="0" y="14" font-size="12" font-weight="600" fill="#1b2735">Row: 300 × 62 (dialogsRowHeight)</text>
+    <rect x="0" y="24" width="300" height="62" fill="none" stroke="#8796a8" stroke-dasharray="4 3"/>
+    <rect x="6" y="25" width="292" height="60" rx="10" fill="rgba(43, 82, 120, .25)" stroke="#2b5278" stroke-width="1.5"/>
+    <text x="10" y="104" font-size="11" fill="#d9480f">left 6</text>
+    <text x="250" y="104" font-size="11" fill="#d9480f">right 2</text>
+    <text x="110" y="104" font-size="11" fill="#d9480f">top 1, bottom 1, radius 10</text>
+    <line x1="0" y1="92" x2="6" y2="92" stroke="#d9480f" stroke-width="2"/>
+    <line x1="298" y1="92" x2="300" y2="92" stroke="#d9480f" stroke-width="2"/>
+    <text x="360" y="14" font-size="12" font-weight="600" fill="#1b2735">Narrow list</text>
+    <rect x="360" y="24" width="72" height="62" fill="none" stroke="#8796a8" stroke-dasharray="4 3"/>
+    <rect x="364" y="25" width="64" height="60" rx="10" fill="rgba(43, 82, 120, .25)" stroke="#2b5278" stroke-width="1.5"/>
+    <circle cx="396" cy="55" r="23" fill="#40576f"/>
+    <text x="360" y="104" font-size="11" fill="#d9480f">margins 4, 1, 4, 1</text>
+    <text x="500" y="14" font-size="12" font-weight="600" fill="#1b2735">Search pill: 34 high</text>
+    <rect x="500" y="24" width="240" height="50" fill="none" stroke="#8796a8" stroke-dasharray="4 3"/>
+    <rect x="510" y="30" width="222" height="34" rx="9" fill="rgba(23, 33, 43, .15)" stroke="#6396cb" stroke-width="1.5"/>
+    <text x="500" y="92" font-size="11" fill="#d9480f">margins 10, 6, 8, 8, radius 9</text>
+    <text x="0" y="132" font-size="11" fill="#4a5868">Dashed: Telegram's unchanged geometry. Solid: what Soft Panels paints inside it. Hit testing, scrolling and row heights do not change.</text>`;
+})();
+</script>
+</body>
+</html>
