@@ -21,8 +21,10 @@ approved snapshot.
   proposed visual treatments and technical approaches as proposals.
 - Visual concept mockups are now in scope.
 - Implementation planning is in scope: the general plan in
-  `implementation-plan.md`, then smaller per-phase plans. Keep product source
-  changes and builds for later requests.
+  `implementation-plan.md`, the component contracts in `architecture.md`, and
+  one plan per component in `plans/`. A plan that changes a shared contract
+  updates `architecture.md` in the same change. Keep product source changes
+  and builds for later requests.
 
 ## Maintaining the documents
 
