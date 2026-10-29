@@ -16,4 +16,5 @@ These are proposals derived from the mockup. The
 | C3 Material fills | [material fills](c3-material-fills/README.md) |
 | C4 Surface roles | [surface roles](c4-surface-roles/README.md) |
 | C5 Transparent grabs | [transparent grabs](c5-transparent-grabs/README.md) |
+| C6 Toolkit fork | [toolkit fork](c6-toolkit-fork/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C6 Toolkit Fork Reference</title>
+<style>
+:root {
+  --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff;
+  --upstream: #6b7a8c; --fork: #1565c0; --tdesktop: #7b3fb0; --ok: #1b7f3b; --bad: #b3261e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; }
+.panel.wide { grid-column: 1 / -1; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 10px; color: var(--page-muted); font-size: 12px; }
+.mono, pre { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+pre { margin: 0; padding: 10px 12px; border-radius: 6px; background: #f6f8fb; border: 1px solid var(--page-line); line-height: 1.5; white-space: pre; }
+pre .del { color: var(--bad); }
+pre .add { color: var(--ok); }
+pre .dim { color: var(--page-muted); }
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; font-size: 12px; fill: var(--page-fg); }
+svg .sha { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11px; }
+svg .muted { fill: var(--page-muted); font-size: 11px; }
+svg .lane { font-weight: 600; font-size: 12px; }
+.checks { display: grid; gap: 8px; }
+.checks div { display: grid; gap: 4px; font-size: 12px; }
+.checks .tag { display: inline-block; padding: 0 6px; border-radius: 4px; color: #fff; font-size: 11px; font-weight: 600; background: var(--ok); }
+.checks .tag.bad { background: var(--bad); }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C6 Toolkit fork: visual reference</h1>
+  <p>C6 changes no pixels. It gives lib_ui and lib_base changes a home; this sheet shows the branch layout, the .gitmodules change, the upstream update and the outputs that prove each step. Fork commit names are examples from the C8 and C14 plans.</p>
+  <div class="panels">
+
+    <section class="panel wide">
+      <h2>A. Where the commits live</h2>
+      <p class="lead">soft-panels starts at the commit tdesktop pins today. Every tdesktop pointer update is its own commit and points at a fork commit that is already pushed.</p>
+      <svg viewBox="0 0 1180 300" role="img" aria-label="Commit graph of upstream lib_ui, the fork branch and tdesktop">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7b3fb0"/></marker>
+        </defs>
+        <text x="0" y="46" class="lane" style="fill:#6b7a8c">desktop-app/lib_ui</text>
+        <text x="0" y="62" class="muted">upstream master</text>
+        <text x="0" y="136" class="lane" style="fill:#1565c0">KakunArtem/lib_ui</text>
+        <text x="0" y="152" class="muted">branch soft-panels</text>
+        <text x="0" y="236" class="lane" style="fill:#7b3fb0">KakunArtem/tdesktopWin11</text>
+        <text x="0" y="252" class="muted">Telegram/lib_ui pointer</text>
+
+        <line x1="200" y1="50" x2="1160" y2="50" stroke="#6b7a8c" stroke-width="2"/>
+        <circle cx="240" cy="50" r="7" fill="#6b7a8c"/>
+        <circle cx="330" cy="50" r="10" fill="#fff" stroke="#6b7a8c" stroke-width="3"/>
+        <text x="306" y="30" class="sha">79c846f</text>
+        <text x="345" y="80" class="muted">pinned today</text>
+        <circle cx="620" cy="50" r="7" fill="#6b7a8c"/>
+        <circle cx="900" cy="50" r="7" fill="#6b7a8c"/>
+        <text x="860" y="30" class="muted">later upstream commits</text>
+
+        <path d="M330,60 C330,110 370,140 420,140" fill="none" stroke="#1565c0" stroke-width="2"/>
+        <line x1="420" y1="140" x2="820" y2="140" stroke="#1565c0" stroke-width="2"/>
+        <circle cx="500" cy="140" r="9" fill="#1565c0"/>
+        <text x="470" y="122" class="muted"><tspan class="sha">F1</tspan>  title background painter hook (C8)</text>
+        <circle cx="740" cy="140" r="9" fill="#1565c0"/>
+        <text x="710" y="122" class="muted"><tspan class="sha">F2</tspan>  soft menus switch (C14)</text>
+
+        <line x1="200" y1="240" x2="1160" y2="240" stroke="#7b3fb0" stroke-width="2"/>
+        <circle cx="330" cy="240" r="7" fill="#7b3fb0"/>
+        <text x="270" y="272" class="muted">today: pointer 79c846f</text>
+        <circle cx="560" cy="240" r="7" fill="#7b3fb0"/>
+        <text x="520" y="272" class="muted">"Updated lib_ui for …"</text>
+        <circle cx="800" cy="240" r="7" fill="#7b3fb0"/>
+        <text x="760" y="272" class="muted">"Updated lib_ui for …"</text>
+        <line x1="330" y1="230" x2="330" y2="64" stroke="#7b3fb0" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+        <line x1="560" y1="230" x2="506" y2="152" stroke="#7b3fb0" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+        <line x1="800" y1="230" x2="746" y2="152" stroke="#7b3fb0" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+        <text x="960" y="128" class="muted">lib_base: soft-panels at 95a543e,</text>
+        <text x="960" y="144" class="muted">no extra commits is valid</text>
+      </svg>
+    </section>
+
+    <section class="panel">
+      <h2>B. .gitmodules (Task 2 Step 1)</h2>
+      <p class="lead">HTTPS URLs keep anonymous clones working; branch names the current fork branch.</p>
+<pre> [submodule "Telegram/lib_base"]
+ 	path = Telegram/lib_base
+<span class="del">-	url = https://github.com/desktop-app/lib_base.git</span>
+<span class="add">+	url = https://github.com/KakunArtem/lib_base.git</span>
+<span class="add">+	branch = soft-panels</span>
+<span class="dim"> …</span>
+ [submodule "Telegram/lib_ui"]
+ 	path = Telegram/lib_ui
+<span class="del">-	url = https://github.com/desktop-app/lib_ui.git</span>
+<span class="add">+	url = https://github.com/KakunArtem/lib_ui.git</span>
+<span class="add">+	branch = soft-panels</span></pre>
+    </section>
+
+    <section class="panel">
+      <h2>D. Outputs that prove each step</h2>
+      <p class="lead">Expected results, and the failure each one catches.</p>
+      <div class="checks">
+        <div><pre>git ls-remote https://github.com/KakunArtem/lib_ui.git refs/heads/soft-panels
+79c846fdf0327ff99d3efdc1cc4e11ef50bedc6d	refs/heads/soft-panels</pre><span><span class="tag">Task 1</span> branch created at the pinned commit</span></div>
+        <div><pre>git -C Telegram/lib_ui branch -r --contains HEAD
+  fork/soft-panels</pre><span><span class="tag">Task 2</span> the pointer is pushed. <span class="tag bad">empty</span> means a local-only commit</span></div>
+        <div><pre>git -C Telegram/lib_ui remote get-url origin
+https://github.com/KakunArtem/lib_ui.git</pre><span><span class="tag">Task 2</span> sync ran. <span class="tag bad">desktop-app</span> means fetches still go upstream</span></div>
+        <div><pre>git clone --recursive … clone-check
+Submodule path 'Telegram/lib_ui': checked out '79c846f…'</pre><span><span class="tag">Task 2</span> a fresh clone finds every pointer</span></div>
+      </div>
+    </section>
+
+    <section class="panel wide">
+      <h2>C. Taking an upstream update (Task 3)</h2>
+      <p class="lead">After an upstream tdesktop merge moves the pin from U0 to U1, the fork commits are rebased onto U1 under a new branch name. soft-panels is never force-pushed and stays where it was.</p>
+      <svg viewBox="0 0 1180 230" role="img" aria-label="Rebase of the fork branch onto a new upstream commit">
+        <text x="0" y="46" class="lane" style="fill:#6b7a8c">upstream master</text>
+        <text x="0" y="126" class="lane" style="fill:#1565c0">soft-panels</text>
+        <text x="0" y="142" class="muted">unchanged</text>
+        <text x="0" y="206" class="lane" style="fill:#1565c0">soft-panels-&lt;date&gt;</text>
+        <text x="0" y="222" class="muted">.gitmodules branch</text>
+
+        <line x1="200" y1="50" x2="1160" y2="50" stroke="#6b7a8c" stroke-width="2"/>
+        <circle cx="300" cy="50" r="10" fill="#fff" stroke="#6b7a8c" stroke-width="3"/>
+        <text x="290" y="30" class="sha">U0</text>
+        <text x="286" y="80" class="muted" text-anchor="end">old pin</text>
+        <circle cx="700" cy="50" r="10" fill="#fff" stroke="#6b7a8c" stroke-width="3"/>
+        <text x="690" y="30" class="sha">U1</text>
+        <text x="686" y="80" class="muted" text-anchor="end">new pin</text>
+
+        <path d="M300,60 C300,100 330,120 370,120" fill="none" stroke="#1565c0" stroke-width="2"/>
+        <line x1="370" y1="120" x2="560" y2="120" stroke="#1565c0" stroke-width="2"/>
+        <circle cx="420" cy="120" r="9" fill="#1565c0"/><text x="413" y="104" class="sha">F1</text>
+        <circle cx="520" cy="120" r="9" fill="#1565c0"/><text x="513" y="104" class="sha">F2</text>
+
+        <path d="M700,60 C700,150 740,200 790,200" fill="none" stroke="#1565c0" stroke-width="2"/>
+        <line x1="790" y1="200" x2="1000" y2="200" stroke="#1565c0" stroke-width="2"/>
+        <circle cx="840" cy="200" r="9" fill="#1565c0"/><text x="830" y="184" class="sha">F1'</text>
+        <circle cx="940" cy="200" r="9" fill="#1565c0"/><text x="930" y="184" class="sha">F2'</text>
+        <text x="1010" y="204" class="muted">tdesktop pointer → F2'</text>
+
+        <text x="760" y="140" class="sha" style="fill:#4a5868">git rebase --onto U1 U0 soft-panels-&lt;date&gt;</text>
+      </svg>
+    </section>
+
+  </div>
+</div>
+</body>
+</html>

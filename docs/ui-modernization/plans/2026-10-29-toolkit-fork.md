@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, C6](../architecture.md#components); roadmap decision 2 and risk "Submodule changes have no home".
 
+**Visual reference:** [C6 toolkit fork](../component-references/c6-toolkit-fork/README.md): the branch layout, the `.gitmodules` change, the upstream update and the outputs that prove each step.
+
 **Depends on:** nothing. Must finish before [title bar](2026-10-29-title-bar.md) and [transient surfaces](2026-10-29-transient-surfaces.md).
 
 ## Global Constraints
