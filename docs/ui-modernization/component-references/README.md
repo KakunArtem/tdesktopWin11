@@ -21,4 +21,5 @@ These are proposals derived from the mockup. The
 | C8 Title bar | [title bar](c8-title-bar/README.md) |
 | C9 Navigation rail | [navigation rail](c9-navigation-rail/README.md) |
 | C10 Chat list and search | [chat list](c10-chat-list/README.md) |
+| C11 Conversation chrome | [conversation chrome](c11-conversation-chrome/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |

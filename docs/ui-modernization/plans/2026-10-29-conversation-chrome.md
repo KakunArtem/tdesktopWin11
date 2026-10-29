@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Element styling](../architecture.md#element-styling-c9c15); exploration CSS `.chat-header`, `.pinned`; the exploration's chat wallpaper note ("a chat wallpaper fills the message area below the header").
 
+**Visual reference:** [C11 conversation chrome](../component-references/c11-conversation-chrome/README.md): the header and pinned pill from the mockup, several bars stacked as pills, and the chat background option with wallpaper and with material.
+
 **Depends on:** [shell layout](2026-10-29-shell-layout.md), [surface roles](2026-10-29-surface-roles.md).
 
 ## Global Constraints
@@ -85,7 +87,7 @@ In `PinnedBar`, `GroupCallBar`, `RequestsBar` and `MoreChatsBar`: the `_wrap` pa
 
 - [ ] **Step 4: Build and check**
 
-Open a group with an active call, join requests, several pinned messages and a foreign-language message; a sponsored channel message; a chat with a non-contact (add/block bar); a forum with topic tabs in both orientations. Show, switch, hide and close each bar; with Soft Panels on and off; material on and off.
+Open a group with an active call, join requests, several pinned messages and a foreign-language message; a sponsored channel message; a chat with a non-contact (add/block bar); a forum with topic tabs in both orientations. Show, switch, hide and close each bar; with Soft Panels on and off; material on and off. Stacked bars match panel B of the visual reference.
 
 - [ ] **Step 5: Commit**
 
