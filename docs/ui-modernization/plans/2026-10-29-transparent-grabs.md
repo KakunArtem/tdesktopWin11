@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Grabs (C5)](../architecture.md#grabs-c5); roadmap risk "Opaque flashes from grabs and slide animations".
 
+**Visual reference:** [C5 transparent grabs](../component-references/c5-transparent-grabs/README.md): slide and cross-fade frames as the recordings should look, and the opaque, double-density and missing-background failures.
+
 **Depends on:** [surface roles](2026-10-29-surface-roles.md) (`PaintSurface`, `PaintFill`, converted paint sites).
 
 ## Global Constraints
@@ -106,7 +108,7 @@ Before each `_showAnimation->paintContents(p)` in `MainWidget::paintEvent`, `Sec
 - [ ] **Step 4: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
-With material active, record the screen with Win+Alt+R while: opening a chat from the list and pressing Escape in a narrow (one-column) window; opening a chat's info in a normal window; opening pinned and scheduled messages. Step through the recording: no frame shows an opaque or black area, and the background density is constant through each slide and fade. Repeat with material off: identical animations to pre-plan recordings.
+With material active, record the screen with Win+Alt+R while: opening a chat from the list and pressing Escape in a narrow (one-column) window; opening a chat's info in a normal window; opening pinned and scheduled messages. Step through the recording: no frame shows an opaque or black area, and the background density is constant through each slide and fade, as in the correct rows of the visual reference. The `slideFadeOutBg` dimming of the departing section is today's behavior and expected. Repeat with material off: identical animations to pre-plan recordings.
 
 - [ ] **Step 5: Commit**
 

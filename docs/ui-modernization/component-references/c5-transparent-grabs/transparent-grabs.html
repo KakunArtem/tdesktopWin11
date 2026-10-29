@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C5 Transparent Grabs Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --ok: #1b7f3b; --bad: #b3261e; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.film { display: grid; grid-template-columns: 170px repeat(5, 1fr); gap: 8px 8px; align-items: center; }
+.film.fade { grid-template-columns: 170px repeat(5, 1fr); }
+.film .head { font-size: 11px; color: var(--page-muted); font-weight: 600; text-align: center; }
+.label { font-size: 12px; line-height: 1.35; }
+.label b { display: inline-block; padding: 0 6px; border-radius: 4px; color: #fff; font-size: 11px; margin-bottom: 2px; }
+.label b.ok { background: var(--ok); }
+.label b.bad { background: var(--bad); }
+.label span { color: var(--page-muted); }
+
+/* A frame: the conversation pane over the desktop, light theme, Conversation fill 0.79. */
+.frame { position: relative; isolation: isolate; height: 132px; border-radius: 6px; overflow: hidden; }
+.frame::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.frame .material { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); }
+.frame .owner { position: absolute; inset: 0; background: rgba(255, 255, 255, .79); }
+.cache { position: absolute; top: 0; bottom: 0; width: 100%; padding: 8px 10px; color: #000; font-size: 10.5px; line-height: 1.25; }
+.cache.new { box-shadow: -6px 0 12px rgba(0, 0, 0, .18); }
+.cache strong { display: block; }
+.cache em { font-style: normal; color: #535353; display: block; margin-bottom: 6px; }
+.cache i { display: block; height: 6px; border-radius: 3px; background: rgba(0, 0, 0, .14); margin: 6px 0; }
+.cache .avatar { width: 30px; height: 30px; border-radius: 50%; background: #c4d8ec; margin: 2px 0 6px; }
+.cache[data-bg="transparent"] { background: transparent; }
+.cache[data-bg="opaque"] { background: #ffffff; }
+.cache[data-bg="fill"] { background: rgba(255, 255, 255, .79); }
+.density { position: absolute; right: 4px; bottom: 3px; font: 10px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #000; background: rgba(255, 255, 255, .75); padding: 0 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C5 Transparent grabs: visual reference</h1>
+  <p>Frames of a section change (a chat sliding to its info) and of a cross-fade, over the Blue folds wallpaper with the day theme's Conversation fill (0.79). The density label is the fill alpha behind the content at the frame's center.</p>
+
+  <section class="panel">
+    <h2>A. Slide: content-only caches over one background</h2>
+    <p class="lead">Ui::Material::Grab captures content with a transparent background; the owner calls PaintAnimationBackground once, then paints the caches. The old section is clipped where the new one covers it and dimmed by slideFadeOutBg, as today. The other rows are the failures the plan's recordings look for.</p>
+    <div class="film" data-film="slide"></div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Cross-fade: constant density at mid-animation</h2>
+    <p class="lead">Window::SlideAnimation with fade overlaps the departing and arriving caches while both are partly transparent. Shown here in place, as the overlap area: with fills inside the caches their combined alpha dips at the midpoint and the backdrop brightens through.</p>
+    <div class="film fade" data-film="fade"></div>
+  </section>
+</div>
+<script>
+(() => {
+  const progress = [0, 0.25, 0.5, 0.75, 1];
+  const chat = '<strong>Design team</strong><em>5 members</em><i style="width:70%"></i><i style="width:50%"></i><i style="width:80%"></i><i style="width:40%"></i>';
+  const info = '<strong>Group info</strong><em>5 members</em><div class="avatar"></div><i style="width:60%"></i><i style="width:75%"></i>';
+  const header = '<span></span>' + progress.map((p) => `<span class="head">progress ${p}</span>`).join('');
+
+  const slideRows = [
+    { label: '<b class="ok">Correct</b><br><span>content-only grabs, background painted once</span>', owner: true, bg: 'transparent', density: () => '0.79' },
+    { label: '<b class="bad">Opaque flash</b><br><span>Ui::GrabWidget or GrabOpaque with a solid background</span>', owner: true, bg: 'opaque', density: () => '1.00' },
+    { label: '<b class="bad">Double density</b><br><span>caches keep the role fill and the owner paints it again</span>', owner: true, bg: 'fill', density: () => '0.96' },
+    { label: '<b class="bad">Missing background</b><br><span>content-only caches, owner skips PaintAnimationBackground</span>', owner: false, bg: 'transparent', density: () => '0.00' },
+  ];
+  // As SlideAnimation::paintContents: the old cache shifts by slideShift, is clipped to the
+  // part the new cache has not covered yet and dimmed by slideFadeOutBg (#0000003c).
+  const slideFrame = (row, p) => {
+    const steady = (p === 0 || p === 1);
+    const bg = steady ? 'transparent' : row.bg;
+    const coverLeft = (1 - p) * 100;
+    const old = (p < 1) ? `<div style="position:absolute;left:0;top:0;bottom:0;width:${coverLeft}%;overflow:hidden">
+        <div class="cache" data-bg="${bg}" style="left:${-p * 24}px">${chat}</div>
+        <div style="position:absolute;inset:0;background:rgba(0, 0, 0, ${(0.235 * p).toFixed(3)})"></div>
+      </div>` : '';
+    const arriving = (p > 0) ? `<div class="cache${steady ? '' : ' new'}" data-bg="${bg}" style="left:${coverLeft}%">${info}</div>` : '';
+    return `<div class="frame"><div class="material"></div>${row.owner || steady ? '<div class="owner"></div>' : ''}
+      ${old}${arriving}<span class="density">${steady ? '0.79' : row.density(p)}</span></div>`;
+  };
+  const slide = document.querySelector('[data-film="slide"]');
+  slide.innerHTML = header + slideRows.map((row) => `<div class="label">${row.label}</div>` + progress.map((p) => slideFrame(row, p)).join('')).join('');
+
+  const fadeAlpha = (p, fill) => {
+    const a = fill * (1 - p);
+    const b = fill * p;
+    return b + a * (1 - b);
+  };
+  const fadeRows = [
+    { label: '<b class="ok">Correct</b><br><span>content-only caches over one background</span>', bg: 'transparent', owner: true, density: () => 0.79 },
+    { label: '<b class="bad">Mid-fade dip</b><br><span>each cache carries the 0.79 fill</span>', bg: 'fill', owner: false, density: (p) => fadeAlpha(p, 0.79) },
+  ];
+  const fadeFrame = (row, p) => `<div class="frame"><div class="material"></div>${row.owner ? '<div class="owner"></div>' : ''}
+      <div class="cache" data-bg="${row.bg}" style="left:0;opacity:${1 - p}">${chat}</div>
+      <div class="cache" data-bg="${row.bg}" style="left:0;opacity:${p}">${info}</div>
+      <span class="density">${row.density(p).toFixed(2)}</span></div>`;
+  const fade = document.querySelector('[data-film="fade"]');
+  fade.innerHTML = header + fadeRows.map((row) => `<div class="label">${row.label}</div>` + progress.map((p) => fadeFrame(row, p)).join('')).join('');
+})();
+</script>
+</body>
+</html>
