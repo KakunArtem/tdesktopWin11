@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Shell geometry (C7)](../architecture.md#shell-geometry-c7); exploration CSS: `.workspace` (gap 4 px, padding 0 6 6 0), `.nav` (radius 0 12 12 0), `.conversation` (radius 14, 0.5 px edge at 10 %).
 
+**Visual reference:** [C7 shell layout](../component-references/c7-shell-layout/README.md): the gaps, frame and radii marked on the mockup at 100%, the panel rectangles of the test vectors, and the panel frame corners.
+
 **Depends on:** [surface roles](2026-10-29-surface-roles.md) and [transparent grabs](2026-10-29-transparent-grabs.md).
 
 ## Global Constraints
@@ -164,7 +166,7 @@ Add `base::unique_qptr<Window::SoftPanels::PanelFrame>` members for the navigati
 - [ ] **Step 5: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
-Turn on "Soft Panels layout". With and without material: panels match the exploration's layout; gaps show the window fill; boxes, settings layers and media preview still cover the whole window; a call bar sits inside the conversation panel's rounded top.
+Turn on "Soft Panels layout". With and without material: panels match the exploration's layout, as marked in panel A of the visual reference; gaps show the window fill; boxes, settings layers and media preview still cover the whole window; a call bar sits inside the conversation panel's rounded top.
 
 - [ ] **Step 6: Commit**
 
