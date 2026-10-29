@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C13 Messages Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.crop { width: 550px; height: 340px; border-radius: 6px; border: 1px solid var(--page-line); background-repeat: no-repeat; background-size: 956px 656px; background-position: -372px -210px; }
+
+/* Message area: Telegram's day and night colors; day wallpaper colors are approximate. */
+.four { display: grid; grid-template-columns: repeat(4, 276px); gap: 12px; }
+.pane { position: relative; isolation: isolate; height: 404px; border-radius: 8px; overflow: hidden; font-size: 13px; }
+.pane.material::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.pane.material .canvas { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--canvas); }
+.pane.wallpaper.day { background: radial-gradient(circle at 10px 10px, rgba(70, 100, 50, .18) 2px, transparent 3px) 0 0 / 22px 22px, linear-gradient(160deg, #d3e2b8, #a9c58f 55%, #c4d8a4); }
+.pane.wallpaper.night { background: radial-gradient(circle at 10px 10px, rgba(120, 160, 200, .10) 2px, transparent 3px) 0 0 / 22px 22px, linear-gradient(160deg, #0f1b28, #0b141e); }
+.day { --in: #ffffff; --out: #effdde; --text: #000000; --meta-in: #a0acb6; --meta-out: #6cbf5c; --name: #b04f8f; }
+.night { --in: #182533; --out: #2b5278; --text: #f5f5f5; --meta-in: #6d7f8f; --meta-out: #7da8d3; --name: #e88fbf; }
+.day.wallpaper { --svc-bg: rgba(78, 104, 58, .55); --svc-fg: #ffffff; --svc-sel: rgba(64, 140, 190, .90); --svc-sel-fg: #ffffff; --unread-bg: #fcfbfa; --unread-border: rgba(0, 0, 0, .08); --unread-fg: #538bb4; }
+.night.wallpaper { --svc-bg: rgba(33, 48, 64, .84); --svc-fg: #ffffff; --svc-sel: #2e7ab4; --svc-sel-fg: #ffffff; --unread-bg: #182433; --unread-border: transparent; --unread-fg: #ffffff; }
+.day.material { --canvas: rgba(255, 255, 255, .79); --svc-bg: rgba(255, 255, 255, .90); --svc-fg: #000000; --svc-sel: rgba(226, 242, 251, .90); --svc-sel-fg: #000000; --unread-bg: rgba(255, 255, 255, .90); --unread-border: rgba(0, 0, 0, .10); --unread-fg: #346c93; --edge: rgba(0, 0, 0, .08); }
+.night.material { --canvas: rgba(23, 33, 43, .81); --svc-bg: rgba(23, 33, 43, .90); --svc-fg: #f5f5f5; --svc-sel: rgba(32, 48, 66, .90); --svc-sel-fg: #f5f5f5; --unread-bg: rgba(23, 33, 43, .90); --unread-border: rgba(245, 245, 245, .10); --unread-fg: #ffffff; --edge: rgba(245, 245, 245, .10); }
+.flow { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; }
+.svc { align-self: center; max-width: 230px; padding: 3px 9px; border-radius: 12px; background: var(--svc-bg); color: var(--svc-fg); font-size: 12.5px; font-weight: 600; text-align: center; box-shadow: inset 0 0 0 1px var(--edge, transparent); }
+.svc.sel { background: var(--svc-sel); color: var(--svc-sel-fg); }
+.unread { height: 28px; display: grid; place-items: center; background: var(--unread-bg); border-bottom: 1px solid var(--unread-border); color: var(--unread-fg); font-size: 12.5px; }
+.msg { max-width: 220px; padding: 6px 10px 5px; border-radius: 16px; color: var(--text); font-size: 12.5px; }
+.msg.in { align-self: flex-start; margin-left: 10px; background: var(--in); border-bottom-left-radius: 6px; }
+.msg.out { align-self: flex-end; margin-right: 10px; background: var(--out); border-bottom-right-radius: 6px; }
+.msg b { display: block; color: var(--name); font-weight: 600; }
+.msg .t { float: right; margin: 4px 0 0 8px; font-size: 11px; color: var(--meta-in); }
+.msg.out .t { color: var(--meta-out); }
+.sticker { position: relative; align-self: flex-start; margin-left: 10px; width: 96px; height: 96px; }
+.sticker svg { width: 96px; height: 96px; }
+.sticker .time { position: absolute; right: -8px; bottom: 2px; padding: 1px 7px; border-radius: 9px; background: var(--svc-bg); color: var(--svc-fg); font-size: 11px; box-shadow: inset 0 0 0 1px var(--edge, transparent); }
+.tag { position: absolute; right: 8px; top: 8px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--page-line); vertical-align: top; }
+th { font-weight: 600; color: var(--page-muted); }
+td.num { font-variant-numeric: tabular-nums; }
+.bad { color: #b42318; font-weight: 600; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; vertical-align: -1px; margin-right: 5px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2); }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C13 Messages: visual reference</h1>
+  <p>Bubbles keep their opaque fills, radii and contrast. With the "Window material" chat background on, service messages, date pills, media time pills and the unread bar take the Bar fill with readable text instead of colors derived from a wallpaper that is no longer shown.</p>
+
+  <section class="panel">
+    <h2>A. Target: the mockup's messages at 100%</h2>
+    <p class="lead">Date pill on the surface with secondary text; bubbles with their own fills. The mockup's bubbles use radius 14 / 5; Telegram keeps BubbleRadiusLarge() (16) and its small corners.</p>
+    <div class="two">
+      <figure><div class="crop" style="background-image:url(../c7-shell-layout/mockup-light.png)"></div><figcaption>Light</figcaption></figure>
+      <figure><div class="crop" style="background-image:url(../c7-shell-layout/mockup-dark.png)"></div><figcaption>Dark</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Service elements: today on a wallpaper, and on the material background</h2>
+    <p class="lead">Date pill, service message, selected service message, unread bar and a sticker's time pill. Telegram's day and night palettes; the day wallpaper column's service and unread colors are approximate. Bubbles are the same in every column.</p>
+    <div class="four" data-panes></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. Contrast on the Bar fill (0.90), composited on black and on white</h2>
+    <p class="lead">Computed with the C3 script. Today's white service text cannot stay on a light Bar pill; the override uses windowFg. The day unread bar text needs an adjustment the plan did not list.</p>
+    <table>
+      <thead><tr><th>Element</th><th>Theme</th><th>Today's text, put on the Bar fill</th><th>Over black / white</th><th>Override</th><th>Over black / white</th></tr></thead>
+      <tbody>
+        <tr><td>Service, date, time pills</td><td>Day</td><td><span class="sw" style="background:#ffffff"></span><span class="mono">msgServiceFg #ffffff</span></td><td class="num bad">1.25 / 1.00</td><td><span class="sw" style="background:#000000"></span><span class="mono">windowFg #000000</span></td><td class="num">16.83 / 21.00</td></tr>
+        <tr><td>Service, date, time pills</td><td>Night</td><td><span class="sw" style="background:#ffffff"></span><span class="mono">msgServiceFg #ffffff</span></td><td class="num">16.84 / 12.09</td><td><span class="sw" style="background:#f5f5f5"></span><span class="mono">windowFg #f5f5f5</span></td><td class="num">15.45 / 11.09</td></tr>
+        <tr><td>Selected service (bg 15% toward windowBgActive)</td><td>Day</td><td colspan="2" class="mono">bg #e2f2fb</td><td><span class="mono">windowFg #000000</span></td><td class="num">14.67 / 18.54</td></tr>
+        <tr><td>Selected service (bg 15% toward windowBgActive)</td><td>Night</td><td colspan="2" class="mono">bg #203042</td><td><span class="mono">windowFg #f5f5f5</span></td><td class="num">13.18 / 9.00</td></tr>
+        <tr><td>Unread bar text</td><td>Day (approx.)</td><td><span class="sw" style="background:#538bb4"></span><span class="mono">historyUnreadBarFg #538bb4</span></td><td class="num bad">2.94 / 3.67</td><td><span class="sw" style="background:#346c93"></span><span class="mono">EnsureTextContrast #346c93</span></td><td class="num">4.53 / 5.66</td></tr>
+        <tr><td>Unread bar text</td><td>Night</td><td><span class="sw" style="background:#ffffff"></span><span class="mono">historyUnreadBarFg #ffffff</span></td><td class="num">16.84 / 12.09</td><td class="mono">unchanged</td><td class="num">—</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+<script>
+(() => {
+  const sticker = `<svg viewBox="0 0 96 96"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd36b"/><stop offset="1" stop-color="#f39c32"/></linearGradient></defs><circle cx="48" cy="50" r="38" fill="url(#g)"/><circle cx="35" cy="44" r="5" fill="#4a2a10"/><circle cx="61" cy="44" r="5" fill="#4a2a10"/><path d="M33 60q15 13 30 0" fill="none" stroke="#4a2a10" stroke-width="4" stroke-linecap="round"/></svg>`;
+  const pane = (theme, kind, caption, tag) => `
+    <figure><div class="pane ${theme} ${kind}">${kind === 'material' ? '<div class="canvas"></div>' : ''}${tag ? `<span class="tag">${tag}</span>` : ''}
+      <div class="flow">
+        <span class="svc">October 28</span>
+        <div class="msg in"><b>Sofia</b>Found a quieter trail by the lake.<span class="t">10:38</span></div>
+        <span class="svc">Jamie joined the group</span>
+        <span class="svc sel">James pinned "Saturday · 09:30"</span>
+        <div class="unread">Unread messages</div>
+        <div class="msg out">Perfect. Coffee at 9:30?<span class="t">10:40 ✓✓</span></div>
+        <div class="sticker">${sticker}<span class="time">10:44</span></div>
+      </div>
+    </div><figcaption>${caption}</figcaption></figure>`;
+  document.querySelector('[data-panes]').innerHTML = [
+    pane('day', 'wallpaper', '<b>Day, wallpaper.</b> Today: colors adjusted to the wallpaper.'),
+    pane('day', 'material', '<b>Day, material background.</b> Bar pills, windowFg text.', 'proposal'),
+    pane('night', 'wallpaper', '<b>Night, wallpaper.</b> Today.'),
+    pane('night', 'material', '<b>Night, material background.</b> Bar pills, windowFg text.', 'proposal'),
+  ].join('');
+})();
+</script>
+</body>
+</html>

@@ -23,4 +23,5 @@ These are proposals derived from the mockup. The
 | C10 Chat list and search | [chat list](c10-chat-list/README.md) |
 | C11 Conversation chrome | [conversation chrome](c11-conversation-chrome/README.md) |
 | C12 Composer | [composer](c12-composer/README.md) |
+| C13 Messages | [messages](c13-messages/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
