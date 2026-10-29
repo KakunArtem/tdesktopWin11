@@ -12,4 +12,5 @@ These are proposals derived from the mockup. The
 | Component | Reference |
 | --- | --- |
 | C1 Native backdrop | [native backdrop](c1-native-backdrop/README.md) |
+| C2 Material state | [material state](c2-material-state/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |

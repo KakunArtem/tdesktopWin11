@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Material state (C2)](../architecture.md#material-state-c2) and [implementation-plan.md, Phase 2](../implementation-plan.md#phase-2-material-foundation).
 
+**Visual reference:** [C2 material state](../component-references/c2-material-state/README.md): the setting and restart prompt, the decision order with refusal names, and the window in each state.
+
 **Depends on:** the Phase 1 plan executed, with its decision record in `docs/ui-modernization/decisions/2026-10-native-backdrop.md` saying go or conditional go.
 
 ## Global Constraints
@@ -133,7 +135,7 @@ In `BuildWindowTitleSection` (id `u"advanced/window_material"_q`, keywords `tran
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
 Expected: ends with `-> ...\out\Debug\Telegram.exe`.
 
-Start Telegram. Settings > Advanced > Window title bar shows "Use window transparency" below "Use system window frame". Experimental settings no longer list "Window material prototype". Toggle the checkbox on, confirm the restart, and check that `log.txt` contains `refusal: none`. On a machine below build 22621 (or with `Supported()` temporarily returning `false`, not committed) the checkbox is absent.
+Start Telegram. Settings > Advanced > Window title bar shows "Use window transparency" below "Use system window frame", as in panel A of the visual reference. Experimental settings no longer list "Window material prototype". Toggle the checkbox on, confirm the restart, and check that `log.txt` contains `refusal: none`. On a machine below build 22621 (or with `Supported()` temporarily returning `false`, not committed) the checkbox is absent.
 
 - [ ] **Step 7: Commit**
 
