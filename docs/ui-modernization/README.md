@@ -3,7 +3,9 @@
 Status: the Soft Panels visual baseline is approved and
 [saved in the repository](reference/README.md). An
 [implementation architecture and phased plan](implementation-plan.md) is
-proposed; product implementation has not started.
+proposed, with a [component architecture](architecture.md) and
+[one plan per component](plans/README.md); product implementation has not
+started.
 
 ## Purpose
 
@@ -70,6 +72,10 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Readable Soft Panels exploration](explorations/README.md), a proposal that
   addresses the readability check and behavior gaps.
 - [Implementation architecture and phased plan](implementation-plan.md).
+- [Component architecture](architecture.md): the 16 components, their
+  contracts and dependencies, expanding the roadmap.
+- [Component plans](plans/README.md): one implementation plan per component,
+  in execution order.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

@@ -26,7 +26,7 @@ the previous phase established.
 | Phase | Plan |
 | --- | --- |
 | 1. Native backdrop prototype | [2026-10-28-native-backdrop-prototype.md](plans/2026-10-28-native-backdrop-prototype.md) |
-| 2–9 | Written when the preceding phase is complete |
+| 2–9 | One plan per component, listed with their phases in the [component plans index](plans/README.md) and specified by the [component architecture](architecture.md) (2026-10-29). Each is rechecked against the results of the phases before it when it starts. |
 
 ## Verified codebase facts
 
