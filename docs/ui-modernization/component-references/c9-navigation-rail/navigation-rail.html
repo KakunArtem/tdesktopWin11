@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C9 Navigation Rail Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.row { display: grid; grid-template-columns: 220px 1fr; gap: 14px; margin-bottom: 14px; }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; }
+.stack { display: grid; gap: 14px; align-content: start; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+.rails { display: flex; gap: 14px; }
+.rail-crop { width: 80px; height: 703px; border-radius: 6px; border: 1px solid var(--page-line); background-repeat: no-repeat; background-size: 1195px 820px; background-position: -35px -75px; }
+.menus { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.menus img { display: block; width: 100%; border-radius: 6px; }
+
+.states { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 10px 8px; align-items: start; }
+.states .head { font-size: 11px; color: var(--page-muted); font-weight: 600; text-align: center; }
+.states .mode { font-size: 12px; font-weight: 600; padding-top: 40px; }
+.zoom { position: relative; isolation: isolate; height: 100px; border-radius: 6px; overflow: hidden; }
+.zoom::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.zoom .nav { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--nav); }
+.zoom .scale { position: absolute; left: 50%; top: 50%; width: 72px; height: 62px; transform: translate(-50%, -50%) scale(1.5); }
+.light { --nav: rgba(233, 238, 245, .78); --text: #132335; --secondary: #3a4b5f; --accent: #004a8f; --accent-fill: #0564b6; --on-accent: #ffffff; --selected: #cbdff4; --hover: rgba(21, 38, 58, .06); --muted-fill: #dde4ec; --muted-text: #3b4b5d; --ring: #e9eef5; }
+.dark { --nav: rgba(27, 40, 56, .82); --text: #f2f6fb; --secondary: #c2cfdd; --accent: #9ad3ff; --accent-fill: #8ccbff; --on-accent: #0d1f33; --selected: #284661; --hover: rgba(238, 243, 249, .07); --muted-fill: #3a4a5c; --muted-text: #dbe4ee; --ring: #1b2838; }
+.btn { position: absolute; left: 6px; right: 6px; top: 4px; height: 54px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--secondary); font-size: 11px; }
+.btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.btn[data-state="hover"] { background: var(--hover); }
+.btn[data-state="selected"], .btn[data-state="focused"], .btn[data-state="dragging"] { background: var(--selected); color: var(--text); }
+.btn[data-state="selected"] svg, .btn[data-state="focused"] svg, .btn[data-state="dragging"] svg { color: var(--accent); }
+.btn[data-state="focused"] { outline: 2px solid var(--accent); outline-offset: -2px; }
+.btn[data-state="dragging"] { top: -2px; box-shadow: 0 4px 10px rgba(0, 0, 0, .22); }
+.marker { position: absolute; left: 0; top: 21px; width: 3px; height: 20px; border-radius: 2px; background: var(--accent); }
+.dragging .marker { top: 15px; }
+.badge { position: absolute; top: 2px; left: 35px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; font-size: 10px; font-weight: 700; line-height: 1; background: var(--accent-fill); color: var(--on-accent); box-shadow: 0 0 0 2px var(--ring); }
+.badge[data-muted] { background: var(--muted-fill); color: var(--muted-text); }
+.values { margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 14px; font-size: 12px; }
+.values div span { color: var(--page-muted); }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C9 Navigation rail: visual reference</h1>
+  <p>The folder rail and main menu drawer on the shared navigation material. Colors are the readable mockup's; Telegram keeps its own palette entries and C3 adjusts them.</p>
+
+  <div class="row">
+    <section class="panel">
+      <h2>A. Mockup rail</h2>
+      <p class="lead">Magnified 1.25 times, light and dark.</p>
+      <div class="rails">
+        <div class="rail-crop" style="background-image:url(../c7-shell-layout/mockup-light.png)"></div>
+        <div class="rail-crop" style="background-image:url(../c7-shell-layout/mockup-dark.png)"></div>
+      </div>
+    </section>
+    <div class="stack">
+    <section class="panel">
+      <h2>B. Button states at Telegram's rail width (72 px), magnified 1.5 times</h2>
+      <p class="lead">Pills and the marker are painted on FiltersMenu's container under transparent SideBarButtons. Each state must stay reachable by mouse and keyboard.</p>
+      <div class="states" data-states></div>
+      <div class="values">
+        <div><span>Rail width</span><br><span class="mono">windowFiltersWidth 72</span></div>
+        <div><span>Button</span><br><span class="mono">min height 54, radius 10</span></div>
+        <div><span>Container padding, gap</span><br><span class="mono">4, 6, 8; 4</span></div>
+        <div><span>Marker</span><br><span class="mono">3 × 20, radius 2, x 0</span></div>
+        <div><span>Hover</span><br><span class="mono">text at 0.06 / 0.07</span></div>
+        <div><span>Selected</span><br><span class="mono">sideBarBgActive; Bar fill tint</span></div>
+        <div><span>Badge</span><br><span class="mono">height 17, ring 2 in Navigation fill</span></div>
+        <div><span>Muted badge</span><br><span class="mono">sideBarBadgeBgMuted</span></div>
+      </div>
+    </section>
+  <section class="panel">
+    <h2>C. Main menu drawer</h2>
+    <p class="lead">Popup role (0.97), right corners 14, rows with radius 8, layer dim visible outside the rounded corners. The rows shown are the mockup's; Telegram keeps its own MainMenu content and behavior.</p>
+    <div class="menus">
+      <figure><img src="mockup-menu-light.png" alt="Mockup main menu, light, 100%"><figcaption>Light, 100%</figcaption></figure>
+      <figure><img src="mockup-menu-dark.png" alt="Mockup main menu, dark, 100%"><figcaption>Dark, 100%</figcaption></figure>
+    </div>
+  </section>
+  </div>
+  </div>
+
+</div>
+<script>
+(() => {
+  const icon = '<svg viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+  const states = [
+    ['default', 'Default', ''],
+    ['hover', 'Hover', ''],
+    ['selected', 'Selected', 'marker'],
+    ['focused', 'Keyboard focus', 'marker'],
+    ['default', 'Unread', 'badge'],
+    ['default', 'Muted only', 'muted'],
+    ['dragging', 'Dragging', 'marker'],
+  ];
+  const cell = (mode, [state, , extra]) => `
+    <div class="zoom ${mode} ${state === 'dragging' ? 'dragging' : ''}"><div class="nav"></div><div class="scale">
+      ${extra === 'marker' ? '<span class="marker"></span>' : ''}
+      <div class="btn" data-state="${state}">${icon}<span>Work</span>
+        ${extra === 'badge' ? '<span class="badge">12</span>' : ''}${extra === 'muted' ? '<span class="badge" data-muted>4</span>' : ''}
+      </div>
+    </div></div>`;
+  const grid = document.querySelector('[data-states]');
+  grid.innerHTML = '<span></span>' + states.map(([, title]) => `<span class="head">${title}</span>`).join('')
+    + ['light', 'dark'].map((mode) => `<span class="mode">${mode === 'light' ? 'Light' : 'Dark'}</span>` + states.map((s) => cell(mode, s)).join('')).join('');
+})();
+</script>
+</body>
+</html>

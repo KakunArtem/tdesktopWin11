@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Element styling](../architecture.md#element-styling-c9c15); exploration CSS `.rail`, `.rail button`, `.folder-badge`, `.main-menu`, `.menu-item`; the [exploration's main menu notes](../explorations/README.md#proposed-changes).
 
+**Visual reference:** [C9 navigation rail](../component-references/c9-navigation-rail/README.md): the mockup rail and drawer, and every button state at 72 px in light and dark.
+
 **Depends on:** [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`, navigation panel), [surface roles](2026-10-29-surface-roles.md).
 
 ## Global Constraints
@@ -62,7 +64,7 @@ When `SoftPanels()`, lay out buttons with `windowFiltersSoftPanelsPadding` and `
 - [ ] **Step 5: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
-Switch folders, hover, open Edit folders and drag a folder, Tab through the rail, switch text-only and icons-only modes in folder settings. Pills and marker follow every change; focus is visible.
+Switch folders, hover, open Edit folders and drag a folder, Tab through the rail, switch text-only and icons-only modes in folder settings. Pills and marker follow every change; focus is visible. Compare with panel B of the visual reference.
 
 - [ ] **Step 6: Commit**
 

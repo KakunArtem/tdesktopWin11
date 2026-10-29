@@ -19,4 +19,5 @@ These are proposals derived from the mockup. The
 | C6 Toolkit fork | [toolkit fork](c6-toolkit-fork/README.md) |
 | C7 Shell layout | [shell layout](c7-shell-layout/README.md) |
 | C8 Title bar | [title bar](c8-title-bar/README.md) |
+| C9 Navigation rail | [navigation rail](c9-navigation-rail/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
