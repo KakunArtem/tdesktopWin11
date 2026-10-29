@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, Material fills (C3)](../architecture.md#material-fills-c3); values from the [readable exploration](../explorations/README.md).
 
+**Visual reference:** [C3 material fills](../component-references/c3-material-fills/README.md): computed fills per role over black, white and a wallpaper, the adjusted text colors, the border and the inactive state, with a script that reproduces the numbers.
+
 **Depends on:** [material state](2026-10-29-material-state.md) (`Active()`, `ActiveValue()`).
 
 ## Global Constraints
@@ -134,7 +136,7 @@ For each alpha from `Floor(surface, inputs.dark)` upward in 0.01 steps, accept t
 - [ ] **Step 4: Run the tests**
 
 Run: `cmd /c .ai\setup\build-target.cmd test_window_material` then `.\out\Debug\test_window_material.exe; $LASTEXITCODE`
-Expected: `failures: 0` and `0`. If `TestMockupFills` reports a different alpha, print the computed value, recheck the contrast formula against `Ui::CountContrast` rather than editing the expectation.
+Expected: `failures: 0` and `0`. If `TestMockupFills` reports a different alpha, print the computed value, recheck the contrast formula against `Ui::CountContrast` rather than editing the expectation; `compute-fills.py` in the visual reference prints the expected alphas.
 
 - [ ] **Step 5: Commit**
 

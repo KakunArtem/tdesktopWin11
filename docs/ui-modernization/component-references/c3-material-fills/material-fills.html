@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C3 Material Fills Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --raised: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; }
+.panel.wide { grid-column: 1 / -1; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel h3 { font-size: 12.5px; font-weight: 600; margin: 0 0 6px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+.mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; }
+.halves { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.ladder { display: grid; grid-template-columns: 92px 44px 44px 1fr 44px; gap: 6px 8px; align-items: center; font-size: 12px; }
+.ladder .head { font-size: 11px; color: var(--page-muted); font-weight: 600; }
+.ladder .num { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; font-size: 11.5px; text-align: right; }
+.ladder .num.raised { color: var(--raised); font-weight: 700; }
+.tri { display: grid; grid-template-columns: repeat(3, 1fr); height: 44px; border-radius: 6px; overflow: hidden; border: 1px solid var(--page-line); }
+.cell { position: relative; isolation: isolate; overflow: hidden; }
+.cell::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--back); }
+.cell[data-back="black"] { --back: #000; }
+.cell[data-back="white"] { --back: #fff; }
+.cell[data-back="folds"] { --back: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.cell .fill { position: absolute; inset: 0; padding: 5px 8px; display: flex; flex-direction: column; justify-content: center; line-height: 1.25; }
+.cell[data-back="folds"] .fill { backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); }
+.cell .fill b { font-weight: 600; font-size: 12.5px; }
+.cell .fill span { font-size: 12px; }
+.tri-head { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 11px; color: var(--page-muted); font-weight: 600; text-align: center; }
+
+.adjust { display: grid; grid-template-columns: 120px 1fr 1fr; gap: 6px 10px; align-items: center; margin-bottom: 10px; font-size: 12px; }
+.chip { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--page-line); }
+.chip i { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+.zoom { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.zoom figure { margin: 0; }
+.zoom figcaption { margin-top: 5px; font-size: 12px; color: var(--page-muted); }
+.edge { position: relative; height: 150px; border-radius: 6px; overflow: hidden; border: 1px solid var(--page-line); }
+.edge .px { position: absolute; top: 0; bottom: 0; }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 12px; }
+.legend li { display: grid; grid-template-columns: 150px 1fr; gap: 8px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C3 Material fills: visual reference</h1>
+  <p>Fills computed with the plan's algorithm (compute-fills.py) and drawn over the worst-case backdrops and the Blue folds wallpaper. Orange alphas were raised above the role floor to keep text readable.</p>
+  <div class="panels">
+    <section class="panel wide">
+      <h2>A. Role fills for the mockup palette</h2>
+      <p class="lead">Text #132335 / #f2f6fb and secondary #3a4b5f / #c2cfdd on surface #e9eef5 / #1b2838. "Worst" is the lowest text or secondary contrast over black and white at the chosen alpha.</p>
+      <div class="halves" data-ladders="mockup"></div>
+    </section>
+    <section class="panel wide">
+      <h2>B. Telegram's own themes: secondary text adjusted, then fills</h2>
+      <p class="lead">Default day and night secondary text cannot reach 4.5:1 through any translucent fill, so without adjustment every fill is opaque. ReadableOver darkens or lightens it in OKLab, then the fills drop to their floors.</p>
+      <div class="halves" data-ladders="telegram"></div>
+    </section>
+    <section class="panel">
+      <h2>C. Border: primary text at 10%</h2>
+      <p class="lead">A 1 px edge between the shell and a panel, magnified 12 times. BorderColor(text) keeps the text's color and uses alpha 0.10, as the mockup's --edge.</p>
+      <div class="zoom">
+        <figure><div class="edge" data-edge="light"></div><figcaption>Light: #132335 at 10% over the navigation fill</figcaption></figure>
+        <figure><div class="edge" data-edge="dark"></div><figcaption>Dark: #f2f6fb at 10% over the navigation fill</figcaption></figure>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>D. Material inactive</h2>
+      <p class="lead">When Active() is false, Fill() returns the opaque role color and every adjusted entry is written back exactly.</p>
+      <ul class="legend" data-inactive></ul>
+    </section>
+  </div>
+</div>
+<script>
+(() => {
+  // Output of compute-fills.py; rerun it after changing floors or inputs.
+  const data = {
+    'mockup-light': { title: 'Mockup, light', surface: '#e9eef5', text: '#132335', secondary: '#3a4b5f', adjusted: { secondary: ['#3a4b5f', '#3a4b5f'], accent: ['#004a8f', '#004a8f'] }, fills: { Window: [0.72, 0.78, 0.78, 4.58], Navigation: [0.78, 0.78, 0.78, 4.58], Conversation: [0.79, 0.79, 0.79, 4.68], Bar: [0.90, 0.90, 0.90, 6.12], Composer: [0.96, 0.96, 0.96, 7.00], Popup: [0.97, 0.97, 0.97, 7.19] } },
+    'mockup-dark': { title: 'Mockup, dark', surface: '#1b2838', text: '#f2f6fb', secondary: '#c2cfdd', adjusted: { secondary: ['#c2cfdd', '#c2cfdd'], accent: ['#9ad3ff', '#9ad3ff'] }, fills: { Window: [0.74, 0.78, 0.78, 4.63], Navigation: [0.82, 0.82, 0.82, 5.27], Conversation: [0.81, 0.81, 0.81, 5.10], Bar: [0.90, 0.90, 0.90, 6.95], Composer: [0.96, 0.96, 0.96, 8.35], Popup: [0.97, 0.97, 0.97, 8.68] } },
+    'telegram-day': { title: 'Telegram default day theme', surface: '#ffffff', text: '#000000', secondary: '#999999', adjusted: { secondary: ['#999999', '#535353'], accent: ['#168acd', '#005888'] }, fills: { Window: [0.72, 1.00, 0.78, 4.55], Navigation: [0.78, 1.00, 0.78, 4.55], Conversation: [0.79, 1.00, 0.79, 4.65], Bar: [0.90, 1.00, 0.90, 6.16], Composer: [0.96, 1.00, 0.96, 7.06], Popup: [0.97, 1.00, 0.97, 7.18] } },
+    'telegram-night': { title: 'Telegram night theme', surface: '#17212b', text: '#f5f5f5', secondary: '#708499', adjusted: { secondary: ['#708499', '#a6bcd2'], accent: ['#6ab3f3', '#79c0ff'] }, fills: { Window: [0.74, 1.00, 0.81, 4.53], Navigation: [0.82, 1.00, 0.82, 4.68], Conversation: [0.81, 1.00, 0.81, 4.53], Bar: [0.90, 1.00, 0.90, 6.19], Composer: [0.96, 1.00, 0.96, 7.46], Popup: [0.97, 1.00, 0.97, 7.66] } },
+  };
+  const rgba = (hex, alpha) => {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+  };
+  const tri = (theme, alpha, secondary) => ['black', 'folds', 'white'].map((back) => `
+    <div class="cell" data-back="${back}"><div class="fill" style="background:${rgba(theme.surface, alpha)}">
+      <b style="color:${theme.text}">Name</b><span style="color:${secondary}">Preview</span>
+    </div></div>`).join('');
+  const chip = (hex, label) => `<div class="chip"><i style="background:${hex}"></i><span class="mono">${hex}</span>${label ? `<span>${label}</span>` : ''}</div>`;
+
+  const ladder = (key, showAdjust) => {
+    const theme = data[key];
+    const secondary = theme.adjusted.secondary[1];
+    let html = `<div><h3>${theme.title}</h3>`;
+    if (showAdjust) {
+      html += `<div class="adjust">
+        <span>Secondary text</span>${chip(theme.adjusted.secondary[0], 'original')}${chip(theme.adjusted.secondary[1], 'adjusted')}
+        <span>Accent text</span>${chip(theme.adjusted.accent[0], 'original')}${chip(theme.adjusted.accent[1], 'adjusted')}
+      </div>`;
+    }
+    html += `<div class="ladder">
+      <span class="head">Role</span><span class="head num">Floor</span><span class="head num">${showAdjust ? 'Before' : ''}</span>
+      <div class="tri-head"><span>over #000000</span><span>Blue folds</span><span>over #ffffff</span></div><span class="head num">Worst</span>`;
+    for (const [role, [floor, before, after, worst]] of Object.entries(theme.fills)) {
+      const raised = after > floor + 1e-9;
+      html += `<span>${role}<br><span class="num ${raised ? 'raised' : ''}" style="text-align:left">alpha ${after.toFixed(2)}</span></span>
+        <span class="num">${floor.toFixed(2)}</span>
+        <span class="num">${showAdjust ? before.toFixed(2) : ''}</span>
+        <div class="tri">${tri(theme, after, secondary)}</div>
+        <span class="num">${worst.toFixed(2)}</span>`;
+    }
+    return html + '</div></div>';
+  };
+  document.querySelector('[data-ladders="mockup"]').innerHTML = ladder('mockup-light', false) + ladder('mockup-dark', false);
+  document.querySelector('[data-ladders="telegram"]').innerHTML = ladder('telegram-day', true) + ladder('telegram-night', true);
+
+  for (const el of document.querySelectorAll('[data-edge]')) {
+    const theme = data[el.dataset.edge === 'light' ? 'mockup-light' : 'mockup-dark'];
+    const shell = rgba(theme.surface, theme.fills.Window[2]);
+    const panel = rgba(theme.surface, theme.fills.Navigation[2]);
+    const scale = 12;
+    el.style.background = el.dataset.edge === 'light' ? '#6f8fb8' : '#1d3557';
+    el.innerHTML = `
+      <div class="px" style="left:0;width:${scale * 10}px;background:${shell}"></div>
+      <div class="px" style="left:${scale * 10}px;width:${scale}px;background:${panel}"></div>
+      <div class="px" style="left:${scale * 10}px;width:${scale}px;background:${rgba(theme.text, 0.10)}"></div>
+      <div class="px" style="left:${scale * 11}px;right:0;background:${panel}"></div>`;
+  }
+
+  const day = data['telegram-day'];
+  document.querySelector('[data-inactive]').innerHTML = [
+    ['Fill(any role)', `${chip(day.surface, 'alpha 1.00, the palette color')}`],
+    ['windowSubTextFg', `${chip(day.adjusted.secondary[0], 'restored from ' + day.adjusted.secondary[1])}`],
+    ['windowActiveTextFg', `${chip(day.adjusted.accent[0], 'restored from ' + day.adjusted.accent[1])}`],
+    ['Border(any role)', '<span>unchanged formula, drawn over an opaque fill</span>'],
+  ].map(([name, value]) => `<li><span class="mono">${name}</span>${value}</li>`).join('');
+})();
+</script>
+</body>
+</html>
