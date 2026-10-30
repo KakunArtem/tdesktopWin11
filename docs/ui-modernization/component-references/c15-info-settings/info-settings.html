@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C15 Info and Settings Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
+
+/* Telegram day and night colors; day hover and divider colors are approximate. */
+.day { --win: rgba(255, 255, 255, .78); --conv: rgba(255, 255, 255, .79); --popup: rgba(255, 255, 255, .97); --solid: #ffffff; --text: #000000; --sub: #707579; --over: rgba(0, 0, 0, .05); --divider: rgba(0, 0, 0, .05); --edge: rgba(0, 0, 0, .10); --accent: #168acd; --button: #40a7e3; --error: #d14e4e; --avatar: #c4d8ec; --avatar-fg: #213f5c; }
+.night { --win: rgba(23, 33, 43, .81); --conv: rgba(23, 33, 43, .81); --popup: rgba(23, 33, 43, .97); --solid: #17212b; --text: #f5f5f5; --sub: #8c9cad; --over: rgba(255, 255, 255, .06); --divider: rgba(0, 0, 0, .22); --edge: rgba(245, 245, 245, .10); --accent: #6ab2f2; --button: #2f6ea5; --error: #ec3942; --avatar: #40576f; --avatar-fg: #eef5fc; }
+.scene { position: relative; isolation: isolate; height: 360px; border-radius: 8px; overflow: hidden; color: var(--text); font-size: 13px; }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--wall, conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg)); }
+.scene.sky { --wall: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+.scene.nightwall { --wall: radial-gradient(ellipse at 70% 30%, #1f2f5a 0, transparent 55%), linear-gradient(160deg, #070b16, #0d1428 60%, #050811); }
+.glass { position: absolute; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); }
+.body { inset: 0; background: var(--win); z-index: -1; }
+.pane { top: 8px; bottom: 8px; border-radius: 14px; background: var(--conv); box-shadow: inset 0 0 0 1px var(--edge); overflow: hidden; }
+.bubble { position: absolute; padding: 6px 10px; border-radius: 16px 16px 16px 6px; background: var(--solid); font-size: 12.5px; max-width: 150px; }
+.top { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-weight: 600; }
+.top span { margin-left: auto; color: var(--sub); font-weight: 400; font-size: 16px; }
+.avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--avatar); color: var(--avatar-fg); display: grid; place-items: center; font-weight: 600; font-size: 20px; margin: 4px auto 6px; }
+.name { text-align: center; font-weight: 600; font-size: 14px; }
+.status { text-align: center; color: var(--sub); font-size: 12px; margin-bottom: 8px; }
+.row { position: relative; display: flex; align-items: center; gap: 14px; height: 40px; padding: 0 14px; font-size: 13px; }
+.row svg { width: 20px; height: 20px; fill: none; stroke: var(--sub); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.row .val { margin-left: auto; color: var(--accent); }
+.row .valm { margin-left: auto; color: var(--sub); }
+.row.over { background: var(--over); }
+.row.solid { background: var(--solid); }
+.row.solid.over { background: color-mix(in srgb, var(--solid) 94%, #888); }
+.divider { height: 8px; background: var(--divider); }
+.layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); }
+.boxpane { left: 50%; top: 22px; bottom: 22px; width: 260px; transform: translateX(-50%); border-radius: 12px; background: var(--popup); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 28px rgba(0, 0, 0, .3); overflow: hidden; }
+.card { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 280px; padding: 22px 24px 20px; border-radius: 12px; background: var(--popup); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 28px rgba(0, 0, 0, .18); text-align: center; }
+.card h3 { margin: 0 0 14px; font-size: 15px; font-weight: 600; }
+.card p { margin: 0 0 14px; color: var(--sub); font-size: 12.5px; }
+.field { height: 34px; border-bottom: 2px solid var(--accent); text-align: left; padding: 8px 2px; letter-spacing: .3em; margin-bottom: 6px; }
+.field.ph { letter-spacing: 0; color: var(--sub); border-bottom-color: var(--edge); }
+.err { color: var(--error); font-size: 12px; min-height: 18px; margin-bottom: 8px; }
+.btn { height: 38px; border-radius: 8px; background: var(--button); color: #ffffff; display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+.qr { width: 132px; height: 132px; margin: 0 auto 12px; border-radius: 10px; background: #ffffff; padding: 10px; }
+.qr svg { width: 112px; height: 112px; display: block; }
+.tag { position: absolute; right: 8px; top: 8px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; z-index: 3; }
+.tag.bad { background: #b42318; }
+.settings { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.opt { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 16px; font-size: 13px; border-radius: 8px; }
+.opt i { width: 18px; height: 18px; border-radius: 4px; background: #40a7e3; position: relative; flex-shrink: 0; }
+.opt i::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.opt.new { outline: 2px solid var(--mark); outline-offset: -2px; }
+.adv { border: 1px solid var(--page-line); border-radius: 8px; padding: 10px 0; }
+.adv .title { padding: 2px 16px 6px; font-weight: 600; color: #168acd; }
+.adv .about { padding: 2px 16px 4px; font-size: 12px; color: var(--page-muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m5 18 5-5 3 3 2-2 4 4"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 18V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></symbol>
+</svg>
+<div class="sheet">
+  <h1>C15 Info, settings and specialized screens: visual reference</h1>
+  <p>The info pane and settings sit on the panel that hosts them; lock and sign-in screens put their content on a card over the window material. Media viewer, calls, Mini Apps and notification windows stay opaque. There is no mockup design for these screens; they follow the shell, C11 and C14.</p>
+
+  <section class="panel">
+    <h2>A. Info pane: in the third column and as a layer</h2>
+    <p class="lead">ContentWidget fills profileBg in a column and boxBg in a layer. Under Soft Panels: the Conversation role in the third panel, the Popup role in the layer's rounded box.</p>
+    <div class="three" data-info></div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Settings rows: the content fill alone is not enough</h2>
+    <p class="lead">Every SettingsButton row paints its own textBg (windowBg) today. If only ContentWidget changes, the rows stay as opaque strips over the material. The rows' resting fill has to go, keeping the hover and ripple.</p>
+    <div class="three" data-settings></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. Lock and sign-in: Window role on the body, a Popup card behind the content</h2>
+    <p class="lead">Over the plan's test wallpapers, Night and Bright sky. The passcode header and error line are painted by PasscodeLockWidget itself, so the card encloses them. The QR code keeps its white square.</p>
+    <div class="three" data-lock></div>
+  </section>
+
+  <section class="panel">
+    <h2>D. Promotion: from an experimental option to a setting</h2>
+    <p class="lead">Task 3 replaces the soft-panels-layout option with the KV pref soft_panels_layout, next to the transparency checkbox, with C2's restart confirmation. An existing option value is carried over on first read. The defaults are the user's decision.</p>
+    <div class="settings">
+      <div class="adv">
+        <div class="title">Window</div>
+        <div class="opt"><i></i>Use window transparency</div>
+        <div class="opt new"><i></i>Use Soft Panels layout</div>
+        <div class="about">Changing either option restarts Telegram.</div>
+      </div>
+      <div class="adv">
+        <div class="title">Decisions Task 3 Step 1 asks the user</div>
+        <div class="about">Transparency on by default or not.</div>
+        <div class="about">Soft Panels on by default or not.</div>
+        <div class="about">The material chat background's default (C11).</div>
+        <div class="about">Whether Soft Panels applies on macOS and Linux.</div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
+  const profile = (rowClass = '') => `
+    <div class="top">Group Info<span>✕</span></div>
+    <div class="avatar">WC</div><div class="name">Weekend crew</div><div class="status">5 members, 2 online</div>
+    <div class="divider"></div>
+    <div class="row ${rowClass}">${icon('link')}<span>t.me/weekendcrew</span></div>
+    <div class="row ${rowClass} over">${icon('bell')}<span>Notifications</span><span class="val">On</span></div>
+    <div class="row ${rowClass}">${icon('image')}<span>Shared media</span><span class="valm">24</span></div>`;
+  const settings = (rowClass = '') => `
+    <div class="top">Settings<span>⋯</span></div>
+    <div class="row ${rowClass}">${icon('user')}<span>My Account</span></div>
+    <div class="row ${rowClass}">${icon('bell')}<span>Notifications and Sounds</span></div>
+    <div class="row ${rowClass} over">${icon('lock')}<span>Privacy and Security</span></div>
+    <div class="row ${rowClass}">${icon('chat')}<span>Chat Settings</span></div>
+    <div class="row ${rowClass}">${icon('folder')}<span>Folders</span></div>
+    <div class="divider"></div>
+    <div class="row ${rowClass}">${icon('gear')}<span>Advanced</span></div>
+    <div class="row ${rowClass}">${icon('image')}<span>Language</span><span class="val">English</span></div>`;
+
+  document.querySelector('[data-info]').innerHTML = `
+    <figure><div class="scene day"><div class="glass body"></div>
+      <div class="glass pane" style="left:8px;width:150px"><div class="bubble" style="left:10px;top:250px">Found a quieter trail.</div></div>
+      <div class="glass pane" style="left:162px;right:8px">${profile()}</div></div>
+      <figcaption><b>Third column, day.</b> The Conversation role fills the third panel; rows have no resting fill.</figcaption></figure>
+    <figure><div class="scene night"><div class="glass body"></div>
+      <div class="glass pane" style="left:8px;width:150px"><div class="bubble" style="left:10px;top:250px">Found a quieter trail.</div></div>
+      <div class="glass pane" style="left:162px;right:8px">${profile()}</div></div>
+      <figcaption><b>Third column, night.</b> The same panel; the divider stays a darker band.</figcaption></figure>
+    <figure><div class="scene night"><div class="glass body"></div>
+      <div class="glass pane" style="left:8px;right:8px"></div>
+      <div class="layer"></div>
+      <div class="glass boxpane">${profile()}</div></div>
+      <figcaption><b>As a layer, night.</b> The Popup role in a radius 12 box; the dim shows at the corners.</figcaption></figure>`;
+
+  document.querySelector('[data-settings]').innerHTML = `
+    <figure><div class="scene day"><div class="glass body"></div><span class="tag bad">rows unchanged</span>
+      <div class="glass pane" style="left:8px;right:8px">${settings('solid')}</div></div>
+      <figcaption><b>Content fill changed, rows not.</b> Each row's windowBg covers the material: opaque strips with gaps at dividers and the top bar.</figcaption></figure>
+    <figure><div class="scene day"><div class="glass body"></div><span class="tag">proposal</span>
+      <div class="glass pane" style="left:8px;right:8px">${settings()}</div></div>
+      <figcaption><b>Rows without a resting fill, day.</b> Hover (textBgOver) and ripple stay.</figcaption></figure>
+    <figure><div class="scene night"><div class="glass body"></div><span class="tag">proposal</span>
+      <div class="glass pane" style="left:8px;right:8px">${settings()}</div></div>
+      <figcaption><b>Rows without a resting fill, night.</b></figcaption></figure>`;
+
+  const qr = (() => {
+    let cells = '';
+    const n = 21;
+    let seed = 7;
+    const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const finder = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7" fill="#000"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="#000"/>`;
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      const inFinder = (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
+      if (!inFinder && rnd() > .55) cells += `<rect x="${x}" y="${y}" width="1" height="1" fill="#000"/>`;
+    }
+    return `<svg viewBox="0 0 21 21" shape-rendering="crispEdges">${cells}${finder(0, 0)}${finder(14, 0)}${finder(0, 14)}</svg>`;
+  })();
+  document.querySelector('[data-lock]').innerHTML = `
+    <figure><div class="scene night nightwall"><div class="glass body"></div>
+      <div class="glass card"><h3>Enter your passcode</h3><div class="field">••••</div><div class="err">Wrong passcode</div><div class="btn">Submit</div></div></div>
+      <figcaption><b>Passcode lock, Night wallpaper.</b> Window role (0.81) on the body; header, field, error and button on the card.</figcaption></figure>
+    <figure><div class="scene day sky"><div class="glass body"></div>
+      <div class="glass card"><h3>Your phone number</h3><p>Please confirm your country code and enter your phone number.</p><div class="field ph">+1 Phone number</div><div class="err"></div><div class="btn">Next</div></div></div>
+      <figcaption><b>Sign-in phone step, Bright sky.</b> Window role (0.78); the card keeps the step's own layout.</figcaption></figure>
+    <figure><div class="scene night nightwall"><div class="glass body"></div>
+      <div class="glass card"><div class="qr">${qr}</div><h3>Log in by QR code</h3><p>Scan it with Telegram on your phone.</p></div></div>
+      <figcaption><b>QR step, Night wallpaper.</b> The code stays black on its own white square, never on material.</figcaption></figure>`;
+})();
+</script>
+</body>
+</html>

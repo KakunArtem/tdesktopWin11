@@ -25,4 +25,5 @@ These are proposals derived from the mockup. The
 | C12 Composer | [composer](c12-composer/README.md) |
 | C13 Messages | [messages](c13-messages/README.md) |
 | C14 Transient surfaces | [transient surfaces](c14-transient-surfaces/README.md) |
+| C15 Info and settings | [info and settings](c15-info-settings/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |

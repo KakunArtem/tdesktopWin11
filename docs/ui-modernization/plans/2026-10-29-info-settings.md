@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, C15](../architecture.md#components); [verification matrix](../implementation-plan.md#verification-matrix-for-every-phase); roadmap Phase 9 and decisions 3–4.
 
+**Visual reference:** [C15 info and settings](../component-references/c15-info-settings/README.md): the info pane in the third column and as a layer, settings rows with and without their resting fill, lock and sign-in cards over the test wallpapers, and the promoted setting.
+
 **Depends on:** [transient surfaces](2026-10-29-transient-surfaces.md) and every earlier plan.
 
 ## Global Constraints
@@ -37,14 +39,21 @@
 - Modify: `Telegram/SourceFiles/info/info_content_widget.cpp`, `info/info_top_bar.cpp`, `info/info_wrap_widget.cpp`
 - Modify: `Telegram/SourceFiles/info/profile/tabs/info_profile_tabs_host.cpp`, `info/media/info_media_grid_zoom.cpp`, `info/profile/info_profile_balance_pill.cpp`
 - Modify: `Telegram/SourceFiles/settings/settings_intro.cpp`
+- Modify (in the `lib_ui` fork): `ui/widgets/buttons.cpp` or wherever `SettingsButton` paints its background (recheck)
+- Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp` (sets the flag)
+
+**Interfaces:**
+- Produces, in `namespace Ui` (fork): `void SetTransparentSettingsRows(bool enabled);` and `[[nodiscard]] bool TransparentSettingsRows();` — default `false`; when set, `SettingsButton` skips its resting `textBg` fill and keeps `textBgOver` and the ripple.
 
 - [ ] **Step 1: Content and top bar fills**
 
 `ContentWidget::paintEvent` fills `_bg`: paint it with `PaintSurface(..., Surface::Conversation, _bg)` when the content is in a panel, or `Surface::Popup` when its wrap is a layer (`Info::Wrap::Layer`); replace its opaque attribute with `SetOpaquePaint(this, true)`. Same for `TopBar::paintEvent`'s brush fill; keep its existing `_roundRect` rule for the opaque attribute.
 
-- [ ] **Step 2: Settings intro**
+- [ ] **Step 2: Settings intro and rows**
 
 `settings_intro.cpp` sets `WA_OpaquePaintEvent` on its wrap: use `SetOpaquePaint`.
+
+Every row is a `Ui::SettingsButton`. The row styles `settingsButton` and `infoProfileButton` derive from `lib_ui`'s `defaultSettingsButton` and are used in 53 files, and each row paints its `textBg` (`windowBg`) under itself. `settingsOptionDisabled` relies on this when it sets `textBg: windowBg`. If only the content fill changes, the rows stay opaque strips over the material. Recheck the paint at the pinned `lib_ui` commit, add the flag above in the fork, and have the app call `Ui::SetTransparentSettingsRows(Ui::Material::SoftPanels())` at startup, as C14 does for menus. Dividers (`Ui::BoxContentDivider`) keep their band.
 
 - [ ] **Step 3: Grabs**
 
@@ -58,9 +67,13 @@ Open a user, group and channel profile in the third column; switch shared media 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp
+git -C Telegram/lib_ui commit -am "Added transparent settings row option."
+git -C Telegram/lib_ui push fork HEAD
+git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp
 git commit -m "Brought info and settings sections into Soft Panels."
 ```
+
+Pushing needs the user's approval.
 
 ---
 
@@ -75,7 +88,7 @@ git commit -m "Brought info and settings sections into Soft Panels."
 
 - [ ] **Step 1: Lock screens**
 
-`LockWidget::paintEvent` fills `st::windowBg`: paint the Window role, then a Popup-role rounded card behind the centered content when `SoftPanels()`.
+`LockWidget::paintEvent` delegates to `LockWidget::paintContent`, which fills `st::windowBg`. Paint the Window role there, then a Popup-role rounded card behind the centered content when `SoftPanels()`. `PasscodeLockWidget::paintContent` calls the base first and then draws the "Enter passcode" header above `_passcode` and the error line below it. The card must enclose both, plus the submit button.
 
 - [ ] **Step 2: Sign-in**
 
