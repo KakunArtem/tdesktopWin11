@@ -10,6 +10,8 @@
 
 **Spec:** [architecture.md, C14](../architecture.md#components); exploration CSS `.details` (radius 13, 97 % fill, 0.5 px edge), `.main-menu` and `.menu-item` (radius 8); [research note on desktop Acrylic for transient UI](../research-translucent-explorer11.md#how-this-maps-to-telegram).
 
+**Visual reference:** [C14 transient surfaces](../component-references/c14-transient-surfaces/README.md): the mockup's details popup and menu rows, every in-app layer and the context menu in day and night, and where each surface is changed.
+
 **Depends on:** [toolkit fork](2026-10-29-toolkit-fork.md), the element plans C9–C13 (so the surfaces are judged against the finished main window).
 
 ## Global Constraints
@@ -51,21 +53,27 @@ git commit -m "Inventoried transient surfaces for Soft Panels."
 ### Task 2: In-app layers
 
 **Files:**
-- Modify: `Telegram/SourceFiles/chat_helpers/chat_helpers.style`, `chat_helpers/tabbed_panel.cpp`, `chat_helpers/field_autocomplete.cpp`
+- Modify: `Telegram/SourceFiles/chat_helpers/chat_helpers.style`, `chat_helpers/tabbed_panel.cpp`, `chat_helpers/tabbed_selector.cpp`, `chat_helpers/emoji_list_widget.cpp`, `chat_helpers/stickers_list_widget.cpp`, `chat_helpers/gifs_list_widget.cpp`, `chat_helpers/stickers_list_footer.cpp`, `chat_helpers/field_autocomplete.cpp`
+- Modify: `Telegram/SourceFiles/ui/chat/chat_style_radius.h`, `chat_style_radius.cpp`
+- Modify: `Telegram/SourceFiles/inline_bots/inline_results_widget.cpp`, `Telegram/SourceFiles/ui/filter_icon_panel.cpp`
 - Modify: `Telegram/SourceFiles/history/view/reactions/history_view_reactions_selector.cpp`
 - Modify: `Telegram/SourceFiles/boxes/boxes.style` and the app call sites that pick box styles, as the inventory lists them
 
 **Interfaces:**
 - Produces style values in `chat_helpers.style`: `softPanelsPopupRadius: 12px`; parallel styles named `<upstream name>SoftPanels` for each panel the app constructs, differing only in radius and background fields.
+- Produces, in `ui/chat/chat_style_radius.h`: `[[nodiscard]] int Ui::PopupPanelRadius();` — `st::softPanelsPopupRadius` under Soft Panels, `st::emojiPanRadius` otherwise.
 - Consumes: `Ui::Material::PaintSurface(p, path, Surface::Popup, solid)`.
 
 - [ ] **Step 1: Choose parallel styles at the app call sites**
 
-For each in-app layer whose style the app passes, pass the Soft Panels variant when `Ui::Material::SoftPanels()`.
+For each in-app layer whose style the app passes, pass the Soft Panels variant when `Ui::Material::SoftPanels()`. The emoji panel's radius is not a style field: `st::emojiPanRadius` is read directly in 40 places. Replace the 36 in the transient surfaces with `Ui::PopupPanelRadius()`: `tabbed_panel.cpp`, `tabbed_selector.cpp`, the three list widgets, `stickers_list_footer.cpp`, the reactions selector, `inline_results_widget.cpp` and `filter_icon_panel.cpp`. Leave the QR and IV editor boxes as they are.
 
 - [ ] **Step 2: Paint backgrounds through the Popup role**
 
-Where the panel paints its own rounded background (for example `TabbedPanel`'s paint), paint with `PaintSurface(..., Surface::Popup, ...)` and stroke the border. Keep existing shadows.
+Paint the backgrounds with `PaintSurface(..., Surface::Popup, ...)` and stroke the border. Keep existing shadows. Each layer has its own paint sites:
+- Emoji panel: `TabbedPanel::paintEvent` paints only the shadow. The background is painted by `TabbedSelector` (`paintBgRoundedPart` with the `_panelRounding` corner pixmaps, the tabs strip in `paintSlideFrame` and `paintContent`) and by each list widget, which fills `st().bg` itself (`EmojiListWidget`, `StickersListWidget`, `GifsListWidget`). Under Soft Panels the lists paint nothing, and `TabbedSelector` paints the whole rounded shape once.
+- Autocomplete: `FieldAutocomplete::paintEvent` fills a square `rect()` with `_st.bg`, across `_boundings`, the full chat width. Under Soft Panels, bound it to the composer pill's width (C12) and paint a rounded shape 6 px above the pill.
+- Reaction selector: it paints into `_paintBuffer`, which is filled with the opaque `_st.bg`, and caches round frames with `_st.bg` as their background color. A translucent fill needs both to start transparent. Its expanded radius follows `Ui::PopupPanelRadius()`.
 
 - [ ] **Step 3: Build and check**
 
@@ -74,7 +82,7 @@ Open the emoji, sticker and GIF panel from the composer, the tabbed selector in 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add Telegram/SourceFiles/chat_helpers Telegram/SourceFiles/history/view/reactions Telegram/SourceFiles/boxes
+git add Telegram/SourceFiles/chat_helpers Telegram/SourceFiles/ui/chat/chat_style_radius.h Telegram/SourceFiles/ui/chat/chat_style_radius.cpp Telegram/SourceFiles/inline_bots/inline_results_widget.cpp Telegram/SourceFiles/ui/filter_icon_panel.cpp Telegram/SourceFiles/history/view/reactions Telegram/SourceFiles/boxes
 git commit -m "Restyled in-app transient surfaces for Soft Panels."
 ```
 

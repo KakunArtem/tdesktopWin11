@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C14 Transient Surfaces Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.crops { display: grid; grid-template-columns: 250px 250px 272px 272px; gap: 14px; }
+.crop { height: 218px; border-radius: 6px; border: 1px solid var(--page-line); background-repeat: no-repeat; background-size: 956px 656px; }
+.crop.details { width: 250px; background-position: -666px -106px; }
+.crop.menu { width: 272px; background-position: -28px -150px; }
+
+/* Scenes on the conversation material; Telegram day and night colors (day hover approximate). */
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
+.scene { position: relative; isolation: isolate; height: 330px; border-radius: 8px; overflow: hidden; font-size: 13px; color: var(--text); }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.scene .canvas { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--canvas); }
+.day { --canvas: rgba(255, 255, 255, .79); --popup: rgba(255, 255, 255, .97); --menu: #ffffff; --text: #000000; --sub: #707579; --icon: #999999; --over: #f1f1f1; --edge: rgba(0, 0, 0, .10); --accent: #168acd; --attention: #d14e4e; --in: #ffffff; --tooltip: #eef2f5; --tooltip-fg: #000000; --pill: rgba(255, 255, 255, .96); }
+.night { --canvas: rgba(23, 33, 43, .81); --popup: rgba(23, 33, 43, .97); --menu: #17212b; --text: #f5f5f5; --sub: #8c9cad; --icon: #6c7883; --over: #232e3c; --edge: rgba(245, 245, 245, .10); --accent: #6ab2f2; --attention: #ec3942; --in: #182533; --tooltip: #16222d; --tooltip-fg: #d4e0ea; --pill: rgba(23, 33, 43, .96); }
+.shadow { box-shadow: inset 0 0 0 1px var(--edge), 0 6px 22px rgba(0, 0, 0, .22); }
+.bubble { position: absolute; padding: 6px 10px; border-radius: 16px 16px 16px 6px; background: var(--in); font-size: 12.5px; max-width: 250px; }
+.bubble span { float: right; margin: 4px 0 0 8px; font-size: 11px; color: var(--sub); }
+.menu { position: absolute; width: 200px; padding: 6px 0; border-radius: 12px; background: var(--menu); }
+.menu div { position: relative; display: flex; align-items: center; gap: 12px; height: 36px; margin: 0 4px; padding: 0 12px; border-radius: 8px; font-size: 13px; }
+.menu div.over { background: var(--over); }
+.menu div.danger { color: var(--attention); }
+.menu div.danger svg { stroke: var(--attention); }
+.menu hr { border: 0; border-top: 1px solid var(--edge); margin: 6px 0; }
+.menu svg, .tabs svg, .search svg { width: 18px; height: 18px; fill: none; stroke: var(--icon); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.emoji { position: absolute; width: 345px; height: 300px; border-radius: 12px; background: var(--popup); overflow: hidden; }
+.tabs { display: flex; justify-content: center; gap: 22px; height: 40px; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--sub); }
+.tabs .on { color: var(--accent); }
+.search { margin: 0 10px 6px; height: 32px; border-radius: 9px; background: var(--over); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--sub); font-size: 12.5px; }
+.grid { display: grid; grid-template-columns: repeat(9, 1fr); padding: 2px 8px; font-size: 22px; line-height: 34px; text-align: center; }
+.grid b { grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: var(--sub); text-align: left; line-height: 22px; padding-left: 4px; }
+.foot { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--edge); color: var(--icon); font-size: 16px; }
+.layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); }
+.box { position: absolute; left: 50%; top: 50%; width: 300px; transform: translate(-50%, -50%); border-radius: 12px; background: var(--menu); padding: 18px 20px 10px; }
+.box h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+.box p { margin: 0 0 14px; font-size: 13px; }
+.box .actions { display: flex; justify-content: flex-end; gap: 4px; }
+.box .actions span { padding: 7px 12px; border-radius: 8px; font-weight: 600; color: var(--accent); font-size: 12.5px; }
+.box .actions span.danger { color: var(--attention); }
+.strip { position: absolute; height: 40px; border-radius: 20px; background: var(--popup); display: flex; align-items: center; gap: 4px; padding: 0 8px; font-size: 22px; }
+.strip i { font-style: normal; width: 32px; text-align: center; }
+.strip .more { width: 26px; height: 26px; border-radius: 50%; background: var(--over); display: grid; place-items: center; font-size: 13px; color: var(--sub); }
+.tooltip { position: absolute; white-space: nowrap; padding: 4px 8px; border-radius: 4px; background: var(--tooltip); color: var(--tooltip-fg); font-size: 12px; box-shadow: inset 0 0 0 1px var(--edge); }
+.composer { position: absolute; left: 16px; right: 16px; bottom: 14px; height: 46px; border-radius: 18px; background: var(--pill); box-shadow: inset 0 0 0 1px var(--edge); display: flex; align-items: center; padding: 0 16px; font-size: 13px; }
+.auto { position: absolute; left: 16px; right: 16px; bottom: 66px; border-radius: 12px; background: var(--popup); padding: 4px 0; }
+.auto div { display: flex; align-items: center; gap: 10px; height: 40px; margin: 0 4px; padding: 0 10px; border-radius: 8px; }
+.auto div.over { background: var(--over); }
+.auto em { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+.auto span { color: var(--sub); }
+.toast { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); padding: 9px 16px; border-radius: 12px; background: rgba(0, 0, 0, .70); color: #ffffff; font-size: 12.5px; white-space: nowrap; }
+.tag { position: absolute; right: 8px; top: 8px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; z-index: 3; }
+
+.diagram svg { display: block; width: 100%; height: auto; }
+svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-reply" viewBox="0 0 24 24"><path d="M10 6 4 12l6 6"/><path d="M4 12h10a6 6 0 0 1 6 6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-fwd" viewBox="0 0 24 24"><path d="m14 6 6 6-6 6"/><path d="M20 12H10a6 6 0 0 0-6 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 4 3H6l4-3z"/><path d="M12 13v7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-del" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+</svg>
+<div class="sheet">
+  <h1>C14 Transient surfaces: visual reference</h1>
+  <p>Menus, panels, autocomplete, the reaction selector, boxes and toasts share one elevated look: radius 12, menu highlights with radius 8 inset by 4 px, Border(Popup), and the Popup fill (0.97) for in-app layers. Popup windows stay opaque until the Acrylic prototype's go/no-go.</p>
+
+  <section class="panel">
+    <h2>A. Target: the mockup's details popup and main menu at 100%</h2>
+    <p class="lead">The details popup: radius 13, the surface at 97 %, a thin edge and a soft shadow. The main menu's rows: rounded highlights with radius 8. Telegram's context menus have no mockup design; they follow these two.</p>
+    <div class="crops">
+      <figure><div class="crop details" style="background-image:url(mockup-details-light.png)"></div><figcaption>Details popup, light</figcaption></figure>
+      <figure><div class="crop details" style="background-image:url(mockup-details-dark.png)"></div><figcaption>Details popup, dark</figcaption></figure>
+      <figure><div class="crop menu" style="background-image:url(../c9-navigation-rail/mockup-menu-light.png)"></div><figcaption>Main menu rows, light</figcaption></figure>
+      <figure><div class="crop menu" style="background-image:url(../c9-navigation-rail/mockup-menu-dark.png)"></div><figcaption>Main menu rows, dark</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Surfaces in the day theme, over the conversation material</h2>
+    <p class="lead">Telegram's day colors; the hover color is approximate. Each surface keeps its content, keyboard navigation, dismissal and positioning.</p>
+    <div class="three" data-scenes="day"></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. Surfaces in the night theme</h2>
+    <p class="lead">Colors from night.tdesktop-theme: menuBg and boxBg #17212b, windowBgOver #232e3c for highlights, tooltipBg #16222d, toastBg #000000b2, layerBg #0000007f.</p>
+    <div class="three" data-scenes="night"></div>
+  </section>
+
+  <section class="panel">
+    <h2>D. Shapes and where each value lives</h2>
+    <p class="lead">Popup windows (top-level, lib_ui) and in-app layers (children of the main window, styled by the app) are changed in different places.</p>
+    <div class="diagram"><svg viewBox="0 0 1190 230" data-geometry></svg></div>
+  </section>
+</div>
+<script>
+(() => {
+  const icon = (id) => `<svg><use href="#i-${id}"/></svg>`;
+  const spans = (s) => [...s].map((c) => `<span>${c}</span>`).join('');
+  const scenes = (theme) => [
+    `<figure><div class="scene ${theme}"><div class="canvas"></div>
+      <div class="bubble" style="left:14px;top:20px">Found a quieter trail by the lake.<span>10:38</span></div>
+      <div class="menu shadow" style="left:60px;top:66px">
+        <div>${icon('reply')}Reply</div>
+        <div class="over">${icon('copy')}Copy Text</div>
+        <div>${icon('fwd')}Forward</div>
+        <div>${icon('pin')}Pin</div>
+        <div>${icon('check')}Select</div>
+        <hr>
+        <div class="danger">${icon('del')}Delete</div>
+      </div></div>
+      <figcaption><b>Context menu (popup window).</b> Outer radius 12; the hovered row is a radius 8 pill inset by 4 px. Opaque menuBg unless Task 4 goes.</figcaption></figure>`,
+    `<figure><div class="scene ${theme}"><div class="canvas"></div>
+      <div class="emoji shadow" style="left:12px;top:15px">
+        <div class="tabs"><span class="on">Emoji</span><span>Stickers</span><span>GIFs</span></div>
+        <div class="search">${icon('search')}Search emoji</div>
+        <div class="grid"><b>Recently used</b>${spans('😀😂🥰😎🤔👍🙏🔥🎉')}<b>Smileys</b>${spans('😃😄😁😆😅🤣😊😇🙂🙃😉😌😍😘😗😙')}</div>
+        <div class="foot"><span>🕘</span><span>😀</span><span>🐻</span><span>🍔</span><span>⚽</span><span>🚗</span></div>
+      </div></div>
+      <figcaption><b>Emoji, sticker and GIF panel (in-app).</b> 345 px wide as today; radius 12 instead of emojiPanRadius 8; Popup fill.</figcaption></figure>`,
+    `<figure><div class="scene ${theme}"><div class="canvas"></div>
+      <div class="bubble" style="left:14px;top:20px">Found a quieter trail by the lake.<span>10:38</span></div>
+      <div class="layer"></div>
+      <div class="box shadow"><h3>Delete message</h3><p>Are you sure you want to delete this message for everyone?</p><div class="actions"><span>Cancel</span><span class="danger">Delete</span></div></div></div>
+      <figcaption><b>Box over the layer dim (in-app).</b> Radius 12; the dim shows in the corners, not a square.</figcaption></figure>`,
+    `<figure><div class="scene ${theme}"><div class="canvas"></div>
+      <div class="strip shadow" style="left:14px;top:40px"><i>👍</i><i>❤️</i><i>🔥</i><i>🎉</i><i>😂</i><i>😢</i><span class="more">⌄</span></div>
+      <div class="bubble" style="left:14px;top:92px">Found a quieter trail by the lake.<span>10:38</span></div>
+      <div class="tooltip" style="left:96px;top:160px">Wednesday, October 28, 2026 at 10:38</div></div>
+      <figcaption><b>Reaction strip and tooltip.</b> The strip stays a capsule (radius 20) and morphs to the panel radius when expanded. The tooltip keeps its shape until Task 3's recheck.</figcaption></figure>`,
+    `<figure><div class="scene ${theme}"><div class="canvas"></div><span class="tag">proposal</span>
+      <div class="auto shadow">
+        <div class="over"><em style="background:#5a8fc2"></em>James<span>@james</span></div>
+        <div><em style="background:#7aa36b"></em>Jamie<span>@jamie_k</span></div>
+        <div><em style="background:#b07ad0"></em>Jana<span>@jana</span></div>
+      </div>
+      <div class="composer">@ja</div></div>
+      <figcaption><b>Autocomplete (in-app).</b> Proposal: as wide as the composer pill, radius 12, 6 px above it. Today it is a square strip across the whole chat width.</figcaption></figure>`,
+    `<figure><div class="scene ${theme}"><div class="canvas"></div>
+      <div class="toast">Link copied to clipboard.</div>
+      <div class="bubble" style="left:14px;top:120px">Found a quieter trail by the lake.<span>10:38</span></div></div>
+      <figcaption><b>Toast (in-app).</b> Keeps toastBg; radius 12.</figcaption></figure>`,
+  ].join('');
+  document.querySelectorAll('[data-scenes]').forEach((node) => { node.innerHTML = scenes(node.dataset.scenes); });
+
+  const svg = document.querySelector('[data-geometry]');
+  svg.innerHTML = `
+    <text x="0" y="14" font-size="12" font-weight="600" fill="#1b2735">Menu: outer radius 12, highlight radius 8</text>
+    <rect x="0" y="26" width="220" height="150" rx="12" fill="#ffffff" stroke="#8796a8"/>
+    <rect x="4" y="62" width="212" height="36" rx="8" fill="#e3ecf5" stroke="#2b5278" stroke-width="1.2"/>
+    <line x1="0" y1="80" x2="4" y2="80" stroke="#d9480f" stroke-width="2"/>
+    <line x1="216" y1="80" x2="220" y2="80" stroke="#d9480f" stroke-width="2"/>
+    <text x="16" y="84" font-size="11" fill="#1b2735">hovered item, inset 4 left and right</text>
+    <text x="0" y="196" font-size="11" fill="#4a5868">Ui::SoftMenus() in the lib_ui fork; default off,</text>
+    <text x="0" y="211" font-size="11" fill="#4a5868">so the upstream look is unchanged.</text>
+
+    <text x="270" y="14" font-size="12" font-weight="600" fill="#1b2735">In-app panel and box: radius 12</text>
+    <rect x="270" y="26" width="220" height="150" rx="12" fill="rgba(255,255,255,.97)" stroke="#2b5278" stroke-width="1.2"/>
+    <text x="284" y="56" font-size="11" fill="#1b2735">Popup fill 0.97 + Border(Popup)</text>
+    <text x="284" y="74" font-size="11" fill="#1b2735">existing shadow kept</text>
+    <text x="270" y="196" font-size="11" fill="#4a5868">App-side parallel styles; the emoji panel</text>
+    <text x="270" y="211" font-size="11" fill="#4a5868">radius is st::emojiPanRadius, read directly.</text>
+
+    <text x="540" y="14" font-size="12" font-weight="600" fill="#1b2735">Where each surface is changed</text>
+    <g font-size="11.5" fill="#1b2735">
+      <text x="540" y="40" font-weight="600">Popup windows (lib_ui fork, Task 3; Acrylic in Task 4)</text>
+      <text x="552" y="58">PopupMenu, DropdownMenu, send menu, Tooltip</text>
+      <text x="540" y="86" font-weight="600">In-app layers (tdesktop, Task 2)</text>
+      <text x="552" y="104">TabbedPanel / TabbedSelector and its lists, FieldAutocomplete,</text>
+      <text x="552" y="120">reactions Selector, boxes on LayerStackWidget, Toast, ImportantTooltip</text>
+      <text x="540" y="148" font-weight="600">Painted by several widgets (findings)</text>
+      <text x="552" y="166">Emoji panel: TabbedSelector paints the rounded parts; EmojiListWidget,</text>
+      <text x="552" y="182">StickersListWidget and GifsListWidget fill their own st().bg.</text>
+      <text x="552" y="198">TabbedPanel paints only the shadow.</text>
+    </g>`;
+})();
+</script>
+</body>
+</html>
