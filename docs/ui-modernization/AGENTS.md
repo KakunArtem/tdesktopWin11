@@ -23,7 +23,9 @@ approved snapshot.
 - Implementation planning is in scope: the general plan in
   `implementation-plan.md`, the component contracts in `architecture.md`, and
   one plan per component in `plans/`. A plan that changes a shared contract
-  updates `architecture.md` in the same change. Keep product source changes
+  updates `architecture.md` in the same change. `architecture.md` is also the
+  progress tracker: update a plan's row in its Progress table as tasks commit,
+  and its Open decisions table as the user decides. Keep product source changes
   and builds for later requests.
 
 ## Maintaining the documents
