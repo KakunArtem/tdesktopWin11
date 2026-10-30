@@ -158,7 +158,7 @@ git commit -m "Added contrast-driven window material fill calculator."
 - Produces, in `namespace Ui` (`chat_theme_readability.h`): `[[nodiscard]] QColor EnsureTextContrast(const QColor &color, const std::vector<QColor> &backgrounds, float64 floor);` — the existing file-local `EnsureContrast` with `nudge = true`, made public.
 - Produces, in `namespace Window::Material`:
   - `struct Adjustment { QColor original; QColor adjusted; };`
-  - `[[nodiscard]] QColor ReadableOver(const QColor &text, const QColor &surface, Surface role, bool dark);` — `Ui::EnsureTextContrast(text, { Composite(surface at floor, black), Composite(surface at floor, white) }, 4.5)`.
+  - `[[nodiscard]] QColor ReadableOver(const QColor &text, const QColor &surface, Surface role, bool dark, float64 target = 4.5);` — `Ui::EnsureTextContrast(text, { Composite(surface at floor, black), Composite(surface at floor, white) }, target)`. Icons and large text pass `3.`.
 
 The palette entries themselves are changed in Task 3; this task stays pure so it can be unit-tested.
 
@@ -222,7 +222,7 @@ git commit -m "Added readable text adjustment for window material."
 - Produces, in `namespace Ui::Material` (`td_ui`, read by both targets):
   - `void SetFills(base::flat_map<Surface, QColor> fills, base::flat_map<Surface, QColor> borders);` — called only by `Window::Material`; fires `FillsChanged()`.
   - `[[nodiscard]] QColor Fill(Surface surface);` — the published fill; the opaque role color when `Active()` is false.
-  - `[[nodiscard]] QColor Border(Surface surface);`
+  - `[[nodiscard]] QColor Border(Surface surface);` — `BorderColor` of the role's `text`, also while `Active()` is false.
   - `[[nodiscard]] rpl::producer<> FillsChanged();` — fires after every recomputation, so widgets can repaint.
 - `Window::Material` computes the maps below and publishes them with `Ui::Material::SetFills`.
 
@@ -237,11 +237,11 @@ Role inputs, all `st::` palette colors (recheck each name in `lib_ui/ui/colors.p
 | Composer | `historyComposeAreaBg` | `windowFg` | `historyComposeAreaFgService` |
 | Popup | `menuBg` | `menuFg` | `windowSubTextFg` |
 
-Entries adjusted while active, each against the Navigation and Conversation floors: `windowSubTextFg`, `dialogsTextFg`, `dialogsDateFg`, `dialogsTextFgService`, `windowActiveTextFg`, `historyComposeAreaFgService`.
+Entries adjusted while active, each against the Navigation and Conversation floors at 4.5:1: `windowSubTextFg`, `dialogsTextFg`, `dialogsDateFg`, `dialogsTextFgService`, `windowActiveTextFg`, `historyComposeAreaFgService`. Keep them in a file-local table of `{ const style::color *entry; std::vector<Surface> roles; float64 target; }`, so later plans append rows instead of changing code; the full list is in [Adjusted palette entries](../architecture.md#adjusted-palette-entries).
 
 - [ ] **Step 1: Implement the cache**
 
-On `ActiveValue()` becoming true: save each listed entry's color into a file-local `base::flat_map<const style::color*, Adjustment>`, set each to `ReadableOver` the stricter of the two floors (both backdrops, both roles), then compute fills. On `false`: write every saved `original` back, clear the map, compute opaque fills. Change colors through the same setter `chat_theme_readability.cpp` uses; then call `style::NotifyPaletteChanged()` once.
+On `ActiveValue()` becoming true: save each listed entry's color into a file-local `base::flat_map<const style::color*, Adjustment>`, set each to `ReadableOver` the strictest floor among its roles at its target (both backdrops), then compute fills. On `false`: write every saved `original` back, clear the map, compute opaque fills. Change colors through the same setter `chat_theme_readability.cpp` uses; then call `style::NotifyPaletteChanged()` once.
 
 - [ ] **Step 2: Recompute on theme changes**
 

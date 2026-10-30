@@ -1,15 +1,68 @@
 # Soft Panels redesign architecture
 
-Date: 2026-10-29. Status: proposal for review. This document expands the
-[implementation roadmap](implementation-plan.md) into the complete list of
-components to build, the contracts between them and one plan per component.
-It changes no confirmed user decision; proposals and assumptions are labeled.
+Date: 2026-10-29, updated 2026-10-30. Status: proposal for review. This
+document expands the [implementation roadmap](implementation-plan.md) into the
+complete list of components to build, the contracts between them and one plan
+per component. It is also the main record of the redesign's
+[progress](#progress) and [open decisions](#open-decisions). It changes no
+confirmed user decision; proposals and assumptions are labeled.
 
 Inputs: the [project brief](README.md), the
 [readable Soft Panels exploration](explorations/README.md) (the appearance
 target), the [approved reference](reference/README.md), the
 [element map](element-map.md), the [design directions](design-directions.md)
 and the [native backdrop prototype plan](plans/2026-10-28-native-backdrop-prototype.md).
+
+## Progress
+
+Snapshot 2026-10-30: every component has a plan and a visual reference; no
+plan has started, and no product code exists. Rows are in execution order.
+
+Update a row whenever a plan task commits: the tasks done, the status and the
+record the plan writes (paths are under `docs/ui-modernization/`). Statuses
+are Not started, In progress, Blocked (say on what) and Done (every task
+committed and the plan's "Done when" list holds). A plan corrected before
+execution keeps its row; note the correction in the plan.
+
+| ID | Component | Plan | Visual reference | Tasks done | Status | Record |
+| --- | --- | --- | --- | --- | --- | --- |
+| C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 0 / 7 | Not started | `decisions/2026-10-native-backdrop.md` |
+| C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | Not started | `tools/`, `checks/README.md` |
+| C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 0 / 4 | Not started | `checks/material-state.md` |
+| C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |
+| C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 0 / 5 | Not started | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
+| C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 0 / 4 | Not started | `checks/grab-audit.md` |
+| C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 0 / 3 | Not started | `toolkit-fork.md` |
+| C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 0 / 4 | Not started | `checks/shell-layout.md` |
+| C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
+| C9 | Navigation rail | [plan](plans/2026-10-29-navigation-rail.md) | [reference](component-references/c9-navigation-rail/README.md) | 0 / 4 | Not started | `checks/navigation-rail.md` |
+| C10 | Chat list and search | [plan](plans/2026-10-29-chat-list.md) | [reference](component-references/c10-chat-list/README.md) | 0 / 4 | Not started | `checks/chat-list.md` |
+| C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 0 / 4 | Not started | `checks/conversation-chrome.md` |
+| C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 0 / 4 | Not started | `checks/composer.md` |
+| C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | Not started | `checks/messages.md` |
+| C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
+| C15 | Info, settings and specialized screens | [plan](plans/2026-10-29-info-settings.md) | [reference](component-references/c15-info-settings/README.md) | 0 / 4 | Not started | `checks/final.md` |
+
+## Open decisions
+
+The plans are written against the assumption in the second column. Each
+decision is the user's; "Needed before" is the last point where an answer
+changes no written code. Record answers in the [project brief](README.md) as
+user decisions with the date, then remove the row here.
+
+| Decision | Plans assume | Needed before | Raised in |
+| --- | --- | --- | --- |
+| Phase 1 result: go with Acrylic, Mica or no-go | Go with Acrylic | C2 | C1 decision record; see [What a Phase 1 no-go changes](#what-a-phase-1-no-go-changes) |
+| Minimum Windows build for material | 22621 (Windows 11 22H2) | C2 | Roadmap decision 1 |
+| Material refused while the native frame is on | Yes | C2 | Roadmap decision 5 |
+| Fork `lib_ui` and `lib_base` under your account | `KakunArtem/lib_ui` and `KakunArtem/lib_base`, branch `soft-panels` | C6 Task 1 Step 2 | Roadmap decision 2 |
+| Soft Panels layout on macOS and Linux | Compiled everywhere; the switch exists only on Windows | C7 (C15 Task 3 asks it, after the switch is built) | Roadmap decision 4 |
+| Default `lib_ui` styles changed on every platform | No; parallel app styles and fork flags | C14 | C14 Global Constraints |
+| Night theme badge contrast: both unread badges are below 3:1 on the material, the muted one already 2.08:1 on the opaque list | Keep today's fills | C10 Task 3 Step 2 | [C10 reference](component-references/c10-chat-list/README.md#findings) |
+| Mockup values not adopted: rail width 64 (72 kept), header 56 (54 kept), bubble radius 14 (16 kept), light active chat row, composer drop shadow | Telegram's values | Any time; each is a style value | C9–C13 Global Constraints |
+| Window transparency on by default; chat background default | Off; the user's wallpaper | C15 Task 3 | Roadmap decision 3 |
+| Soft Panels layout on by default | Off | C15 Task 3 | C15 |
+| Popup Acrylic kept and promoted to a setting | Off, experimental | C15 Task 3 | C14 Task 4 decision record |
 
 ## Confirmed direction
 
@@ -112,20 +165,40 @@ Each component has one responsibility, one owner directory and one plan.
 | C4 | Surface roles | Role painting helper, paint-site conversion, opaque-paint audit, window palette. | `ui/ui_material.*` (`td_ui`), existing paint sites | C2, C3 | 2 | [surface roles](plans/2026-10-29-surface-roles.md) |
 | C5 | Transparent grabs | Section and slide animations without opaque flashes. | `Ui::GrabWidget` callers, `window/window_slide_animation.*` | C4 | 2 | [transparent grabs](plans/2026-10-29-transparent-grabs.md) |
 | C6 | Toolkit fork | Forked `lib_ui` / `lib_base` remotes, submodule pointers and the rule for upstream merges. | `.gitmodules`, `Telegram/lib_ui` | — | before 3 | [toolkit fork](plans/2026-10-29-toolkit-fork.md) |
-| C7 | Shell layout | Soft Panels switch, outer frame, gaps and rounded panel containers in one-, two- and three-column layouts. | `window/window_soft_panels.*`, `mainwidget.cpp`, `window/main_window.cpp` | C4 | 3 | [shell layout](plans/2026-10-29-shell-layout.md) |
-| C8 | Title bar | Transparent title area with the existing caption buttons, drag regions and inactive state. | forked `lib_ui/ui/platform/win/`, `platform/win/main_window_win.cpp` | C6, C7 | 3 | [title bar](plans/2026-10-29-title-bar.md) |
-| C9 | Navigation rail | Folder rail and main menu entry on the shared navigation panel. | `window/window_filters_menu.*`, `window/window.style`, `window/window_main_menu.*` | C7 | 4 | [navigation rail](plans/2026-10-29-navigation-rail.md) |
-| C10 | Chat list and search | Search field, rows, states, archive, topics and stories strip. | `dialogs/`, `dialogs/dialogs.style` | C7 | 4 | [chat list](plans/2026-10-29-chat-list.md) |
-| C11 | Conversation chrome | Header, pinned and contextual bars, "Window material" chat background. | `history/view/history_view_top_bar_widget.*`, `ui/chat/*_bar.*`, `window/section_widget.cpp` | C7 | 5 | [conversation chrome](plans/2026-10-29-conversation-chrome.md) |
-| C12 | Composer | Floating rounded composer in both implementations with every state. | `history/view/controls/`, `history/history_widget.cpp`, `chat_helpers/chat_helpers.style` | C7 | 6 | [composer](plans/2026-10-29-composer.md) |
-| C13 | Messages | Bubbles, service messages, date pills, reactions and attachment cards. | `ui/chat/chat.style`, `history/view/`, `history/view/media/` | C7 | 7 | [messages](plans/2026-10-29-messages.md) |
+| C7 | Shell layout | Soft Panels switch, outer frame, gaps and rounded panel containers in one-, two- and three-column layouts. | `window/window_soft_panels.*`, `mainwidget.cpp`, `window/main_window.cpp` | C4, C5 | 3 | [shell layout](plans/2026-10-29-shell-layout.md) |
+| C8 | Title bar | Transparent title area with the existing caption buttons, drag regions and inactive state. | forked `lib_ui/ui/platform/win/`, `platform/win/main_window_win.cpp` | C3, C6, C7 | 3 | [title bar](plans/2026-10-29-title-bar.md) |
+| C9 | Navigation rail | Folder rail and main menu entry on the shared navigation panel. | `window/window_filters_menu.*`, `window/window.style`, `window/window_main_menu.*` | C4, C7 | 4 | [navigation rail](plans/2026-10-29-navigation-rail.md) |
+| C10 | Chat list and search | Search field, rows, states, archive, topics and stories strip. | `dialogs/`, `dialogs/dialogs.style` | C4, C7 | 4 | [chat list](plans/2026-10-29-chat-list.md) |
+| C11 | Conversation chrome | Header, pinned and contextual bars, "Window material" chat background. | `history/view/history_view_top_bar_widget.*`, `ui/chat/*_bar.*`, `window/section_widget.cpp` | C4, C7 | 5 | [conversation chrome](plans/2026-10-29-conversation-chrome.md) |
+| C12 | Composer | Floating rounded composer in both implementations with every state. | `history/view/controls/`, `history/history_widget.cpp`, `chat_helpers/chat_helpers.style` | C4, C7 | 6 | [composer](plans/2026-10-29-composer.md) |
+| C13 | Messages | Bubbles, service messages, date pills, reactions and attachment cards. | `ui/chat/chat.style`, `history/view/`, `history/view/media/` | C3, C11 | 7 | [messages](plans/2026-10-29-messages.md) |
 | C14 | Transient surfaces | Menus, tooltips, pickers, boxes and toasts; optional popup Acrylic. | forked `lib_ui/ui/widgets/`, `lib_ui/ui/layers/`, `chat_helpers/`, `boxes/` | C6, C9–C13 | 8 | [transient surfaces](plans/2026-10-29-transient-surfaces.md) |
-| C15 | Info, settings and specialized screens | Info pane, settings, lock and intro screens, final accessibility pass. | `info/`, `settings/`, `intro/`, `window/window_lock_widgets.*` | C14 | 9 | [info and settings](plans/2026-10-29-info-settings.md) |
+| C15 | Info, settings and specialized screens | Info pane, settings, lock and intro screens, final accessibility pass. | `info/`, `settings/`, `intro/`, `window/window_lock_widgets.*`, forked `lib_ui` settings rows | C14 and every earlier plan | 9 | [info and settings](plans/2026-10-29-info-settings.md) |
 | C16 | Verification tooling | Backdrop, contrast and screenshot checks reused by every phase. | `docs/ui-modernization/tools/`, `tests/` | C1 | 1–9 | [verification tooling](plans/2026-10-29-verification-tooling.md) |
 
-Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8; then C9–C13
-in parallel; C14; C15. C16 grows alongside: its contrast tool is needed by C3
+Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8; then C9–C12
+in parallel, with C13 after C11; C14; C15. C16 grows alongside: its contrast tool is needed by C3
 and its screenshot matrix by C7.
+
+## Coverage of the element map
+
+Every family of the [element map](element-map.md) has an owner, or a stated
+reason why no plan changes it.
+
+| Element family | Owner | Notes |
+| --- | --- | --- |
+| Visual foundations | C2, C3, C4, C7 | Roles, tint, radii and borders. Typography, icons and motion keep Telegram's values. |
+| Window shell | C7, C8 | Frame, gaps, panels, title area and caption buttons. |
+| Shared controls | None | Buttons, fields, toggles, checkboxes, sliders and scrollbars keep their upstream look over the role of their panel. Changed only where an element plan needs it: the search field (C10), settings rows (C15) and the history scroll colors (C13). |
+| Navigation and accounts | C9 | The account switcher lives in the main menu; the narrow chats list is C10. |
+| Chat list and search | C10 | |
+| Conversation header and bars | C11 | |
+| Messages and conversation canvas | C11, C13 | C11 owns the chat background option, C13 the colors over it. |
+| Message attachments | C13 | Verified, not restyled; GPU children keep opaque fills. |
+| Composer | C12 | Autocomplete above the composer is C14. |
+| Transient surfaces | C14 | |
+| Info and settings | C15 | |
+| Secondary and specialized screens | C15 | Lock and sign-in only. Media viewer, stories, calls, Mini Apps and notifications are separate windows and stay opaque (C4, C15). The audio player and call bars sit in the conversation panel (C7). |
 
 ## Shared contracts
 
@@ -168,7 +241,7 @@ Every `ActiveValue()` change is forwarded to `Ui::Material::SetActive`.
 | `enum class Surface` | The roles listed under Material fills. |
 | `bool Active()` / `rpl::producer<bool> ActiveValue()` | Mirror of `Window::Material::ActiveValue()`; `false` until set. |
 | `QColor Fill(Surface)` / `QColor Border(Surface)` / `rpl::producer<> FillsChanged()` | Cached fills published by C3. |
-| `bool SoftPanels()` / `rpl::producer<bool> SoftPanelsValue()` | The Soft Panels layout switch (C7); `false` on platforms other than Windows. |
+| `bool SoftPanels()` / `rpl::producer<bool> SoftPanelsValue()` | The Soft Panels layout switch (C7), fixed at startup because the switch needs a restart; `false` on platforms other than Windows. |
 | `void SetActive(bool)`, `void SetFills(...)`, `void SetSoftPanels(bool)` | Writers, called only from the `Telegram` target. |
 
 The policy (`window/window_material_policy.h`, from Phase 1) keeps its pure
@@ -223,7 +296,12 @@ list of secondary text palette entries against the role floors, through the
 mechanism `Ui::EnsureBubblesReadable` already uses in
 `ui/chat/chat_theme_readability.cpp`. The exploration does the same with its
 stronger text colors. Results are recomputed on `style::PaletteChanged()` and
-on every `ActiveValue()` change.
+on every `ActiveValue()` change. Each adjusted entry has its roles and its
+target; the list is under [Adjusted palette entries](#adjusted-palette-entries).
+
+`Border(surface)` is `BorderColor` of the role's text in both modes. The
+shell's panel frames (C7) use `st::shadowFg` instead while material is
+inactive.
 
 ### Surface roles (C4)
 
@@ -266,7 +344,8 @@ these functions call the `lib_ui` grabs unchanged.
 
 ### Shell geometry (C7)
 
-`Window::SoftPanels` in `window/window_soft_panels.h`:
+`Window::SoftPanels`: the pure `Layout` in `window/window_soft_panels_layout.h`
+(unit-tested without the app), `PanelFrame` in `window/window_soft_panels.h`:
 
 ```cpp
 struct LayoutArgs {
@@ -313,6 +392,74 @@ are style values, so they follow the interface scale.
 - Text and icon colors stay palette keys. Readability is reached by fills and
   by C3's runtime adjustment of existing entries, not by new palette keys, so
   custom and cloud themes work unchanged.
+
+### Adjusted palette entries
+
+While material is active, C3 raises each entry until it reaches its target
+over the lowest floor among its roles, composited on black and on white, and
+restores it exactly when material turns off. A plan that adds an entry adds
+its row here and to C3's table in `window/window_material.cpp`.
+
+| Entries | Roles | Target | Plan |
+| --- | --- | --- | --- |
+| `windowSubTextFg`, `dialogsTextFg`, `dialogsDateFg`, `dialogsTextFgService`, `windowActiveTextFg`, `historyComposeAreaFgService` | Navigation, Conversation | 4.5:1 | C3 |
+| `titleButtonFg`, `titleButtonFgActive`, `titleButtonCloseFg`, `titleButtonCloseFgActive` | Window | 3:1 | C8 |
+| `titleFg`, `titleFgActive` (the canary build label) | Window | 4.5:1 | C8 |
+| `placeholderFg` | Navigation, Bar | 4.5:1 | C10 |
+| `dialogsUnreadBgMuted`, only if the user chooses to adjust the badges | Navigation | 3:1 | C10 |
+
+Service messages, date pills and the unread bar are not palette entries here:
+C13 overrides them per chat style, and only while the material chat background
+is on.
+
+### Conversation bars and chat background (C11)
+
+`Ui::Material` (`td_ui`) adds `BarPillRect(row)`, `PaintBar(p, row, clip,
+solid)` and `PaintBarContent(p, row, solid)`; the sizes are
+`softPanelsBarMargins` and `softPanelsBarRadius` in
+`window/window_soft_panels.style`. `Window::Material` adds
+`ChatBackgroundEnabled()`, `SetChatBackgroundEnabled(bool)`,
+`ChatBackgroundActive()` (enabled and `Active()`) and
+`ChatBackgroundActiveValue()`.
+
+### Chat colors on the material background (C13)
+
+`Ui::ChatStyle` gains `applyAdjustedServiceSelected(QColor bg)`,
+`applyAdjustedUnreadBar(QColor bg, QColor border, QColor fg)` and
+`applyScrollColors(not_null<const style::palette*>)`. Each resets the service
+corner caches, increments the palette version and fires `paletteChanged()`.
+`Window::SessionController::applyMaterialChatColors()` reapplies the theme
+with `_chatStyle->apply()`, then the overrides while
+`ChatBackgroundActive()`.
+
+### Popup radius (C14)
+
+`[[nodiscard]] int Ui::PopupPanelRadius()` in `ui/chat/chat_style_radius.h`
+returns `st::softPanelsPopupRadius` (12) under Soft Panels and
+`st::emojiPanRadius` (8) otherwise. It replaces the direct reads of
+`st::emojiPanRadius` in transient surfaces; the lock and sign-in cards (C15)
+use `softPanelsPopupRadius` directly.
+
+### Toolkit fork hooks
+
+Every `lib_ui` change is one of these hooks. Unset, each one leaves upstream
+behavior unchanged.
+
+| Hook | Set by | Plan |
+| --- | --- | --- |
+| `RpWindow::setTitleBackgroundPainter(Fn<void(QPainter&, const QRect&)>)` | `MainWindow::initHook()` when `Capable()` | C8 |
+| `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()` | startup, from `SoftPanels()` | C14 |
+| `Ui::Platform::SetPopupBackdrop(bool)` | the popup option and `ActiveValue()` | C14 |
+| `Ui::SetTransparentSettingsRows(bool)` / `Ui::TransparentSettingsRows()` | startup, from `SoftPanels()` | C15 |
+
+### Settings and switches
+
+| Name | Kind and place | Default | Applies | Plan |
+| --- | --- | --- | --- | --- |
+| `window_material`, "Use window transparency" | KV pref, Advanced > Window title bar | Off | After restart | C2; replaces the Phase 1 option |
+| `soft-panels-layout`, "Soft Panels layout" | `base::options`, Experimental | Off | After restart | C7; C15 promotes it to the KV pref `soft_panels_layout`, "Use Soft Panels layout" |
+| `window_material_chat_background`, "Show window material behind messages" | KV pref, Chat settings, only when `Capable()` | Off | Live | C11 |
+| `popup-material-prototype` | `base::options`, Experimental | Off | After restart | C14; C15 promotes it to the KV pref `popup_material` if the record says go and the user agrees |
 
 ## Cross-cutting rules
 

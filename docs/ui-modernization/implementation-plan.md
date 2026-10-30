@@ -40,7 +40,7 @@ Paths are relative to `Telegram/`.
 | Rendering | [RpWindow](../../Telegram/lib_ui/ui/widgets/rp_window.cpp) primes a QRhi backing store via `EnsureWindowRhi` ([rhi_surface.cpp](../../Telegram/lib_ui/ui/rhi/rhi_surface.cpp)). `RpWindow(bool translucent)` already sets `WA_TranslucentBackground`. | Phase 1 tests whether DWM translucency works through this path. |
 | Surfaces | The chat list fills `st::dialogsBg` ([dialogs_widget.cpp](../../Telegram/SourceFiles/dialogs/dialogs_widget.cpp)), the header fills `st::topBarBg` ([history_view_top_bar_widget.cpp](../../Telegram/SourceFiles/history/view/history_view_top_bar_widget.cpp)), and chat sections use `SectionWidget::PaintBackground` ([section_widget.cpp](../../Telegram/SourceFiles/window/section_widget.cpp)). | Opaque fills are spread over many paint sites. |
 | Palette | [colors.palette](../../Telegram/lib_ui/ui/colors.palette) supports alpha; `style::PaletteChanged()` reports theme changes. | Fills can be derived from the active palette at runtime. |
-| Animations | Section transitions grab widgets; `Ui::GrabWidget` takes a background color ([ui_utility.cpp](../../Telegram/lib_ui/ui/ui_utility.cpp)). The window, history and dialogs areas have 27 grab call sites. | Grabs need a transparent background in material mode. |
+| Animations | Section transitions grab widgets; `Ui::GrabWidget` takes a background color ([ui_utility.cpp](../../Telegram/lib_ui/ui/ui_utility.cpp)). The window, history and dialogs areas have 27 grab call sites (33 call lines with `mainwidget.cpp`, per the [architecture survey](architecture.md#verified-source-facts)). | Grabs need a transparent background in material mode. |
 | Settings | `Core::Settings` uses append-only serialization and KV prefs; the native frame toggle is in [settings_advanced.cpp](../../Telegram/SourceFiles/settings/sections/settings_advanced.cpp). Experimental toggles use `base::options`. | New settings use KV prefs; prototypes use options. |
 | Navigation | [FiltersMenu](../../Telegram/SourceFiles/window/window_filters_menu.h) already has the main menu button and unread counters. | The rail is restyled, not rebuilt. |
 | Composer | [ComposeControls](../../Telegram/SourceFiles/history/view/controls/history_view_compose_controls.h) and [HistoryWidget](../../Telegram/SourceFiles/history/history_widget.h) each implement a composer. | Composer work covers both. |
@@ -62,7 +62,7 @@ record button) already exist in Telegram and must be preserved.
    surface, the lowest fill at which the palette's text and secondary text
    reach 4.5:1 against both a black and a white backdrop, so custom themes
    stay readable without new keys.
-3. **Surface roles** (`window/window_material.*`): window, navigation panel,
+3. **Surface roles** (`ui/ui_material.*` in `td_ui`): window, navigation panel,
    conversation panel and content. A helper used at each existing fill site
    paints the role's fill, or nothing when a parent already painted it. In
    solid mode it paints today's opaque color, so behavior with material off is
@@ -87,7 +87,8 @@ instead.
 | `Telegram/SourceFiles/tests/test_window_material.cpp`, `Telegram/cmake/test_window_material.cmake` | 1, extended in 2 | Unit tests for the policy and fill calculator. |
 | `docs/ui-modernization/tools/Test-Backdrop.ps1` | 1 | Screen-level transparency check. |
 | `Telegram/SourceFiles/window/window_material_fills.{h,cpp}` | 2 | Contrast-driven fill calculation from palette colors. |
-| `Telegram/SourceFiles/window/window_material.{h,cpp}` | 2 | Material state service and surface role painting helper. |
+| `Telegram/SourceFiles/window/window_material.{h,cpp}` | 2 | Material state service. |
+| `Telegram/SourceFiles/ui/ui_material.{h,cpp}` | 2 | Paint-time state and the surface role painting helper, in `td_ui` ([why](architecture.md#two-namespaces-two-targets)). |
 | `Telegram/SourceFiles/settings/sections/settings_advanced.cpp` | 2 | "Window transparency" setting next to the native frame option. |
 | `Telegram/SourceFiles/window/window_soft_panels.{h,cpp}` | 3 | Rounded panel containers and frame geometry. |
 | `Telegram/SourceFiles/mainwidget.cpp` | 3 | Panel insets and gaps in `MainWidget::updateControlsGeometry`. |
@@ -114,7 +115,8 @@ instead.
 - **Depends on:** a go or conditional go from Phase 1.
 - **Produces:** the material service, a "Window transparency" setting
   (KV pref) replacing the prototype option, palette-derived fills, the surface
-  role helper, transparent grabs at the 27 grab sites, and removal of the
+  role helper, transparent grabs at every grab site (audited by file, see
+  [C5](plans/2026-10-29-transparent-grabs.md)), and removal of the
   prototype strip. With the setting on, only areas that no longer paint show
   material.
 - **Tests:** fill calculator unit tests using the exploration's colors as
@@ -156,7 +158,7 @@ instead.
 
 ### Phase 7: Messages and attachments
 
-- **Depends on:** Phase 3.
+- **Depends on:** Phase 3 and Phase 5's "Window material" chat background.
 - **Produces:** bubbles, service messages, date pills, reactions and
   attachment cards across all mirrored chat sections.
 - **Tests:** screenshots of each message type in light, dark and solid
@@ -177,7 +179,7 @@ instead.
   accessibility pass.
 - **Tests:** the full verification matrix below.
 
-Phases 1–3 are sequential; 4–7 can run in parallel; 8–9 follow.
+Phases 1–3 are sequential; 4–6 can run in parallel; 7 follows 5; 8–9 follow.
 
 ## Verification matrix for every phase
 
@@ -213,7 +215,8 @@ Made on 2026-10-28:
 - Acrylic is the working guideline for the native material. Mica stays an
   alternative if Acrylic cannot match the mockup.
 
-Still needed:
+Still needed (tracked, with the plan each one blocks, in
+[Open decisions](architecture.md#open-decisions)):
 
 1. Minimum Windows build for material; proposed: Windows 11 22H2 (22621).
 2. Fork `lib_ui` and `lib_base` under your account before Phase 3.

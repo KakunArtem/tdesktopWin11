@@ -2,7 +2,8 @@
 
 One implementation plan per component of the
 [redesign architecture](../architecture.md). Execute them in the order below,
-one at a time. Plans after Phase 1 assume its decision record ends in go or
+one at a time. Progress and open decisions are tracked in the architecture's
+[Progress](../architecture.md#progress) section. Plans after Phase 1 assume its decision record ends in go or
 conditional go; reread [What a Phase 1 no-go changes](../architecture.md#what-a-phase-1-no-go-changes)
 before starting any of them.
 
@@ -21,12 +22,13 @@ before starting any of them.
 | 8, parallel | C10 Chat list and search | [2026-10-29-chat-list.md](2026-10-29-chat-list.md) |
 | 8, parallel | C11 Conversation chrome | [2026-10-29-conversation-chrome.md](2026-10-29-conversation-chrome.md) |
 | 8, parallel | C12 Composer | [2026-10-29-composer.md](2026-10-29-composer.md) |
-| 8, parallel | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
+| 8, after C11 | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
 | 9 | C14 Transient surfaces | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
 | 10 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
 
 "Parallel" plans touch disjoint directories; they can run in separate
-sessions or worktrees, but each still lands as its own commits.
+sessions or worktrees, but each still lands as its own commits. C13 consumes
+C11's chat background state, so it starts after C11 lands.
 
 ## Ground rules
 
@@ -55,6 +57,8 @@ Every plan's Global Constraints include these lines.
   is updated in a separate tdesktop commit. Recheck every named `lib_ui`
   function at the pinned commit before editing: the planning survey could not
   read the submodules.
+- After each task's commit, update the plan's row in
+  [Progress](../architecture.md#progress) in the same commit or right after it.
 - Visual checks use the tools from the
   [verification tooling plan](2026-10-29-verification-tooling.md):
   `Test-Backdrop.ps1`, `Measure-Contrast.ps1` and the screenshot matrix in

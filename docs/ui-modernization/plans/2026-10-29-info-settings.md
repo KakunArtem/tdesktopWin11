@@ -84,7 +84,7 @@ Pushing needs the user's approval.
 - Modify: `Telegram/SourceFiles/intro/intro_widget.cpp`, `intro/intro.style`
 
 **Interfaces:**
-- Produces style values: `lockSoftPanelsCard: margins(...)` and `introSoftPanelsCard: margins(...)` — card padding around the existing centered content; the content's own geometry is unchanged.
+- Produces style values: `lockSoftPanelsCard: margins(24px, 22px, 24px, 20px)` and `introSoftPanelsCard: margins(24px, 22px, 24px, 20px)` — card padding around the existing centered content, from panel C of the visual reference; the content's own geometry is unchanged.
 
 - [ ] **Step 1: Lock screens**
 
@@ -111,15 +111,16 @@ git commit -m "Brought lock and sign-in screens into Soft Panels."
 
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp`, `settings/settings_experimental.cpp`, `settings/sections/settings_advanced.cpp`, `Telegram/Resources/langs/lang.strings`
+- Modify, if popup Acrylic is promoted: `Telegram/SourceFiles/window/window_material.cpp`
 - Modify: `docs/ui-modernization/README.md`, `docs/ui-modernization/implementation-plan.md`
 
 - [ ] **Step 1: Ask the user**
 
-Present the roadmap's open decisions with the evidence gathered in the check records: transparency on by default or not; Soft Panels on by default or not; material chat background default; whether Soft Panels applies on macOS and Linux. Record the answers in the README's direction section as user decisions with the date.
+Present the roadmap's open decisions with the evidence gathered in the check records: transparency on by default or not; Soft Panels on by default or not; material chat background default; whether Soft Panels applies on macOS and Linux; and, if `decisions/popup-acrylic.md` says go, whether to promote popup Acrylic. Record the answers in the README's direction section as user decisions with the date, and close them in [Open decisions](../architecture.md#open-decisions).
 
 - [ ] **Step 2: Promote**
 
-Replace the `soft-panels-layout` option with a KV pref `soft_panels_layout` and a checkbox "Use Soft Panels layout" next to "Use window transparency" (restart confirmation as in C2). On first read, if the pref is absent, take the old option's stored value; otherwise the decided default. Remove the option from experimental settings.
+Replace the `soft-panels-layout` option with a KV pref `soft_panels_layout` and a checkbox "Use Soft Panels layout" next to "Use window transparency" (restart confirmation as in C2). On first read, if the pref is absent, take the old option's stored value; otherwise the decided default. Remove the option from experimental settings. If the user chose to promote popup Acrylic, replace `popup-material-prototype` the same way, with the KV pref `popup_material` and a checkbox "Use transparency in menus" shown only when `Window::Material::Capable()`.
 
 - [ ] **Step 3: Check upgrade**
 
@@ -128,7 +129,7 @@ Start a build from before this task with the option on, quit, start this build: 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/settings Telegram/Resources/langs/lang.strings docs/ui-modernization/README.md docs/ui-modernization/implementation-plan.md
+git add Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/window/window_material.cpp Telegram/SourceFiles/settings Telegram/Resources/langs/lang.strings docs/ui-modernization/README.md docs/ui-modernization/implementation-plan.md docs/ui-modernization/architecture.md
 git commit -m "Promoted Soft Panels layout to a setting."
 ```
 
