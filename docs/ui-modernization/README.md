@@ -81,10 +81,9 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Component plans](plans/README.md): one implementation plan per component,
   in execution order.
 - [Component visual references](component-references/README.md): what each
-  component changes, isolated from the mockup, for all sixteen planned
-  components.
+  component changes, isolated from the mockup, for every planned component.
 - [Shared controls, foundations and separate windows](shared-elements.md):
-  the elements no plan covered yet, grouped as C17 to C19.
+  the elements no plan covered, grouped as C17 to C19; C17 is planned.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

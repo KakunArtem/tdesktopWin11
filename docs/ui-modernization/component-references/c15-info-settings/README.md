@@ -32,10 +32,12 @@ conversation chrome (C11) and the transient surfaces (C14).
   Each row fills its `textBg` (`windowBg`) under itself; `settingsOptionDisabled`
   relies on this to turn off hover with `textBg: windowBg`. Changing
   `ContentWidget`'s fill alone leaves opaque strips (panel B, left).
-  Task 1 Step 2 now adds a fork flag, as C14 did for menus.
-  `SetTransparentSettingsRows` skips the resting fill and keeps
-  `textBgOver` and the ripple. The paint function is in `lib_ui`, which is
-  not checked out here, so it must be rechecked at the pinned commit.
+  The [C17 shared controls plan](../../plans/2026-10-30-shared-controls.md)
+  maps this fill for every control at once: a surface-colored fill is
+  skipped, and the `windowBgOver` hover and divider band become the soft hover
+  of the chats list. C15 consumes it instead of adding its own flag. The paint
+  function, `SettingsButton::paintBg`, was read at the pinned commit
+  `79c846fd`.
 - **The lock screen fill is in `paintContent`.** `LockWidget::paintEvent`
   delegates to `LockWidget::paintContent`, which fills `windowBg`.
   `PasscodeLockWidget::paintContent` then draws the "Enter passcode" header
@@ -56,8 +58,8 @@ conversation chrome (C11) and the transient surfaces (C14).
 - Colors are Telegram's day and night palettes. The day hover and divider
   colors are approximate (`lib_ui`'s palette is not checked out). The two
   test wallpapers are the mockup's Night and Bright sky.
-- Dividers keep a band in this proposal; making them transparent gaps is
-  another option to judge in the Task 1 check.
+- Dividers keep a band in the soft hover tint (C17), lighter than the panel
+  in both themes, as `windowBgOver` is today.
 - The passcode, phone and QR texts are shortened stand-ins for the real
   language strings.
 

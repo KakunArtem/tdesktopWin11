@@ -67,8 +67,8 @@ default theme at 1.00 before adjustment.
   alpha.
 - Night colors come from `night.tdesktop-theme`. Day colors
   (`windowFg #000000`, `windowSubTextFg #999999`,
-  `windowActiveTextFg #168acd`) approximate the default palette in `lib_ui`,
-  which is not checked out here. Recheck them at the pinned commit.
+  `windowActiveTextFg #168acd`) match `lib_ui`'s palette at the pinned
+  commit `79c846fd`, read from GitHub on 2026-10-30 for C17.
 - The Night theme Window role is raised to 0.81, a case the plan's unit tests
   do not cover. Use it as an extra expectation when checking Task 3.
 

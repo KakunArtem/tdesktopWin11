@@ -19,9 +19,9 @@ figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
 figcaption b { color: var(--page-fg); font-weight: 600; }
 .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
 
-/* Telegram day and night colors; day hover and divider colors are approximate. */
-.day { --win: rgba(255, 255, 255, .78); --conv: rgba(255, 255, 255, .79); --popup: rgba(255, 255, 255, .97); --solid: #ffffff; --text: #000000; --sub: #707579; --over: rgba(0, 0, 0, .05); --divider: rgba(0, 0, 0, .05); --edge: rgba(0, 0, 0, .10); --accent: #168acd; --button: #40a7e3; --error: #d14e4e; --avatar: #c4d8ec; --avatar-fg: #213f5c; }
-.night { --win: rgba(23, 33, 43, .81); --conv: rgba(23, 33, 43, .81); --popup: rgba(23, 33, 43, .97); --solid: #17212b; --text: #f5f5f5; --sub: #8c9cad; --over: rgba(255, 255, 255, .06); --divider: rgba(0, 0, 0, .22); --edge: rgba(245, 245, 245, .10); --accent: #6ab2f2; --button: #2f6ea5; --error: #ec3942; --avatar: #40576f; --avatar-fg: #eef5fc; }
+/* Telegram day and night colors; hover and divider bands are C17's soft hover. */
+.day { --win: rgba(255, 255, 255, .78); --conv: rgba(255, 255, 255, .79); --popup: rgba(255, 255, 255, .97); --solid: #ffffff; --text: #000000; --sub: #707579; --over: rgba(0, 0, 0, .06); --divider: rgba(0, 0, 0, .06); --edge: rgba(0, 0, 0, .10); --accent: #168acd; --button: #40a7e3; --error: #d14e4e; --avatar: #c4d8ec; --avatar-fg: #213f5c; }
+.night { --win: rgba(23, 33, 43, .81); --conv: rgba(23, 33, 43, .81); --popup: rgba(23, 33, 43, .97); --solid: #17212b; --text: #f5f5f5; --sub: #8c9cad; --over: rgba(245, 245, 245, .07); --divider: rgba(245, 245, 245, .07); --edge: rgba(245, 245, 245, .10); --accent: #6ab2f2; --button: #2f6ea5; --error: #ec3942; --avatar: #40576f; --avatar-fg: #eef5fc; }
 .scene { position: relative; isolation: isolate; height: 360px; border-radius: 8px; overflow: hidden; color: var(--text); font-size: 13px; }
 .scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: var(--wall, conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg)); }
 .scene.sky { --wall: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
@@ -148,7 +148,7 @@ figcaption b { color: var(--page-fg); font-weight: 600; }
     <figure><div class="scene night"><div class="glass body"></div>
       <div class="glass pane" style="left:8px;width:150px"><div class="bubble" style="left:10px;top:250px">Found a quieter trail.</div></div>
       <div class="glass pane" style="left:162px;right:8px">${profile()}</div></div>
-      <figcaption><b>Third column, night.</b> The same panel; the divider stays a darker band.</figcaption></figure>
+      <figcaption><b>Third column, night.</b> The same panel; the divider is a band in the hover tint.</figcaption></figure>
     <figure><div class="scene night"><div class="glass body"></div>
       <div class="glass pane" style="left:8px;right:8px"></div>
       <div class="layer"></div>
@@ -161,7 +161,7 @@ figcaption b { color: var(--page-fg); font-weight: 600; }
       <figcaption><b>Content fill changed, rows not.</b> Each row's windowBg covers the material: opaque strips with gaps at dividers and the top bar.</figcaption></figure>
     <figure><div class="scene day"><div class="glass body"></div><span class="tag">proposal</span>
       <div class="glass pane" style="left:8px;right:8px">${settings()}</div></div>
-      <figcaption><b>Rows without a resting fill, day.</b> Hover (textBgOver) and ripple stay.</figcaption></figure>
+      <figcaption><b>Rows without a resting fill, day.</b> Hover is C17's soft hover; the ripple stays.</figcaption></figure>
     <figure><div class="scene night"><div class="glass body"></div><span class="tag">proposal</span>
       <div class="glass pane" style="left:8px;right:8px">${settings()}</div></div>
       <figcaption><b>Rows without a resting fill, night.</b></figcaption></figure>`;

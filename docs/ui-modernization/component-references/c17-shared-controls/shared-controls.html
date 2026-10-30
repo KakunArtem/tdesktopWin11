@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C17 Shared Controls Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
+.four { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 18px; }
+.crop { border-radius: 8px; background-repeat: no-repeat; border: 1px solid var(--page-line); }
+
+/* Telegram palettes at the pinned lib_ui commit and night.tdesktop-theme; "-today" values are before C17's adjustments. */
+.day { --conv: rgba(255, 255, 255, .79); --popup: rgba(255, 255, 255, .97); --solid: #ffffff; --solid-over: #f1f1f1; --soft-over: rgba(0, 0, 0, .06); --text: #000000; --sub: #535353; --sect: #005888; --edge: rgba(0, 0, 0, .10);
+  --check-today: #b3b3b3; --check: #6e6e6e; --focus-today: #37a1de; --focus: #0075ab; --lbtn-today: #168acd; --lbtn: #005888;
+  --line: #e0e0e0; --track: #e1eaef; --active: #40a7e3; --button: #40a7e3; --knob: #ffffff; --scroll: rgba(0, 0, 0, .33); --chip: #e9f3fb; --avatar: #c4d8ec; --avatar-fg: #213f5c; }
+.night { --conv: rgba(23, 33, 43, .81); --popup: rgba(23, 33, 43, .97); --solid: #17212b; --solid-over: #232e3c; --soft-over: rgba(245, 245, 245, .07); --text: #f5f5f5; --sub: #a6bcd2; --sect: #79c0ff; --edge: rgba(245, 245, 245, .10);
+  --check-today: #4f6276; --check: #8499ae; --focus-today: #6396cb; --focus: #679bd0; --lbtn-today: #6ab2f2; --lbtn: #77bfff;
+  --line: #313c49; --track: #364554; --active: #5288c1; --button: #2f6ea5; --knob: #17212b; --scroll: rgba(255, 255, 255, .33); --chip: #253447; --avatar: #40576f; --avatar-fg: #eef5fc; }
+.today { --check: var(--check-today); --focus: var(--focus-today); --lbtn: var(--lbtn-today); }
+
+.scene { position: relative; isolation: isolate; border-radius: 8px; overflow: hidden; color: var(--text); font-size: 13px; }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.glass { position: absolute; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); }
+.pane { top: 8px; bottom: 8px; left: 8px; right: 8px; border-radius: 14px; background: var(--conv); box-shadow: inset 0 0 0 1px var(--edge); overflow: hidden; }
+.layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); }
+.box { left: 50%; top: 18px; bottom: 18px; width: 300px; transform: translateX(-50%); border-radius: 12px; background: var(--popup); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 28px rgba(0, 0, 0, .3); overflow: hidden; }
+.tag { position: absolute; right: 8px; top: 8px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; z-index: 3; }
+.tag.bad { background: #b42318; }
+
+.top { height: 42px; display: flex; align-items: center; padding: 0 16px; font-weight: 600; font-size: 14px; }
+.sect { padding: 8px 16px 4px; color: var(--sect); font-weight: 600; font-size: 12.5px; }
+.row { position: relative; display: flex; align-items: center; gap: 12px; height: 32px; padding: 0 16px; }
+.srow { position: relative; display: flex; align-items: center; height: 38px; padding: 0 16px; }
+.srow .tg { margin-left: auto; }
+.over { background: var(--soft-over); }
+.today .srow, .today .peer, .today .field, .today .lb, .today .ms { background: var(--solid); }
+.today .srow.over, .today .peer.over { background: var(--solid-over); }
+.today .band { background: var(--solid-over); }
+.band { height: 8px; background: var(--soft-over); }
+.cb { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--check); flex-shrink: 0; position: relative; }
+.cb.on { border-color: var(--active); background: var(--active); }
+.cb.on::after { content: ""; position: absolute; left: 4px; top: 0; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.rd { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--check); flex-shrink: 0; position: relative; }
+.rd.on { border-color: var(--active); }
+.rd.on::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--active); }
+.tg { width: 34px; height: 18px; border-radius: 9px; background: var(--check); position: relative; flex-shrink: 0; }
+.tg::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--knob); }
+.tg.on { background: var(--active); }
+.tg.on::after { left: 18px; }
+.slider { position: relative; margin: 8px 24px 4px; height: 18px; }
+.slider .tr { position: absolute; left: 0; right: 0; top: 7px; height: 4px; border-radius: 2px; background: var(--track); }
+.slider .ac { position: absolute; left: 0; width: 33%; top: 7px; height: 4px; border-radius: 2px; background: var(--active); }
+.slider .th { position: absolute; left: calc(33% - 8px); top: 1px; width: 16px; height: 16px; border-radius: 50%; background: var(--active); }
+.ticks { display: flex; justify-content: space-between; margin: 0 18px 4px; color: var(--sub); font-size: 11.5px; }
+.tabs { display: flex; gap: 22px; padding: 4px 16px 0; height: 32px; }
+.tabs span { color: var(--sub); font-weight: 600; font-size: 12.5px; position: relative; }
+.tabs span.on { color: var(--lbtn); }
+.tabs span.on::after { content: ""; position: absolute; left: -2px; right: -2px; bottom: 2px; height: 3px; border-radius: 2px; background: var(--active); }
+.field { margin: 2px 16px 6px; height: 34px; padding: 10px 2px 0; border-bottom: 1px solid var(--line); color: var(--sub); }
+.field.focus { border-bottom: 2px solid var(--focus); color: var(--text); }
+.buttons { display: flex; align-items: center; gap: 10px; padding: 6px 16px 10px; justify-content: flex-end; }
+.lb { height: 32px; padding: 0 14px; border-radius: 6px; display: grid; place-items: center; color: var(--lbtn); font-weight: 600; font-size: 12.5px; }
+.ab { height: 28px; padding: 0 12px; border-radius: 4px; display: grid; place-items: center; background: var(--button); color: #ffffff; font-weight: 600; font-size: 12.5px; }
+.peer { position: relative; display: flex; align-items: center; gap: 12px; height: 50px; padding: 0 16px; }
+.av { width: 38px; height: 38px; border-radius: 50%; background: var(--avatar); color: var(--avatar-fg); display: grid; place-items: center; font-weight: 600; font-size: 13px; flex-shrink: 0; position: relative; }
+.av.sel::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%; background: var(--active); box-shadow: 0 0 0 2px var(--solid); }
+.peer .nm { font-weight: 600; font-size: 13px; line-height: 1.25; }
+.peer .st { color: var(--sub); font-size: 12px; }
+.scroll { position: absolute; right: 3px; top: 120px; width: 4px; height: 90px; border-radius: 2px; background: var(--scroll); }
+.ms { margin: 2px 12px 6px; padding: 6px; border-radius: 0; display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--line); }
+.chip { height: 26px; border-radius: 13px; background: var(--chip); display: flex; align-items: center; gap: 6px; padding: 0 10px 0 2px; font-size: 12.5px; }
+.chip i { width: 22px; height: 22px; border-radius: 50%; background: var(--avatar); }
+.ms .ph { color: var(--sub); align-self: center; padding: 0 4px; }
+
+table { border-collapse: collapse; font-size: 12px; width: 100%; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--page-line); vertical-align: middle; }
+th { font-weight: 600; color: var(--page-muted); }
+code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid rgba(0, 0, 0, .15); }
+.two { display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; }
+.two h3 { font-size: 12.5px; font-weight: 600; margin: 0 0 6px; }
+.miss { color: #b42318; font-weight: 600; }
+.ok { color: #1e7a3a; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <h1>C17 Shared controls: visual reference</h1>
+  <p>Under Soft Panels a control skips a fill in the surface color and turns the opaque windowBgOver hover into the translucent hover the chats list uses. Filled buttons, marks, borders, ripples and text keep their look; three state colors are raised on the material.</p>
+
+  <section class="panel">
+    <h2>A. Mockup targets: a switch and a field with no fill of their own</h2>
+    <p class="lead">The readable mockup's main menu switch keeps a filled knob on its track, and the composer field has no background: the pill behind it is the only fill. Crops of the C9 and C7 captures at 100%.</p>
+    <div class="four" data-mockup></div>
+  </section>
+
+  <section class="panel">
+    <h2>B. On a panel: Chat settings in the Conversation role</h2>
+    <p class="lead">Today every settings row, field and light button paints windowBg under itself, and hover paints windowBgOver: opaque patches over the 0.79 / 0.81 fill. With soft controls they rest on the panel, hover is windowFg at 6 % / 7 %, and the divider band takes the same tint.</p>
+    <div class="three" data-panel></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. In a box: Add Members in the Popup role</h2>
+    <p class="lead">Boxes fill 0.97, so patches are faint there; the hover, the multi-select field and the list rows change the most. The selection ring around the avatar check stays.</p>
+    <div class="three" data-box></div>
+  </section>
+
+  <section class="panel">
+    <h2>D. Colors and the mapping</h2>
+    <p class="lead">Contrast is the worst case over the strictest role floor (Navigation 0.78 in day, Conversation 0.81 in night) on a black and a white backdrop, and on the opaque surface for solid mode.</p>
+    <div class="two">
+      <div>
+        <h3>Raised while material is active (Task 3)</h3>
+        <table data-adjusted></table>
+        <h3 style="margin-top:12px">Kept until the user decides</h3>
+        <table data-kept></table>
+      </div>
+      <div>
+        <h3>The mapping under Soft Panels (Tasks 1 and 2)</h3>
+        <table>
+          <tr><th>Fill color</th><th>Becomes</th></tr>
+          <tr><td><code>windowBg</code>, <code>boxBg</code></td><td>Nothing: the role behind shows</td></tr>
+          <tr><td><code>windowBgOver</code></td><td><code>windowFg</code> at 6 % (day) or 7 % (night)</td></tr>
+          <tr><td>Any other color</td><td>Unchanged</td></tr>
+        </table>
+        <h3 style="margin-top:12px">Where it applies</h3>
+        <table>
+          <tr><th>Site</th><th>Where</th></tr>
+          <tr><td><code>RoundButton</code>, <code>FlatButton</code>, <code>SettingsButton</code></td><td>fork, <code>buttons.cpp</code></td></tr>
+          <tr><td><code>InputField</code> fill and opaque attribute</td><td>fork, <code>input_field.cpp</code></td></tr>
+          <tr><td><code>BoxContentDivider</code> band</td><td>fork, <code>box_content_divider.cpp</code></td></tr>
+          <tr><td><code>PeerListContent</code> rows and cache</td><td>app, <code>peer_list_box.cpp</code></td></tr>
+          <tr><td><code>MultiSelect</code> background</td><td>app, <code>multi_select.cpp</code></td></tr>
+          <tr><td>Toggles, checkboxes, radios, sliders, tabs, scroll bars</td><td>no fill to map; checked only</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const crop = (file, x, y, w, h, label) => `
+    <figure><div class="crop" style="width:${w}px;height:${h}px;background-image:url('${file}');background-position:-${x}px -${y}px"></div>
+      <figcaption><b>${label}</b></figcaption></figure>`;
+  document.querySelector('[data-mockup]').innerHTML =
+    crop('../c9-navigation-rail/mockup-menu-light.png', 36, 376, 260, 40, 'Switch, light')
+    + crop('../c9-navigation-rail/mockup-menu-dark.png', 36, 376, 260, 40, 'Switch, dark')
+    + crop('../c7-shell-layout/mockup-light.png', 386, 556, 300, 54, 'Composer field, light')
+    + crop('../c7-shell-layout/mockup-dark.png', 386, 556, 300, 54, 'Composer field, dark');
+
+  const settings = () => `
+    <div class="top">Chat settings</div>
+    <div class="sect">Messages</div>
+    <div class="row"><span class="cb on"></span>Send with Enter</div>
+    <div class="row"><span class="cb"></span>Replace emoji automatically</div>
+    <div class="row"><span class="rd on"></span>Default text size</div>
+    <div class="row"><span class="rd"></span>Large text size</div>
+    <div class="srow over">Animated emoji<span class="tg on"></span></div>
+    <div class="srow">Auto-night mode<span class="tg"></span></div>
+    <div class="band"></div>
+    <div class="sect">Interface scale</div>
+    <div class="slider"><div class="tr"></div><div class="ac"></div><div class="th"></div></div>
+    <div class="ticks"><span>100%</span><span>125%</span><span>150%</span><span>200%</span></div>
+    <div class="tabs"><span class="on">Media</span><span>Files</span><span>Links</span></div>
+    <div class="field">Username</div>
+    <div class="field focus">alexkim</div>
+    <div class="buttons"><div class="lb">Add account</div><div class="ab">Save</div></div>
+    <div class="band"></div>
+    <div class="peer"><div class="av">MC</div><div><div class="nm">Maya Chen</div><div class="st">last seen recently</div></div></div>
+    <div class="peer over"><div class="av">DT</div><div><div class="nm">Design team</div><div class="st">12 members</div></div></div>
+    <div class="scroll"></div>`;
+  const scene = (theme, today, body, tag, height) => `
+    <div class="scene ${theme} ${today ? 'today' : ''}" style="height:${height}px">${tag}${body}</div>`;
+  const tagToday = '<span class="tag bad">today</span>';
+  const tagSoft = '<span class="tag">soft controls</span>';
+
+  document.querySelector('[data-panel]').innerHTML = `
+    <figure>${scene('day', true, `<div class="glass pane">${settings()}</div>`, tagToday, 690)}
+      <figcaption><b>Today, day.</b> White strips behind rows, fields, the light button and list rows; an opaque grey hover and band. Original check, focus line and light button colors.</figcaption></figure>
+    <figure>${scene('day', false, `<div class="glass pane">${settings()}</div>`, tagSoft, 690)}
+      <figcaption><b>Soft controls, day.</b> One fill for the whole panel. Hover and band are text at 6 %. Raised colors: check #6e6e6e, focus line #0075ab, light button #005888.</figcaption></figure>
+    <figure>${scene('night', false, `<div class="glass pane">${settings()}</div>`, tagSoft, 690)}
+      <figcaption><b>Soft controls, night.</b> Hover and band are text at 7 %; the toggle knob keeps windowBg. Check #8499ae, focus line #679bd0, light button #77bfff.</figcaption></figure>`;
+
+  const box = () => `
+    <div class="glass pane"></div><div class="layer"></div>
+    <div class="glass box">
+      <div class="top">Add Members</div>
+      <div class="ms"><span class="chip"><i></i>Maya</span><span class="chip"><i></i>Oliver</span><span class="ph">Search</span></div>
+      <div class="peer"><div class="av sel">MC</div><div><div class="nm">Maya Chen</div><div class="st">last seen recently</div></div></div>
+      <div class="peer over"><div class="av">JR</div><div><div class="nm">James Reid</div><div class="st">online</div></div></div>
+      <div class="peer"><div class="av sel">OL</div><div><div class="nm">Oliver</div><div class="st">last seen yesterday</div></div></div>
+      <div class="peer"><div class="av">SF</div><div><div class="nm">Sofia</div><div class="st">last seen 2 hours ago</div></div></div>
+      <div class="buttons" style="position:absolute;left:0;right:0;bottom:0"><div class="lb">Cancel</div><div class="lb">Add</div></div>
+    </div>`;
+  document.querySelector('[data-box]').innerHTML = `
+    <figure>${scene('day', true, box(), tagToday, 400)}
+      <figcaption><b>Today, day.</b> Faint white rectangles behind the field, rows and buttons; an opaque hover.</figcaption></figure>
+    <figure>${scene('day', false, box(), tagSoft, 400)}
+      <figcaption><b>Soft controls, day.</b> Rows, field and buttons on the Popup fill; hover is text at 6 %.</figcaption></figure>
+    <figure>${scene('night', false, box(), tagSoft, 400)}
+      <figcaption><b>Soft controls, night.</b> The ring around each avatar check keeps windowBg.</figcaption></figure>`;
+
+  const sw = (c) => `<span class="sw" style="background:${c}"></span><code>${c}</code>`;
+  const adjusted = [
+    ['<code>checkboxFg</code>, 3:1', '#b3b3b3', '1.24', '#6e6e6e', '#4f6276', '1.41', '#8499ae'],
+    ['<code>activeLineFg</code>, 3:1', '#37a1de', '1.70', '#0075ab', '#6396cb', '2.85', '#679bd0'],
+    ['<code>lightButtonFg</code>, 4.5:1', '#168acd', '2.24', '#005888', '#6ab2f2', '3.91', '#77bfff'],
+  ];
+  document.querySelector('[data-adjusted]').innerHTML = `
+    <tr><th>Entry, target</th><th>Day today</th><th>Worst</th><th>Day raised</th><th>Night today</th><th>Worst</th><th>Night raised</th></tr>`
+    + adjusted.map(([n, d, dw, da, nt, nw, na]) => `<tr><td>${n}</td><td>${sw(d)}</td><td class="miss">${dw}</td><td>${sw(da)}</td><td>${sw(nt)}</td><td class="miss">${nw}</td><td>${sw(na)}</td></tr>`).join('');
+  const kept = [
+    ['<code>inputBorderFg</code>', 'field bottom line', '#e0e0e0', '1.32', '#313c49', '1.45'],
+    ['<code>sliderBgInactive</code>', 'slider track', '#e1eaef', '1.22', '#364554', '1.66'],
+  ];
+  document.querySelector('[data-kept]').innerHTML = `
+    <tr><th>Entry</th><th>Draws</th><th>Day</th><th>Solid</th><th>Night</th><th>Solid</th></tr>`
+    + kept.map(([n, w, d, ds, nt, ns]) => `<tr><td>${n}</td><td>${w}</td><td>${sw(d)}</td><td class="miss">${ds}</td><td>${sw(nt)}</td><td class="miss">${ns}</td></tr>`).join('')
+    + `<tr><td colspan="6">Both miss 3:1 on today's opaque surface too. Raising them to 3:1 would darken them to about <code>#6e6e6e</code> (day): a visible change of Telegram's look, so it is the user's decision.</td></tr>`;
+})();
+</script>
+</body>
+</html>

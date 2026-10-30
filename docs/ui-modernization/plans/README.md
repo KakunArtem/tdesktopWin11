@@ -23,16 +23,17 @@ before starting any of them.
 | 8, parallel | C11 Conversation chrome | [2026-10-29-conversation-chrome.md](2026-10-29-conversation-chrome.md) |
 | 8, parallel | C12 Composer | [2026-10-29-composer.md](2026-10-29-composer.md) |
 | 8, after C11 | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
-| 9 | C14 Transient surfaces | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
-| 10 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
+| 9 | C17 Shared controls | [2026-10-30-shared-controls.md](2026-10-30-shared-controls.md) |
+| 10 | C14 Transient surfaces | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
+| 11 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
 
 "Parallel" plans touch disjoint directories; they can run in separate
 sessions or worktrees, but each still lands as its own commits. C13 consumes
 C11's chat background state, so it starts after C11 lands.
 
-C17 Shared controls, C18 Foundations and C19 Separate windows are grouped in
+C18 Foundations and C19 Separate windows are grouped in
 [shared elements](../shared-elements.md) and have no plan yet. When planned,
-C17 goes before C14 and C19 after C14.
+C19 goes after C14.
 
 ## Ground rules
 

@@ -12,13 +12,13 @@
 
 **Visual reference:** [C15 info and settings](../component-references/c15-info-settings/README.md): the info pane in the third column and as a layer, settings rows with and without their resting fill, lock and sign-in cards over the test wallpapers, and the promoted setting.
 
-**Depends on:** [transient surfaces](2026-10-29-transient-surfaces.md) and every earlier plan.
+**Depends on:** [transient surfaces](2026-10-29-transient-surfaces.md), [shared controls](2026-10-30-shared-controls.md) (settings rows, peer lists and dividers) and every earlier plan.
 
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules).
 - The info pane in the third column fills the third panel; as a layer it keeps the layer's rounded box shape with the Popup role.
-- Settings rows keep their hover and ripple; only backgrounds change.
+- Settings rows keep their ripple; their resting fill and hover follow C17's mapping.
 - Lock and sign-in screens: Window role on the body, content on a centered card with the Popup role and `softPanelsPopupRadius`.
 - Media viewer, calls, group calls, Mini Apps and notification windows are not changed; the check record states this.
 - Promotion keeps the user's current values: a user who had the experimental switch on keeps Soft Panels on.
@@ -39,11 +39,9 @@
 - Modify: `Telegram/SourceFiles/info/info_content_widget.cpp`, `info/info_top_bar.cpp`, `info/info_wrap_widget.cpp`
 - Modify: `Telegram/SourceFiles/info/profile/tabs/info_profile_tabs_host.cpp`, `info/media/info_media_grid_zoom.cpp`, `info/profile/info_profile_balance_pill.cpp`
 - Modify: `Telegram/SourceFiles/settings/settings_intro.cpp`
-- Modify (in the `lib_ui` fork): `ui/widgets/buttons.cpp` or wherever `SettingsButton` paints its background (recheck)
-- Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp` (sets the flag)
 
 **Interfaces:**
-- Produces, in `namespace Ui` (fork): `void SetTransparentSettingsRows(bool enabled);` and `[[nodiscard]] bool TransparentSettingsRows();` — default `false`; when set, `SettingsButton` skips its resting `textBg` fill and keeps `textBgOver` and the ripple.
+- Consumes: `Ui::ControlFill` and the soft controls switch from [shared controls](2026-10-30-shared-controls.md), which already maps `SettingsButton`, `PeerListContent` and `BoxContentDivider`.
 
 - [ ] **Step 1: Content and top bar fills**
 
@@ -53,7 +51,7 @@
 
 `settings_intro.cpp` sets `WA_OpaquePaintEvent` on its wrap: use `SetOpaquePaint`.
 
-Every row is a `Ui::SettingsButton`. The row styles `settingsButton` and `infoProfileButton` derive from `lib_ui`'s `defaultSettingsButton` and are used in 53 files, and each row paints its `textBg` (`windowBg`) under itself. `settingsOptionDisabled` relies on this when it sets `textBg: windowBg`. If only the content fill changes, the rows stay opaque strips over the material. Recheck the paint at the pinned `lib_ui` commit, add the flag above in the fork, and have the app call `Ui::SetTransparentSettingsRows(Ui::Material::SoftPanels())` at startup, as C14 does for menus. Dividers (`Ui::BoxContentDivider`) keep their band.
+Every row is a `Ui::SettingsButton`. The row styles `settingsButton` and `infoProfileButton` derive from `lib_ui`'s `defaultSettingsButton` and are used in 53 files, and each row paints its `textBg` (`windowBg`) under itself. C17 already maps that fill and the `windowBgOver` hover, and turns divider bands into the soft band. Check every top-level settings section for a row style whose `textBg` is not a surface color; such a row keeps its fill, so record it with the reason.
 
 - [ ] **Step 3: Grabs**
 
@@ -67,13 +65,9 @@ Open a user, group and channel profile in the third column; switch shared media 
 - [ ] **Step 5: Commit**
 
 ```bash
-git -C Telegram/lib_ui commit -am "Added transparent settings row option."
-git -C Telegram/lib_ui push fork HEAD
-git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp
+git add Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp
 git commit -m "Brought info and settings sections into Soft Panels."
 ```
-
-Pushing needs the user's approval.
 
 ---
 

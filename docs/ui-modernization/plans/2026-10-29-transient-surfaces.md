@@ -12,7 +12,7 @@
 
 **Visual reference:** [C14 transient surfaces](../component-references/c14-transient-surfaces/README.md): the mockup's details popup and menu rows, every in-app layer and the context menu in day and night, and where each surface is changed.
 
-**Depends on:** [toolkit fork](2026-10-29-toolkit-fork.md), the element plans C9–C13 (so the surfaces are judged against the finished main window).
+**Depends on:** [toolkit fork](2026-10-29-toolkit-fork.md), the element plans C9–C13 (so the surfaces are judged against the finished main window), and [shared controls](2026-10-30-shared-controls.md), which already maps the fills of buttons, fields and lists inside boxes.
 
 ## Global Constraints
 
