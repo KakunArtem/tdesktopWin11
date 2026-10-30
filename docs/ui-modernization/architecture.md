@@ -15,13 +15,16 @@ and the [native backdrop prototype plan](plans/2026-10-28-native-backdrop-protot
 
 ## Progress
 
-Snapshot 2026-10-30: every component has a plan and a visual reference; no
-plan has started, and no product code exists. Rows are in execution order.
+Snapshot 2026-10-30: C1 to C16 each have a plan and a visual reference;
+C17 to C19 are grouped in [shared elements](shared-elements.md) with no plan
+yet. No plan has started, and no product code exists. Rows are in execution
+order.
 
 Update a row whenever a plan task commits: the tasks done, the status and the
 record the plan writes (paths are under `docs/ui-modernization/`). Statuses
-are Not started, In progress, Blocked (say on what) and Done (every task
-committed and the plan's "Done when" list holds). A plan corrected before
+are Grouped (elements listed, no plan yet), Not started, In progress, Blocked
+(say on what) and Done (every task committed and the plan's "Done when" list
+holds). A plan corrected before
 execution keeps its row; note the correction in the plan.
 
 | ID | Component | Plan | Visual reference | Tasks done | Status | Record |
@@ -40,8 +43,11 @@ execution keeps its row; note the correction in the plan.
 | C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 0 / 4 | Not started | `checks/conversation-chrome.md` |
 | C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 0 / 4 | Not started | `checks/composer.md` |
 | C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | Not started | `checks/messages.md` |
+| C17 | Shared controls | not written | not made | — | Grouped | [grouping](shared-elements.md#c17-shared-controls) |
+| C18 | Foundations | not written | not made | — | Grouped | [grouping](shared-elements.md#c18-foundations) |
 | C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
 | C15 | Info, settings and specialized screens | [plan](plans/2026-10-29-info-settings.md) | [reference](component-references/c15-info-settings/README.md) | 0 / 4 | Not started | `checks/final.md` |
+| C19 | Separate windows | not written | not made | — | Grouped | [grouping](shared-elements.md#c19-separate-windows) |
 
 ## Open decisions
 
@@ -56,13 +62,15 @@ user decisions with the date, then remove the row here.
 | Minimum Windows build for material | 22621 (Windows 11 22H2) | C2 | Roadmap decision 1 |
 | Material refused while the native frame is on | Yes | C2 | Roadmap decision 5 |
 | Fork `lib_ui` and `lib_base` under your account | `KakunArtem/lib_ui` and `KakunArtem/lib_base`, branch `soft-panels` | C6 Task 1 Step 2 | Roadmap decision 2 |
-| Soft Panels layout on macOS and Linux | Compiled everywhere; the switch exists only on Windows | C7 (C15 Task 3 asks it, after the switch is built) | Roadmap decision 4 |
 | Default `lib_ui` styles changed on every platform | No; parallel app styles and fork flags | C14 | C14 Global Constraints |
 | Night theme badge contrast: both unread badges are below 3:1 on the material, the muted one already 2.08:1 on the opaque list | Keep today's fills | C10 Task 3 Step 2 | [C10 reference](component-references/c10-chat-list/README.md#findings) |
 | Mockup values not adopted: rail width 64 (72 kept), header 56 (54 kept), bubble radius 14 (16 kept), light active chat row, composer drop shadow | Telegram's values | Any time; each is a style value | C9–C13 Global Constraints |
 | Window transparency on by default; chat background default | Off; the user's wallpaper | C15 Task 3 | Roadmap decision 3 |
 | Soft Panels layout on by default | Off | C15 Task 3 | C15 |
 | Popup Acrylic kept and promoted to a setting | Off, experimental | C15 Task 3 | C14 Task 4 decision record |
+| Text fields on panels: keep the bottom line or become pills like the search field | Not decided | C17 | [C17](shared-elements.md#c17-shared-controls) |
+| System font (Segoe UI) as the Soft Panels default, as in the mockup | Telegram's default font | C18 | [C18](shared-elements.md#typography) |
+| Separate panels and Telegram's notifications take the popup shape | Unchanged | C19 | [C19](shared-elements.md#c19-separate-windows) |
 
 ## Confirmed direction
 
@@ -86,7 +94,7 @@ change.
 | Material requires Windows 11 build 22621 or later. | Roadmap decision 1 | Material state |
 | `lib_ui` and `lib_base` are forked under the user's account before Phase 3. | Roadmap decision 2 | Toolkit fork, Title bar, Transient surfaces |
 | "Window transparency" is off by default until Phase 9; the chat background in material mode stays the user's wallpaper. | Roadmap decision 3 | Material state, Conversation chrome |
-| The Soft Panels layout and element styles are compiled for every platform, but the layout switch and material exist only on Windows. | Roadmap decision 4 (proposal) | Shell layout and every element plan |
+| The Soft Panels layout and element styles are compiled for every platform, but the layout switch and material exist only on Windows. | User decision 2026-10-30: Windows first | Shell layout and every element plan |
 | Material is refused while the native window frame is on. | Roadmap decision 5 | Material state, Title bar |
 | The Phase 1 prototype ends in go or conditional go with Acrylic. | Phase 1 plan | Every plan after Phase 1 |
 
@@ -174,31 +182,35 @@ Each component has one responsibility, one owner directory and one plan.
 | C13 | Messages | Bubbles, service messages, date pills, reactions and attachment cards. | `ui/chat/chat.style`, `history/view/`, `history/view/media/` | C3, C11 | 7 | [messages](plans/2026-10-29-messages.md) |
 | C14 | Transient surfaces | Menus, tooltips, pickers, boxes and toasts; optional popup Acrylic. | forked `lib_ui/ui/widgets/`, `lib_ui/ui/layers/`, `chat_helpers/`, `boxes/` | C6, C9–C13 | 8 | [transient surfaces](plans/2026-10-29-transient-surfaces.md) |
 | C15 | Info, settings and specialized screens | Info pane, settings, lock and intro screens, final accessibility pass. | `info/`, `settings/`, `intro/`, `window/window_lock_widgets.*`, forked `lib_ui` settings rows | C14 and every earlier plan | 9 | [info and settings](plans/2026-10-29-info-settings.md) |
+| C17 | Shared controls | Buttons, selection controls, fields, tabs, sliders, scroll bars and lists on the role fills. | forked `lib_ui/ui/widgets/`, app `.style` files | C3, C7 | — | [grouping](shared-elements.md#c17-shared-controls) |
+| C18 | Foundations | Typography, icon colors and motion rules. | C3's adjusted entries, `ui/power_saving.*` | C3 | — | [grouping](shared-elements.md#c18-foundations) |
+| C19 | Separate windows | Media viewer, calls, separate panels, Instant View, notifications and the restore shell. | `media/view/`, `calls/`, `Ui::SeparatePanel` users, `iv/`, `window/notifications_manager_default.*` | C14 | — | [grouping](shared-elements.md#c19-separate-windows) |
 | C16 | Verification tooling | Backdrop, contrast and screenshot checks reused by every phase. | `docs/ui-modernization/tools/`, `tests/` | C1 | 1–9 | [verification tooling](plans/2026-10-29-verification-tooling.md) |
 
 Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8; then C9–C12
-in parallel, with C13 after C11; C14; C15. C16 grows alongside: its contrast tool is needed by C3
+in parallel, with C13 after C11; C17 before C14; C14; C15; C19 after C14.
+C18's icon colors can land with C17. C16 grows alongside: its contrast tool is needed by C3
 and its screenshot matrix by C7.
 
 ## Coverage of the element map
 
-Every family of the [element map](element-map.md) has an owner, or a stated
-reason why no plan changes it.
+Every family of the [element map](element-map.md) has an owner. C17 to C19
+are grouped in [shared elements](shared-elements.md) and have no plan yet.
 
 | Element family | Owner | Notes |
 | --- | --- | --- |
-| Visual foundations | C2, C3, C4, C7 | Roles, tint, radii and borders. Typography, icons and motion keep Telegram's values. |
+| Visual foundations | C2, C3, C4, C7, C18 | Roles, tint, radii and borders; C18 groups typography, icon colors and motion. Sizes, icon shapes and durations keep Telegram's values. |
 | Window shell | C7, C8 | Frame, gaps, panels, title area and caption buttons. |
-| Shared controls | None | Buttons, fields, toggles, checkboxes, sliders and scrollbars keep their upstream look over the role of their panel. Changed only where an element plan needs it: the search field (C10), settings rows (C15) and the history scroll colors (C13). |
+| Shared controls | C17 | Single instances are restyled earlier: the search field (C10), the composer field (C12), settings rows (C15) and the history scroll colors (C13). |
 | Navigation and accounts | C9 | The account switcher lives in the main menu; the narrow chats list is C10. |
-| Chat list and search | C10 | |
+| Chat list and search | C10 | The folder tabs strip, shown when folders are tabs instead of the rail, is grouped in C17. |
 | Conversation header and bars | C11 | |
 | Messages and conversation canvas | C11, C13 | C11 owns the chat background option, C13 the colors over it. |
 | Message attachments | C13 | Verified, not restyled; GPU children keep opaque fills. |
 | Composer | C12 | Autocomplete above the composer is C14. |
 | Transient surfaces | C14 | |
 | Info and settings | C15 | |
-| Secondary and specialized screens | C15 | Lock and sign-in only. Media viewer, stories, calls, Mini Apps and notifications are separate windows and stay opaque (C4, C15). The audio player and call bars sit in the conversation panel (C7). |
+| Secondary and specialized screens | C15, C19 | C15 owns lock and sign-in; C19 groups the separate windows (media viewer, stories, calls, Mini Apps, Instant View, notifications). The audio player and call bars sit in the conversation panel (C7). |
 
 ## Shared contracts
 

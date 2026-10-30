@@ -25,6 +25,8 @@ Windows 11 as the design target.
 - Use the [readable Soft Panels mockup](explorations/README.md) as the
   appearance target, rather than choosing between Acrylic and Mica first.
   Acrylic is the working guideline for now (2026-10-28).
+- Focus on Windows for now: the Soft Panels layout and material are judged and
+  built for Windows, and macOS and Linux keep the upstream look (2026-10-30).
 
 The approved reference remains the earlier baseline; the readable mockup
 refines it. Detailed element states, the final native material and
@@ -79,7 +81,10 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Component plans](plans/README.md): one implementation plan per component,
   in execution order.
 - [Component visual references](component-references/README.md): what each
-  component changes, isolated from the mockup, for all sixteen components.
+  component changes, isolated from the mockup, for all sixteen planned
+  components.
+- [Shared controls, foundations and separate windows](shared-elements.md):
+  the elements no plan covered yet, grouped as C17 to C19.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

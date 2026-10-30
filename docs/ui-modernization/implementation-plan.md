@@ -222,8 +222,8 @@ Still needed (tracked, with the plan each one blocks, in
 2. Fork `lib_ui` and `lib_base` under your account before Phase 3.
 3. Whether transparency is on by default, and the default chat background in
    material mode.
-4. Whether the Soft Panels layout applies on macOS and Linux or stays
-   Windows-only.
+4. Decided on 2026-10-30: Windows first. The Soft Panels layout and material
+   are Windows-only for now; macOS and Linux keep the upstream look.
 5. Whether material is disabled when the native window frame is on. Phase 1
    assumes yes.
 

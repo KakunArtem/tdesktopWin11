@@ -30,6 +30,10 @@ before starting any of them.
 sessions or worktrees, but each still lands as its own commits. C13 consumes
 C11's chat background state, so it starts after C11 lands.
 
+C17 Shared controls, C18 Foundations and C19 Separate windows are grouped in
+[shared elements](../shared-elements.md) and have no plan yet. When planned,
+C17 goes before C14 and C19 after C14.
+
 ## Ground rules
 
 Every plan's Global Constraints include these lines.

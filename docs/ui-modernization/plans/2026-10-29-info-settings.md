@@ -116,7 +116,7 @@ git commit -m "Brought lock and sign-in screens into Soft Panels."
 
 - [ ] **Step 1: Ask the user**
 
-Present the roadmap's open decisions with the evidence gathered in the check records: transparency on by default or not; Soft Panels on by default or not; material chat background default; whether Soft Panels applies on macOS and Linux; and, if `decisions/popup-acrylic.md` says go, whether to promote popup Acrylic. Record the answers in the README's direction section as user decisions with the date, and close them in [Open decisions](../architecture.md#open-decisions).
+Present the roadmap's open decisions with the evidence gathered in the check records: transparency on by default or not; Soft Panels on by default or not; material chat background default; and, if `decisions/popup-acrylic.md` says go, whether to promote popup Acrylic. Record the answers in the README's direction section as user decisions with the date, and close them in [Open decisions](../architecture.md#open-decisions).
 
 - [ ] **Step 2: Promote**
 

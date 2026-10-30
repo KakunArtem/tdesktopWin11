@@ -27,3 +27,6 @@ These are proposals derived from the mockup. The
 | C14 Transient surfaces | [transient surfaces](c14-transient-surfaces/README.md) |
 | C15 Info and settings | [info and settings](c15-info-settings/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
+
+C17 to C19 are grouped in [shared elements](../shared-elements.md) and get a
+reference with their plans.
