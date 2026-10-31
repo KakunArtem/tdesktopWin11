@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Wallpapers</title>
+<style>
+/* Copied from the .stage[data-wallpaper] rules of explorations/soft-panels-readable.html. */
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+.wall { position: fixed; inset: 0; }
+.wall[data-wallpaper="folds"] { background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.wall[data-wallpaper="warm"] { background: radial-gradient(ellipse at 72% 28%, #f5c49a 0 18%, transparent 19%), linear-gradient(145deg, #323765 0 32%, #ce8270 33% 55%, #7f9aaf 56% 76%, #243d66 77%); }
+.wall[data-wallpaper="sky"] { background: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+.wall[data-wallpaper="night"] { background: radial-gradient(ellipse at 70% 30%, #1f2f5a 0, transparent 55%), linear-gradient(160deg, #070b16, #0d1428 60%, #050811); }
+</style>
+</head>
+<body>
+<div class="wall" data-wallpaper="folds"></div>
+<script>
+// wallpapers.html?wallpaper=<folds|warm|sky|night>; anything else shows folds.
+(() => {
+  const names = ['folds', 'warm', 'sky', 'night'];
+  const requested = new URLSearchParams(location.search).get('wallpaper');
+  if (names.includes(requested)) {
+    document.querySelector('.wall').dataset.wallpaper = requested;
+  }
+})();
+</script>
+</body>
+</html>

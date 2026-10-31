@@ -47,6 +47,8 @@
 
 - [ ] **Step 1: Write `wallpapers.html` and `Export-Wallpapers.ps1`**
 
+`wallpapers.html` was written on macOS on 2026-10-31 and checked with headless Chrome; write `Export-Wallpapers.ps1`.
+
 - [ ] **Step 2: Export and look**
 
 Run: `powershell -NoProfile -ExecutionPolicy Bypass -File docs\ui-modernization\tools\Export-Wallpapers.ps1`

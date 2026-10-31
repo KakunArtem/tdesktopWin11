@@ -29,7 +29,7 @@ execution keeps its row; note the correction in the plan.
 | ID | Component | Plan | Visual reference | Tasks done | Status | Record |
 | --- | --- | --- | --- | --- | --- | --- |
 | C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 0 / 7 | Not started | `decisions/2026-10-native-backdrop.md` |
-| C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | Not started | `tools/`, `checks/README.md` |
+| C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | In progress: `tools/wallpapers.html` written | `tools/`, `checks/README.md` |
 | C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 0 / 4 | Not started | `checks/material-state.md` |
 | C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 0 / 5 | Not started | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
