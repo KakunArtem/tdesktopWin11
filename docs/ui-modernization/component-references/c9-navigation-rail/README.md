@@ -6,7 +6,7 @@ Date: 2026-10-29. Status: proposal. Component: C9 in the
 
 C9 restyles the folder rail and the main menu drawer on the shared
 navigation material. This reference shows the mockup's rail and drawer, and
-every button state the plan lists at Telegram's own rail width.
+every button state the plan lists at the Soft Panels rail width.
 
 ## Files
 
@@ -24,19 +24,20 @@ every button state the plan lists at Telegram's own rail width.
 | Panel | Plan task | What it pins |
 | --- | --- | --- |
 | A. Mockup rail | Task 1 | Menu button, folders with icon and label, selected pill with marker, badges, Edit at the bottom. |
-| B. Button states | Tasks 1–2, Task 4 States row | Default, hover, selected, keyboard focus, unread badge, muted-only badge and dragging, light and dark, at 72 px and magnified 1.5 times, with the plan's sizes listed below them. |
+| B. Button states | Tasks 1–2, Task 4 States row | Default, hover, selected, keyboard focus, unread badge, muted-only badge and dragging, light and dark, on the light rail at 64 px and magnified 1.5 times, with the plan's sizes listed below them. |
 | C. Main menu drawer | Task 3 | Popup fill, rounded right corners, rounded rows, and the layer dim outside the corners. |
 
 ## Notes
 
-- The mockup's rail is 64 px. Panel B uses Telegram's 72 px; the user then
-  adopted 64 px under Soft Panels (2026-10-31).
-- Colors are the mockup's tokens (`--selected`, `--hover`, `--accent`,
-  `--muted-fill`). The app uses its palette entries (`sideBarBgActive`,
-  `sideBarBadgeBgMuted` and others). In the day theme they were made for a
-  dark sidebar. The user chose a light rail (2026-10-31): under Soft Panels
-  it takes the chats list's colors and `Ui::Material::SelectedFill()`, close
-  to the mockup's `--selected`.
+- The rail is 64 px, the mockup's width, which the user adopted under Soft
+  Panels (2026-10-31): `windowFiltersSoftPanelsWidth`. Telegram's 72 px stays
+  with Soft Panels off.
+- The user chose a light rail (2026-10-31). Panel B draws it: the selected
+  pill is the opaque `Ui::Material::SelectedFill()` (`#c6e5f7` day,
+  `#294058` night), and its label and icon take the accent color, as
+  `windowActiveTextFg` does. Other colors are the mockup's tokens (`--hover`,
+  `--accent`, `--muted-fill`); the app uses its palette entries, adjusted by
+  C3 and C18.
 - The keyboard focus ring is a proposal: a 2 px accent outline on the pill.
   Telegram's current focus style for `SideBarButton` must be rechecked in
   `lib_ui`.

@@ -54,7 +54,7 @@
   - `[[nodiscard]] QColor ResolveControlFill(const QColor &fill, const SoftControlColors &colors);` — pure: a fully transparent color when `fill` is opaque and equals `windowBg` or `boxBg`; `colors.hover` when it equals `windowBgOver`; `fill` otherwise.
   - `void SetSoftControls(bool enabled);`, `[[nodiscard]] bool SoftControls();` and `void SetSoftControlHover(QColor hover);` — process-wide; off by default.
   - `[[nodiscard]] QColor ControlFill(const style::color &fill);` — `fill->c` while off; otherwise `ResolveControlFill` with `st::windowBg`, `st::boxBg`, `st::windowBgOver` and the hover.
-- Produces, in `namespace Ui::Material` (tdesktop, `ui/ui_material.h`): `[[nodiscard]] QColor SelectedFill();` — `st::windowBgActive` at alpha 0.30, the selected pill of the rail (C9) and the open chat row (C10), as the [element styling](../architecture.md#element-styling-c9c15) contract defines it.
+- Produces, in `namespace Ui::Material` (tdesktop, `ui/ui_material.h`): `[[nodiscard]] QColor SelectedFill();` — `st::windowBgActive` at alpha 0.30 composited over `st::windowBg`, returned opaque and recomputed on palette changes; the selected pill of the rail (C9) and the open chat row (C10), as the [element styling](../architecture.md#element-styling-c9c15) contract defines it.
 
 - [ ] **Step 1: Write the failing test**
 

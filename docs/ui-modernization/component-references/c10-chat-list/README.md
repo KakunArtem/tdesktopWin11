@@ -20,7 +20,7 @@ row states in the night theme and the exact geometry.
 | Panel | Plan task | What it pins |
 | --- | --- | --- |
 | A. Mockup list | Tasks 1–2 | Search pill, rows with avatars, unread and muted badges, archive row. |
-| B. Row states | Task 1, Task 3 Step 2 | Default, hover, active, pressed with the ripple clipped to the pill, unread and muted badges. Night theme colors on the Navigation fill (0.82). Names, previews and times use C3's adjusted colors. |
+| B. Row states | Task 1, Task 3 Step 2 | Default, hover, the open chat's opaque `SelectedFill()` pill with normal text colors, pressed with the ripple clipped to the pill, unread and muted badges. Night theme colors on the Navigation fill (0.82). Names, previews and times use C3's adjusted colors. |
 | C. Search and geometry | Tasks 1–2 | Search pill default and focused; row pill margins 6, 1, 2, 1 with radius 10; narrow-list margins 4, 1, 4, 1; search pill 34 high with margins 10, 6, 8, 8 and radius 9. |
 
 ## Contrast in the night theme
@@ -54,8 +54,9 @@ the Navigation fill (0.82 of `#17212b`) over black and white backdrops:
 ## Notes
 
 - The mockup's selection is a light pill with dark text. The user adopted it
-  (2026-10-31): under Soft Panels the open chat is a `SelectedFill()` pill
-  with normal text colors, which this sheet, drawn before, does not show.
+  (2026-10-31): under Soft Panels the open chat is the opaque
+  `SelectedFill()` pill (`#294058` in the night theme panel B draws) with
+  normal text colors, in place of `dialogsBgActive` with white text.
 - Row height (62), avatar size (46) and badge height (19) are Telegram's.
   The pill is painted inside the row, so hit testing and scrolling do not
   change.

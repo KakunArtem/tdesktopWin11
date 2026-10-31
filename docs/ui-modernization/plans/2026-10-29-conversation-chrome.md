@@ -17,7 +17,7 @@
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules).
-- Header height under Soft Panels: `softPanelsTopBarHeight` 56 px, the exploration's (user decision 2026-10-31); upstream keeps `topBarHeight` (54 px). The chats list header aligns with it, as it does today.
+- Header height under Soft Panels: `softPanelsTopBarHeight` 56 px, the exploration's (user decision 2026-10-31); upstream keeps `topBarHeight` (54 px). The chats list header aligns with it, as it does today, and C15 gives the info pane's top bar the same height.
 - Bar pill at 100 % scale: margins `12, 0, 12, 4` inside the bar's row, radius `9`, Bar role, border `Border(Surface::Bar)`; the existing accent line of `Ui::MessageBar` stays.
 - Chat background pref: key `window_material_chat_background`, `bool`, default `false`; label "Show window material behind messages"; shown only when `Window::Material::Capable()`.
 - With the pref off, the user's wallpaper fills the message area exactly as today, also with material active.

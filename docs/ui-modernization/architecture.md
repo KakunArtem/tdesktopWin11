@@ -396,9 +396,12 @@ are style values, so they follow the interface scale.
   custom and cloud themes work unchanged.
 - The selected pill of the rail (C9) and of the open chat row (C10) is
   `[[nodiscard]] QColor Ui::Material::SelectedFill()` in `ui/ui_material.h`:
-  `windowBgActive` at alpha 0.30, painted over the panel. Over white and the
-  night panel it is close to the mockup's `#cbdff4` and `#284661`. Content on
-  it keeps its normal, not its `*Active`, colors.
+  `windowBgActive` at alpha 0.30 composited over `windowBg`, an opaque color
+  (`#c6e5f7` day, `#294058` night, close to the mockup's `#cbdff4` and
+  `#284661`). It is painted opaque in solid and material mode: C3 adjusts text
+  against the panel, so over a translucent pill adjusted secondary text would
+  fall to 3.9:1 (day) and 3.5:1 (night). Content on it keeps its normal, not
+  its `*Active`, colors.
 
 ### Adjusted palette entries
 

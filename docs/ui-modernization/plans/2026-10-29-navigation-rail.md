@@ -21,7 +21,7 @@
 - At 100 % scale: buttons `54` px minimum height (icons-only and main menu already use it), corner radius `10`, `4` px vertical gap, container padding `4, 6, 8` (top, sides, bottom); marker `3 × 20` px, radius `2`, at the rail's left edge, accent color.
 - Hover fill: primary text at alpha `0.06` (light) / `0.07` (dark), the exploration's `--hover`.
 - Light rail (user decision 2026-10-31): under Soft Panels the rail is part of the navigation panel, so its solid color is `dialogsBg` and its parallel styles take the chats list's colors: labels `windowSubTextFg`, icons `menuIconFg`, and the selected label and icon `windowActiveTextFg`. Each is already adjusted by C3 or C18 while material is active.
-- Selected fill: `Ui::Material::SelectedFill()` ([element styling](../architecture.md#element-styling-c9c15)), in solid and material mode. `sideBarBgActive` (`#17212b` in the day theme) is not used under Soft Panels.
+- Selected fill: `Ui::Material::SelectedFill()` ([element styling](../architecture.md#element-styling-c9c15)), opaque in solid and material mode, so the adjusted label and icon colors keep their contrast on it. `sideBarBgActive` (`#17212b` in the day theme) is not used under Soft Panels.
 - Without Soft Panels the rail keeps its upstream colors; while material is active they are raised by C3 (`sideBarTextFg`, `sideBarTextFgActive`, added here) and C18 (the icons).
 - Main menu: width stays `mainMenuWidth`; right corner radius `14`; row radius `8`; Popup role.
 - Every behavior stays: folder click, drag reorder in edit mode, context menu, unread counters, muted badges, "Edit" entry, premium lock, tab and keyboard order.

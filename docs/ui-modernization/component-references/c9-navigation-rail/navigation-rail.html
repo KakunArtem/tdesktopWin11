@@ -30,19 +30,18 @@ figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
 .zoom { position: relative; isolation: isolate; height: 100px; border-radius: 6px; overflow: hidden; }
 .zoom::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
 .zoom .nav { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--nav); }
-.zoom .scale { position: absolute; left: 50%; top: 50%; width: 72px; height: 62px; transform: translate(-50%, -50%) scale(1.5); }
-.light { --nav: rgba(233, 238, 245, .78); --text: #132335; --secondary: #3a4b5f; --accent: #004a8f; --accent-fill: #0564b6; --on-accent: #ffffff; --selected: #cbdff4; --hover: rgba(21, 38, 58, .06); --muted-fill: #dde4ec; --muted-text: #3b4b5d; --ring: #e9eef5; }
-.dark { --nav: rgba(27, 40, 56, .82); --text: #f2f6fb; --secondary: #c2cfdd; --accent: #9ad3ff; --accent-fill: #8ccbff; --on-accent: #0d1f33; --selected: #284661; --hover: rgba(238, 243, 249, .07); --muted-fill: #3a4a5c; --muted-text: #dbe4ee; --ring: #1b2838; }
+.zoom .scale { position: absolute; left: 50%; top: 50%; width: 64px; height: 62px; transform: translate(-50%, -50%) scale(1.5); }
+.light { --nav: rgba(233, 238, 245, .78); --text: #132335; --secondary: #3a4b5f; --accent: #004a8f; --accent-fill: #0564b6; --on-accent: #ffffff; --selected: #c6e5f7; --hover: rgba(21, 38, 58, .06); --muted-fill: #dde4ec; --muted-text: #3b4b5d; --ring: #e9eef5; }
+.dark { --nav: rgba(27, 40, 56, .82); --text: #f2f6fb; --secondary: #c2cfdd; --accent: #9ad3ff; --accent-fill: #8ccbff; --on-accent: #0d1f33; --selected: #294058; --hover: rgba(238, 243, 249, .07); --muted-fill: #3a4a5c; --muted-text: #dbe4ee; --ring: #1b2838; }
 .btn { position: absolute; left: 6px; right: 6px; top: 4px; height: 54px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--secondary); font-size: 11px; }
 .btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .btn[data-state="hover"] { background: var(--hover); }
-.btn[data-state="selected"], .btn[data-state="focused"], .btn[data-state="dragging"] { background: var(--selected); color: var(--text); }
-.btn[data-state="selected"] svg, .btn[data-state="focused"] svg, .btn[data-state="dragging"] svg { color: var(--accent); }
+.btn[data-state="selected"], .btn[data-state="focused"], .btn[data-state="dragging"] { background: var(--selected); color: var(--accent); }
 .btn[data-state="focused"] { outline: 2px solid var(--accent); outline-offset: -2px; }
 .btn[data-state="dragging"] { top: -2px; box-shadow: 0 4px 10px rgba(0, 0, 0, .22); }
 .marker { position: absolute; left: 0; top: 21px; width: 3px; height: 20px; border-radius: 2px; background: var(--accent); }
 .dragging .marker { top: 15px; }
-.badge { position: absolute; top: 2px; left: 35px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; font-size: 10px; font-weight: 700; line-height: 1; background: var(--accent-fill); color: var(--on-accent); box-shadow: 0 0 0 2px var(--ring); }
+.badge { position: absolute; top: 2px; left: 31px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; font-size: 10px; font-weight: 700; line-height: 1; background: var(--accent-fill); color: var(--on-accent); box-shadow: 0 0 0 2px var(--ring); }
 .badge[data-muted] { background: var(--muted-fill); color: var(--muted-text); }
 .values { margin-top: 12px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 14px; font-size: 12px; }
 .values div span { color: var(--page-muted); }
@@ -64,16 +63,16 @@ figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
     </section>
     <div class="stack">
     <section class="panel">
-      <h2>B. Button states at Telegram's rail width (72 px), magnified 1.5 times</h2>
-      <p class="lead">Pills and the marker are painted on FiltersMenu's container under transparent SideBarButtons. Each state must stay reachable by mouse and keyboard.</p>
+      <h2>B. Button states at the Soft Panels rail width (64 px), magnified 1.5 times</h2>
+      <p class="lead">A light rail, as the user chose: labels in windowSubTextFg and icons in menuIconFg, the selected pill opaque SelectedFill() with label and icon in windowActiveTextFg. Pills and the marker are painted on FiltersMenu's container under transparent SideBarButtons. Each state must stay reachable by mouse and keyboard.</p>
       <div class="states" data-states></div>
       <div class="values">
-        <div><span>Rail width</span><br><span class="mono">windowFiltersWidth 72</span></div>
+        <div><span>Rail width</span><br><span class="mono">windowFiltersSoftPanelsWidth 64</span></div>
         <div><span>Button</span><br><span class="mono">min height 54, radius 10</span></div>
         <div><span>Container padding, gap</span><br><span class="mono">4, 6, 8; 4</span></div>
         <div><span>Marker</span><br><span class="mono">3 × 20, radius 2, x 0</span></div>
         <div><span>Hover</span><br><span class="mono">text at 0.06 / 0.07</span></div>
-        <div><span>Selected</span><br><span class="mono">sideBarBgActive; Bar fill tint</span></div>
+        <div><span>Selected</span><br><span class="mono">SelectedFill(), opaque</span></div>
         <div><span>Badge</span><br><span class="mono">height 17, ring 2 in Navigation fill</span></div>
         <div><span>Muted badge</span><br><span class="mono">sideBarBadgeBgMuted</span></div>
       </div>

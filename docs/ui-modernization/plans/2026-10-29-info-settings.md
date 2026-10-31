@@ -25,8 +25,8 @@
 
 ## Review Focus
 
-- Info pane opened in the third column, then the window narrowed until it moves to a layer: the background switches role without a stale panel. Pinned by Task 1 Step 4.
-- Shared media tabs in a profile (`info_profile_tabs_host.cpp` slide grabs): no opaque frames. Pinned by Task 1 Step 3.
+- Info pane opened in the third column, then the window narrowed until it moves to a layer: the background switches role without a stale panel. Pinned by Task 1 Step 5.
+- Shared media tabs in a profile (`info_profile_tabs_host.cpp` slide grabs): no opaque frames. Pinned by Task 1 Step 4.
 - Passcode lock with material on: the unlock field stays readable on the busiest test wallpaper. Pinned by Task 2 Step 3.
 - Sign-in with a QR code: the QR stays black on white, never on material. Pinned by Task 2 Step 3.
 - Upgrade from a build with the experimental switch on: Soft Panels stays on after promotion. Pinned by Task 3 Step 3.
@@ -39,6 +39,7 @@
 - Modify: `Telegram/SourceFiles/info/info_content_widget.cpp`, `info/info_top_bar.cpp`, `info/info_wrap_widget.cpp`
 - Modify: `Telegram/SourceFiles/info/profile/tabs/info_profile_tabs_host.cpp`, `info/media/info_media_grid_zoom.cpp`, `info/profile/info_profile_balance_pill.cpp`
 - Modify: `Telegram/SourceFiles/settings/settings_intro.cpp`
+- Modify: `Telegram/SourceFiles/info/info.style`, `info/profile/info_profile_top_bar.cpp`, `settings/sections/settings_premium.cpp`, `settings_credits.cpp`, `settings_business.cpp`, `info/bot/starref/info_bot_starref_join_widget.cpp`, `info_bot_starref_setup_widget.cpp`
 
 **Interfaces:**
 - Consumes: `Ui::ControlFill` and the soft controls switch from [shared controls](2026-10-30-shared-controls.md), which already maps `SettingsButton`, `PeerListContent` and `BoxContentDivider`.
@@ -47,25 +48,29 @@
 
 `ContentWidget::paintEvent` fills `_bg`: paint it with `PaintSurface(..., Surface::Conversation, _bg)` when the content is in a panel, or `Surface::Popup` when its wrap is a layer (`Info::Wrap::Layer`); replace its opaque attribute with `SetOpaquePaint(this, true)`. Same for `TopBar::paintEvent`'s brush fill; keep its existing `_roundRect` rule for the opaque attribute.
 
-- [ ] **Step 2: Settings intro and rows**
+- [ ] **Step 2: Top bar height**
+
+The chat header is `softPanelsTopBarHeight` (56 px, C11) under Soft Panels, so the info pane's top bar in the third column must match it. Add `infoTopBarSoftPanels: InfoTopBar(infoTopBar)` to `info.style` (with `using "window/window_soft_panels.style"`), with `height: softPanelsTopBarHeight`, back, close and search buttons of the same height, and the title position moved down by half the difference. Add `[[nodiscard]] const style::InfoTopBar &Info::TopBarStyle();` returning it under Soft Panels and `st::infoTopBar` otherwise, and use it at every read of `st::infoTopBar`: `info_wrap_widget.cpp`, `info_profile_top_bar.cpp`, `settings_premium.cpp`, `settings_credits.cpp`, `settings_business.cpp` and the two star referral widgets. The layer top bar (`infoLayerTopBar`) is already 56 px and stays.
+
+- [ ] **Step 3: Settings intro and rows**
 
 `settings_intro.cpp` sets `WA_OpaquePaintEvent` on its wrap: use `SetOpaquePaint`.
 
 Every row is a `Ui::SettingsButton`. The row styles `settingsButton` and `infoProfileButton` derive from `lib_ui`'s `defaultSettingsButton` and are used in 53 files, and each row paints its `textBg` (`windowBg`) under itself. C17 already maps that fill and the `windowBgOver` hover, and turns divider bands into the soft band. Check every top-level settings section for a row style whose `textBg` is not a surface color; such a row keeps its fill, so record it with the reason.
 
-- [ ] **Step 3: Grabs**
+- [ ] **Step 4: Grabs**
 
 The grab audit assigned `info_wrap_widget.cpp`, `info_profile_tabs_host.cpp`, `info_media_grid_zoom.cpp` and `info_profile_balance_pill.cpp` here: convert each animation grab to `Ui::Material::Grab` and paint the role under the animation, as C5 did for sections.
 
-- [ ] **Step 4: Build and check**
+- [ ] **Step 5: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
-Open a user, group and channel profile in the third column; switch shared media tabs; zoom the media grid; open Settings and walk every top-level section; narrow the window so the info pane becomes a layer and widen it back.
+Open a user, group and channel profile in the third column; switch shared media tabs; zoom the media grid; open Settings and walk every top-level section; narrow the window so the info pane becomes a layer and widen it back. With a chat and its info pane side by side, the two headers share one bottom line.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp
+git add Telegram/SourceFiles/info Telegram/SourceFiles/settings/settings_intro.cpp Telegram/SourceFiles/settings/sections
 git commit -m "Brought info and settings sections into Soft Panels."
 ```
 

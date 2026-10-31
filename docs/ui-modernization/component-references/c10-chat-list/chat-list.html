@@ -23,7 +23,7 @@ figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
 .crop { width: 276px; height: 562px; border-radius: 6px; border: 1px solid var(--page-line); background-repeat: no-repeat; background-size: 956px 656px; background-position: -96px -60px; }
 
 /* Night theme on the Navigation fill (0.82) over Blue folds, text adjusted by C3. */
-.night { --nav: rgba(23, 33, 43, .82); --name: #f5f5f5; --text: #a8bbcf; --date: #abbbce; --service: #79bffc; --active: #2b5278; --active-fg: #ffffff; --hover: rgba(245, 245, 245, .07); --ripple: #25313d; --unread: #4082bc; --muted: #3e546a; --badge-fg: #ffffff; --placeholder: #afbbc7; --bar: rgba(23, 33, 43, .90); --edge: rgba(245, 245, 245, .10); --focus: #6396cb; }
+.night { --nav: rgba(23, 33, 43, .82); --name: #f5f5f5; --text: #a8bbcf; --date: #abbbce; --service: #79bffc; --active: #294058; --hover: rgba(245, 245, 245, .07); --ripple: #25313d; --unread: #4082bc; --muted: #3e546a; --badge-fg: #ffffff; --placeholder: #afbbc7; --bar: rgba(23, 33, 43, .90); --edge: rgba(245, 245, 245, .10); --focus: #6396cb; }
 .desk { position: relative; isolation: isolate; border-radius: 6px; overflow: hidden; }
 .desk::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
 .desk .nav { position: absolute; inset: 0; z-index: -1; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); background: var(--nav); }
@@ -40,8 +40,6 @@ figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
 .list-row .text b { font-weight: 400; color: var(--service); }
 .list-row .badge { position: absolute; right: 12px; top: 33px; min-width: 19px; height: 19px; padding: 0 6px; border-radius: 10px; background: var(--unread); color: var(--badge-fg); font-size: 11px; font-weight: 600; display: grid; place-items: center; }
 .list-row .badge.muted { background: var(--muted); }
-.list-row[data-state="active"] { color: var(--active-fg); }
-.list-row[data-state="active"] .date, .list-row[data-state="active"] .text, .list-row[data-state="active"] .text b { color: var(--active-fg); }
 .scaled { transform: scale(1.25); transform-origin: 0 0; }
 .cell { width: 375px; height: 78px; }
 
@@ -62,7 +60,7 @@ svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-se
   <div class="row-layout">
     <section class="panel">
       <h2>A. Mockup chats list at 100%</h2>
-      <p class="lead">Light and dark. Its selection is a light pill; Telegram keeps its dialogsBgActive pill (panel B) unless the user decides otherwise.</p>
+      <p class="lead">Light and dark. Its selection is a light pill with dark text, which the user adopted for the open chat (panel B, Active).</p>
       <div class="crops">
         <div class="crop" style="background-image:url(../c7-shell-layout/mockup-light.png)"></div>
         <div class="crop" style="background-image:url(../c7-shell-layout/mockup-dark.png)"></div>
@@ -71,7 +69,7 @@ svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-se
     <div class="stack">
       <section class="panel">
         <h2>B. Row states, night theme on the Navigation fill, magnified 1.25 times</h2>
-        <p class="lead">Pill margins 6, 1, 2, 1 and radius 10 inside the unchanged row; the ripple is clipped to the pill.</p>
+        <p class="lead">Pill margins 6, 1, 2, 1 and radius 10 inside the unchanged row; the ripple is clipped to the pill. The open chat's pill is opaque and keeps the normal text colors.</p>
         <div class="states" data-states></div>
       </section>
       <section class="panel">
@@ -100,7 +98,7 @@ svg text { font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-se
   const states = [
     ['Default', 'transparent row', row('default')],
     ['Hover', 'text at 0.07', row('hover')],
-    ['Active', 'dialogsBgActive #2b5278', row('active')],
+    ['Active (open chat)', 'SelectedFill() #294058, opaque', row('active')],
     ['Pressed', 'dialogsRippleBg, clipped', row('pressed')],
     ['Unread', 'dialogsUnreadBg #4082bc', row('default', { badge: 'unread' })],
     ['Muted unread', 'dialogsUnreadBgMuted #3e546a', row('default', { badge: 'muted' })],
