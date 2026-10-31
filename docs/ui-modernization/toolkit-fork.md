@@ -49,7 +49,17 @@ git -C Telegram/lib_ui remote get-url origin
 ```
 
 The last command must print the fork URL. A fresh `git clone --recursive`
-needs nothing extra.
+needs nothing extra for reading.
+
+To commit to the fork, put the submodule on the redesign branch and push over
+SSH, since the HTTPS URL asks for credentials:
+
+```bash
+git -C Telegram/lib_ui switch soft-panels
+git -C Telegram/lib_ui remote set-url --push origin git@github.com:KakunArtem/lib_ui.git
+```
+
+Plans push with `git -C Telegram/lib_ui push origin HEAD:soft-panels`.
 
 ## Taking upstream updates
 

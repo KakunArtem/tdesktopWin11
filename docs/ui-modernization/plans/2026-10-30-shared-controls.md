@@ -122,7 +122,7 @@ Run: `cmd /c .ai\setup\build-target.cmd Telegram`. With Soft Panels and material
 ```bash
 git -C Telegram/lib_ui add ui/widgets/soft_controls.h ui/widgets/soft_controls.cpp
 git -C Telegram/lib_ui commit -am "Added soft controls fill mapping."
-git -C Telegram/lib_ui push fork HEAD
+git -C Telegram/lib_ui push origin HEAD:soft-panels
 git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/ui/ui_material.h Telegram/SourceFiles/ui/ui_material.cpp Telegram/cmake/test_window_material.cmake Telegram/SourceFiles/tests/test_window_material.cpp
 git commit -m "Let shared controls rest on the Soft Panels surfaces."
 ```

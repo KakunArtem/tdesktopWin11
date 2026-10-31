@@ -53,7 +53,7 @@
 
 - [ ] **Step 1: Recheck `SideBarButton` style fields**
 
-Read `SideBarButton` in `lib_ui/ui/widgets/widgets.style` and its `paintEvent` at the pinned commit. App code already uses `textBg`, `textFg`, `textTop`, `textSkip`, `style`, `minHeight`, `minTextWidth` and `iconPosition`. If the active background is not a style field, add a transparent-background flag in the [fork](2026-10-29-toolkit-fork.md) instead of painting over it, and note it in the commit.
+Read `SideBarButton` in `lib_ui/ui/widgets/widgets.style` and its `paintEvent` at the pinned commit. App code already uses `textBg`, `textFg`, `textTop`, `textSkip`, `style`, `minHeight`, `minTextWidth` and `iconPosition`. The [preflight](../preflight.md) found at `79c846fd` that `SideBarButton::paintEvent` fills `textBgActive` or `textBg`, both style fields, so transparent values in the parallel styles are enough and no fork change is needed; confirm it is unchanged.
 
 - [ ] **Step 2: Add the parallel styles and choose them in one place**
 
@@ -92,7 +92,7 @@ git commit -m "Restyled folder rail for Soft Panels."
 
 - [ ] **Step 1: Badge ring**
 
-In the parallel styles, keep `badgeHeight` 17 and `badgeStroke` 2. The stroke paints with the button background color; with a transparent background it must use the Navigation fill instead. If `SideBarButton` strokes with its `textBg`, set the stroke color through the style field the recheck in Task 1 found, or draw the ring in the container paint.
+In the parallel styles, keep `badgeHeight` 17 and `badgeStroke` 2. The ring is not painted: `SideBarButton::validateIconCache` cuts a transparent gap of `badgeStroke` around the badge out of the cached icon, so whatever is behind the button shows through, the Navigation fill included. No change is needed; check it in the screenshots.
 
 - [ ] **Step 2: Muted badges**
 
@@ -112,9 +112,10 @@ git commit -m "Adjusted folder rail badges for Soft Panels."
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_main_menu.cpp`
 - Modify: `Telegram/SourceFiles/window/window_main_menu.style`
+- Modify: `Telegram/SourceFiles/window/window.style` (`mainMenuButtonSoftPanels`, next to `mainMenuButton`)
 
 **Interfaces:**
-- Produces style values: `mainMenuSoftPanelsRadius: 14px`, `mainMenuSoftPanels: Menu(mainMenu)` with item corner radius `8px` where the `Menu` style supports it (recheck in `widgets.style`).
+- Produces style values: `mainMenuSoftPanelsRadius: 14px`, `mainMenuSoftPanelsRowRadius: 8px`, `mainMenuButtonSoftPanels: SettingsButton(mainMenuButton)` with transparent `textBg` and `textBgOver`.
 
 - [ ] **Step 1: Rounded shape**
 
@@ -122,7 +123,7 @@ In `MainMenu::paintEvent`, when `SoftPanels()`, paint `PaintSurface(p, shape, Su
 
 - [ ] **Step 2: Rows**
 
-Pass `st::mainMenuSoftPanels` to the menu when `SoftPanels()`. If the `Menu` style has no item radius, paint the row hover as a rounded rect in `MainMenu`'s own row painting, or leave rows square and record the gap.
+The drawer's rows are `Ui::SettingsButton`s styled `mainMenuButton` (`window.style`) and added through `AddButtonWithIcon`; `st::mainMenu` is a `Menu` style the drawer reads only for the night mode toggle. Neither style has a corner radius, and with C17 the hover is the square soft hover. Under `SoftPanels()`, create the rows with `mainMenuButtonSoftPanels` and paint the hovered row's soft hover as a rounded rect (`mainMenuSoftPanelsRowRadius`, inset by the row's left and right padding) in the drawer's inner container under the rows, following each row's `isOver()`. Keep the ripple; if it shows square corners past the rounded hover, record the gap rather than forking `SettingsButton`.
 
 - [ ] **Step 3: Build and check**
 
@@ -131,7 +132,7 @@ Open the main menu from the rail with material on and off: rounded right corners
 - [ ] **Step 4: Commit**
 
 ```bash
-git add Telegram/SourceFiles/window/window_main_menu.cpp Telegram/SourceFiles/window/window_main_menu.style
+git add Telegram/SourceFiles/window/window_main_menu.cpp Telegram/SourceFiles/window/window_main_menu.style Telegram/SourceFiles/window/window.style
 git commit -m "Rounded the main menu drawer for Soft Panels."
 ```
 

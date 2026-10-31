@@ -91,28 +91,31 @@ git commit -m "Restyled in-app transient surfaces for Soft Panels."
 ### Task 3: Popup menu and tooltip shape in the fork
 
 **Files (in the `lib_ui` fork):**
-- Modify: `ui/widgets/widgets.style`, `ui/widgets/popup_menu.cpp`, `ui/widgets/menu/menu_item_base.cpp` (or wherever item highlights paint; recheck)
+- Modify: `ui/widgets/widgets.style`, `ui/widgets/popup_menu.cpp`, `ui/widgets/menu/menu_action.cpp`, `ui/widgets/menu/menu_multiline_action.cpp`, and a new `ui/widgets/menu/menu_item_background.{h,cpp}` registered in `lib_ui`'s CMake source list
 - Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp` (sets the flag)
+- Modify: the tdesktop menu items that paint their own highlight (listed in Step 1)
 
 **Interfaces:**
 - Produces, in `namespace Ui` (fork): `void SetSoftMenus(bool enabled);` and `[[nodiscard]] bool SoftMenus();` — a process-wide flag read by `PopupMenu` and menu items; default `false`, so upstream look is unchanged.
+- Produces, in `namespace Ui::Menu` (fork, `menu_item_background.h`): `void PaintItemBackground(QPainter &p, const style::Menu &st, QRect rect, bool selected);` — upstream's fill of `itemBg`, then `itemBgOver` when selected (with the `itemBg` underlay when `itemBgOver` is translucent); with `SoftMenus()` the selected fill is the rounded highlight.
 
 - [ ] **Step 1: Recheck at the pinned commit**
 
-Read `PopupMenu`'s background and shadow painting and the menu item's selected-background painting. Record the functions in the commit message body.
+The [preflight](../preflight.md) found at `79c846fd`: `PopupMenu` paints its background with `_roundRect` (radius `PopupMenu::radius`, color `menu.itemBg`), rounds content with `_roundingOverlay` and draws `_boxShadow`, falling back to `shadowFallback` edges; `Menu::Menu` fills `itemBg` when opaque; item highlights are flat `fillRect`s in `Menu::Action::paintBackground` and `MultilineAction::paintEvent`, and the `Menu` style has no item radius. Fifteen tdesktop files paint their own item highlight with the same `itemBg` / `itemBgOver` pattern: `calls_volume_item.cpp`, `calls_group_menu.cpp` (two), `attach_bot_downloads.cpp`, `who_reacted_context_action.cpp` (three highlight fills, plus two selection-pill brushes that stay), `delete_message_context_action.cpp`, `peer_qr_box.cpp`, `bank_card_click_handler.cpp`, `phone_click_handler.cpp`, `bot_attach_web_view.cpp`, `history_view_context_menu.cpp`, `history_view_translate_bar.cpp`, `chat_search_in.cpp`, `iv_editor_insert_suggestions.cpp`, `editor_audio_menu.cpp` and `photo_editor_controls.cpp`. Confirm the list with `grep -rn itemBgOver Telegram/SourceFiles --include=*.cpp`.
 
 - [ ] **Step 2: Implement**
 
-With `SoftMenus()`, item highlights paint as rounded rects with radius 8 inset by 4 px horizontally (style values in `widgets.style`), and the menu's outer radius uses the Soft Panels value. The app calls `Ui::SetSoftMenus(Ui::Material::SoftPanels())` at startup.
+Add `PaintItemBackground` and use it in `Menu::Action::paintBackground` and `MultilineAction::paintEvent`. With `SoftMenus()`, it paints the highlight as a rounded rect with radius 8 inset by 4 px horizontally (new style values in `widgets.style`; existing defaults unchanged), and the menu's outer radius uses the Soft Panels value. Replace the highlight fill in each tdesktop item from Step 1 with `Ui::Menu::PaintItemBackground`, so every context menu item rounds alike. The app calls `Ui::SetSoftMenus(Ui::Material::SoftPanels())` at startup.
 
 - [ ] **Step 3: Build, check, commit in the fork, move the pointer**
 
 Open chat, message, link and tray-icon context menus, a submenu near the right screen edge, and the send menu. Then:
 
 ```bash
-git -C Telegram/lib_ui commit -am "Added soft menu highlight shape."
-git -C Telegram/lib_ui push fork HEAD
-git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp
+git -C Telegram/lib_ui add -A
+git -C Telegram/lib_ui commit -m "Added soft menu highlight shape."
+git -C Telegram/lib_ui push origin HEAD:soft-panels
+git add Telegram/lib_ui Telegram/SourceFiles
 git commit -m "Updated lib_ui for soft menus."
 ```
 
@@ -152,7 +155,7 @@ Record in `decisions/popup-acrylic.md`: backdrop visible, corners and shadow cor
 
 ```bash
 git -C Telegram/lib_ui commit -am "Added popup backdrop prototype."
-git -C Telegram/lib_ui push fork HEAD
+git -C Telegram/lib_ui push origin HEAD:soft-panels
 git add Telegram/lib_ui Telegram/SourceFiles/window/window_material.cpp Telegram/SourceFiles/settings/settings_experimental.cpp docs/ui-modernization/decisions/popup-acrylic.md
 git commit -m "Recorded popup Acrylic prototype results."
 ```

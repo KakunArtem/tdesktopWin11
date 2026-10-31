@@ -40,9 +40,13 @@ Everything else is checked to be unchanged.
   fade has to be checked for corner artifacts.
 - **Separate panels are already rounded.** `Ui::SeparatePanel` is a
   translucent window that paints its own `callShadow` and rounds its frame
-  with `callRadius` (6 px), read directly in five places. A 12 px radius
-  needs one fork hook. `setBottomBarHeight` requires a bottom bar of 0 or at
-  least the radius, so callers have to be rechecked.
+  with `callRadius` (6 px), read in `setBottomBarHeight`,
+  `validateBorderImage` and `paintShadowBorder`. A 12 px radius needs one
+  fork hook. The Mini App and wallet panels round their own bottom bars with
+  `callRadius` too, so they switch to the hook. `setBottomBarHeight`
+  requires a bottom bar of 0 or at least the radius: the wallet passes
+  44 px, and the Mini App passes its bottom buttons' height, which the plan
+  checks.
 - **The restore shell is the one separate window that should change.** It is
   a placeholder `RpWindow` filled with `windowBg`, shown while a separate chat
   window reopens at startup. With material on, the window that replaces it

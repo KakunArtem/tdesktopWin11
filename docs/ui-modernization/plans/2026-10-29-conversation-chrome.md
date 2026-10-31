@@ -85,7 +85,7 @@ git commit -m "Merged the chat header into the Soft Panels conversation panel."
 
 - [ ] **Step 2: Use them in the `td_ui` bars**
 
-In `PinnedBar`, `GroupCallBar`, `RequestsBar` and `MoreChatsBar`: the `_wrap` paint becomes `PaintBar(p, _wrap->rect(), clip, st::historyPinnedBg)`, `_wrap`'s opaque attribute becomes `SetOpaquePaint(_wrap.entity(), !SoftPanels())`, the inner `historyComposeAreaBg` fill becomes `PaintBarContent`, and each bar's own bottom shadow stays hidden under Soft Panels. Offset the inner content by `BarPillRect`'s left and right margins so text and buttons sit inside the pill. Apply `PaintBar` in `SponsoredMessageBar` the same way.
+In `PinnedBar`, `GroupCallBar`, `RequestsBar` and `MoreChatsBar`: the `_wrap` paint becomes `PaintBar(p, _wrap->rect(), clip, st::historyPinnedBg)`, `_wrap`'s opaque attribute becomes `SetOpaquePaint(_wrap.entity(), !SoftPanels())`, the inner `historyComposeAreaBg` fill becomes `PaintBarContent`, and each bar's own bottom shadow stays hidden under Soft Panels. Offset the inner content by `BarPillRect`'s left and right margins so text and buttons sit inside the pill. Apply `PaintBar` the same way to the `historyPinnedBg` fill in `FillSponsoredMessageBar`'s `draw` (`sponsored_message_bar.cpp`); there is no bar class.
 
 - [ ] **Step 3: Use them in the app bars**
 

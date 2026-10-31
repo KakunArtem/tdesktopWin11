@@ -468,7 +468,7 @@ behavior unchanged.
 | Hook | Set by | Plan |
 | --- | --- | --- |
 | `RpWindow::setTitleBackgroundPainter(Fn<void(QPainter&, const QRect&)>)` | `MainWindow::initHook()` when `Capable()` | C8 |
-| `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()` | startup, from `SoftPanels()` | C14 |
+| `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()`, with `Ui::Menu::PaintItemBackground` for every item highlight, tdesktop's own items included | startup, from `SoftPanels()` | C14 |
 | `Ui::Platform::SetPopupBackdrop(bool)` | the popup option and `ActiveValue()` | C14 |
 | `Ui::SetSoftControls(bool)`, `Ui::SetSoftControlHover(QColor)`, `Ui::ControlFill(const style::color&)` | startup, from `SoftPanels()`; the hover on every palette change | C17 |
 | `Ui::SetSeparatePanelRadius(int)` / `Ui::SeparatePanelRadius()` | startup, from `SoftPanels()` | C19 |

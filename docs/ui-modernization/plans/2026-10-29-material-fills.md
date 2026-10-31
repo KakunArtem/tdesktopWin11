@@ -235,7 +235,7 @@ Role inputs, all `st::` palette colors (recheck each name in `lib_ui/ui/colors.p
 | Conversation | `windowBg` | `windowFg` | `windowSubTextFg` |
 | Bar | `topBarBg` | `windowFg` | `windowSubTextFg` |
 | Composer | `historyComposeAreaBg` | `windowFg` | `historyComposeAreaFgService` |
-| Popup | `menuBg` | `menuFg` | `windowSubTextFg` |
+| Popup | `menuBg` | `windowFg` | `windowSubTextFg` |
 
 Entries adjusted while active, each against the Navigation and Conversation floors at 4.5:1: `windowSubTextFg`, `dialogsTextFg`, `dialogsDateFg`, `dialogsTextFgService`, `windowActiveTextFg`, `historyComposeAreaFgService`. Keep them in a file-local table of `{ const style::color *entry; std::vector<Surface> roles; float64 target; }`, so later plans append rows instead of changing code; the full list is in [Adjusted palette entries](../architecture.md#adjusted-palette-entries).
 

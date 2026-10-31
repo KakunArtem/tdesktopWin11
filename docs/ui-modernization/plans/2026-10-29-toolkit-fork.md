@@ -12,6 +12,8 @@
 
 **Visual reference:** [C6 toolkit fork](../component-references/c6-toolkit-fork/README.md): the branch layout, the `.gitmodules` change, the upstream update and the outputs that prove each step.
 
+**Status (2026-10-31):** `lib_ui` is done: `soft-panels` pushed, `.gitmodules` pointed at the fork, [procedure](../toolkit-fork.md) written. `lib_base` keeps upstream until the user forks it.
+
 **Depends on:** nothing. Must finish before [title bar](2026-10-29-title-bar.md) and [transient surfaces](2026-10-29-transient-surfaces.md).
 
 ## Global Constraints
@@ -47,16 +49,14 @@ Ask the user to fork `https://github.com/desktop-app/lib_ui` and `https://github
 
 - [ ] **Step 3: Create `soft-panels` at the pinned commits**
 
-In `Telegram/lib_ui` (after `git submodule update --init Telegram/lib_ui`):
+In a clone of each fork, whose `origin` is the fork:
 
 ```bash
-git remote add fork git@github.com:KakunArtem/lib_ui.git
-git fetch fork
-git switch -c soft-panels <pinned lib_ui sha>
-git push fork soft-panels
+git branch soft-panels <pinned sha>
+git push origin soft-panels
 ```
 
-Same in `Telegram/lib_base` with its pinned SHA. Pushing needs the user's approval.
+Done for `lib_ui` on 2026-10-31 at `79c846fd`. `lib_base` waits for its fork (pinned `95a543e4`). Pushing needs the user's approval.
 
 - [ ] **Step 4: Verify**
 
@@ -78,7 +78,7 @@ For `Telegram/lib_ui` and `Telegram/lib_base` in `.gitmodules`, set `url` to `ht
 - [ ] **Step 2: Check the pointers are reachable from the fork**
 
 Run in each submodule: `git branch -r --contains $(git rev-parse HEAD)`
-Expected: `fork/soft-panels` is listed.
+Expected: `origin/soft-panels` is listed, since `origin` is the fork after Step 3's sync.
 
 - [ ] **Step 3: Sync**
 

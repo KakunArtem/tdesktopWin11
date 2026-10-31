@@ -39,6 +39,10 @@ raises, and C18's font decision changes every screenshot after it. C8, C17
 and C18 each add entries to C3's table in `window/window_material.cpp`, so
 they run one after another. Decide the day rail colors before C9.
 
+The [plan preflight](../preflight.md) checked the plans' names, paint sites
+and read counts against the pinned sources on 2026-10-31 and fixed the
+plans; re-run it after a `lib_ui` or upstream update.
+
 ## Ground rules
 
 Every plan's Global Constraints include these lines.

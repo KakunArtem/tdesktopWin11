@@ -110,17 +110,18 @@ git commit -m "Rounded Telegram's notifications under Soft Panels."
 
 **Files (tdesktop):**
 - Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp`
+- Modify: `Telegram/SourceFiles/ui/chat/attach/attach_bot_webview.cpp`, `Telegram/SourceFiles/wallet/wallet_content.cpp`
 
 **Interfaces:**
 - Produces, in `namespace Ui` (fork, `ui/widgets/separate_panel.h`): `void SetSeparatePanelRadius(int radius);` and `[[nodiscard]] int SeparatePanelRadius();` — process-wide; `0` (the default) means `st::callRadius`, so upstream is unchanged.
 
 - [ ] **Step 1: Recheck the corners at the pinned commit**
 
-`SeparatePanel` reads `st::callRadius` (6 px) in `setBottomBarHeight` (`Expects(!height || height >= st::callRadius)`), `validateBorderImage`, `paintShadowBorder`, `paintBodyBg` and `paintOpaqueBorder`. Read them, and find where a host's content (the Mini App web view in `attach_bot_webview.cpp`, the wallet, payments and passport panels) ends at the bottom when the bottom bar height is 0. If any content reaches a bottom corner, a 12 px radius would show its square corner: stop, record it, and ask the user to choose between keeping 6 px or insetting that content. Check that every `setBottomBarHeight` caller passes 0 or at least 12 px (`walletRowsHintHeight`, the Mini App footer).
+The [preflight](../preflight.md) found at `79c846fd` that `SeparatePanel` reads `st::callRadius` (6 px) in three places: `setBottomBarHeight` (`Expects(!height || height >= st::callRadius)`), `validateBorderImage`, and `paintShadowBorder`, which passes it on to `paintBodyBg`. `paintOpaqueBorder`, the fallback without translucency, draws square edges and has no radius. Two hosts round their own bottom bar with `st::callRadius`: the Mini App's `_bottomButtonsBg` paint in `attach_bot_webview.cpp` and `PaintBottomRoundedPlate` in `wallet_content.cpp`. The wallet's bottom bar is `walletRowsHintHeight` (44 px); check that the Mini App's `_bottomButtonsBg` height is at least 12 px with one and with two buttons, so the `Expects` holds. Confirm these are unchanged, then find where a host's content (the Mini App web view in `attach_bot_webview.cpp`, the wallet, payments and passport panels) ends at the bottom when the bottom bar height is 0. If any content reaches a bottom corner, a 12 px radius would show its square corner: stop, record it, and ask the user to choose between keeping 6 px or insetting that content.
 
 - [ ] **Step 2: Add the hook and use it**
 
-Replace each `st::callRadius` read above with `SeparatePanelRadius()`, including the `Expects`. Keep the shadow (`st::callShadow`) and the opaque fallback border.
+Replace each `st::callRadius` read above with `SeparatePanelRadius()`, including the `Expects`, and in tdesktop the two hosts' bottom bar corners with `Ui::SeparatePanelRadius()`, so the bar's rounded bottom matches the frame. Keep the shadow (`st::callShadow`) and the opaque fallback border. `Platform::Radius()` in `ui/platform/ui_platform_window.cpp` also reads `callRadius`, for the default window helper's shadow on other platforms; leave it.
 
 - [ ] **Step 3: Set it at startup**
 
@@ -134,8 +135,8 @@ Run: `cmd /c .ai\setup\build-target.cmd Telegram`. With Soft Panels on, open a M
 
 ```bash
 git -C Telegram/lib_ui commit -am "Added separate panel radius hook."
-git -C Telegram/lib_ui push fork HEAD
-git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp
+git -C Telegram/lib_ui push origin HEAD:soft-panels
+git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/ui/chat/attach/attach_bot_webview.cpp Telegram/SourceFiles/wallet/wallet_content.cpp
 git commit -m "Gave separate panels the popup radius under Soft Panels."
 ```
 
