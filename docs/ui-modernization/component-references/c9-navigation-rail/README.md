@@ -33,7 +33,9 @@ every button state the plan lists at Telegram's own rail width.
   unless the user decides otherwise. Panel B uses 72 px.
 - Colors are the mockup's tokens (`--selected`, `--hover`, `--accent`,
   `--muted-fill`). The app uses its palette entries (`sideBarBgActive`,
-  `sideBarBadgeBgMuted` and others), adjusted by C3.
+  `sideBarBadgeBgMuted` and others). In the day theme they were made for a
+  dark sidebar: C18 raises the rail icons, and the labels and selected fill
+  are an [open decision](../../architecture.md#open-decisions).
 - The keyboard focus ring is a proposal: a 2 px accent outline on the pill.
   Telegram's current focus style for `SideBarButton` must be rechecked in
   `lib_ui`.

@@ -2,8 +2,10 @@
 
 Date: 2026-10-30. Status: grouping and proposed design direction. C17 has a
 [plan](plans/2026-10-30-shared-controls.md) and a
-[visual reference](component-references/c17-shared-controls/README.md); C18
-and C19 have neither yet. This document covers the elements that the
+[visual reference](component-references/c17-shared-controls/README.md), and
+C18 a [plan](plans/2026-10-31-foundations.md) and a
+[visual reference](component-references/c18-foundations/README.md); C19 has
+neither yet. This document covers the elements that the
 [component architecture](architecture.md#coverage-of-the-element-map) left
 without an owner, groups them into three proposed components, C17 to C19, and
 records what each one paints today.
@@ -54,10 +56,12 @@ Badges belong to C10, and tooltips and toasts to C14.
   and `defaultTextStyle` in `ui/basic.style`. The readable mockup uses the
   same 13 px base and 600 weight, so sizes do not change.
 - The mockup's family is "Segoe UI Variable Text". Settings > Chat settings >
-  Font family already offers Default, System and any installed family
-  (`Core::Settings::customFontFamily`, `style::SystemFontTag()`). On Windows,
-  System is the Segoe UI family. Choosing it is a user setting today; making it
-  the Soft Panels default is a decision, not new font code.
+  Font family already offers Default (bundled Open Sans), System font and any
+  installed family (`Core::Settings::customFontFamily`,
+  `style::SystemFontTag()`). On Windows, System is the Segoe UI family, sized
+  to Open Sans's x-height. Choosing it is a user setting today. Making it the
+  Soft Panels default is a decision; if the user makes it, C18 adds one
+  function so that Default means the system font under Soft Panels.
 - Text drawn on a translucent surface loses ClearType subpixel rendering, as
   the roadmap's risks note. Bubbles stay opaque (C13), so message text keeps
   it; list and header text is the case to compare in the Phase 1 record.
@@ -72,9 +76,11 @@ Badges belong to C10, and tooltips and toasts to C14.
 - Icon colors are a readability issue. `menuIconFg` (`#999999`) is 2.85:1 on
   white, below the 3:1 icon target even in solid mode. `dialogsMenuIconFg` and
   `historyComposeIconFg` are defined as `menuIconFg` in the palette. C3's
-  adjusted list has no icon entries yet, and C8 adds only the caption
-  buttons. The C18 plan adds the icon entries at 3:1. Each derived entry has
-  to be adjusted itself, because a theme stores its own value for it.
+  adjusted list had no icon entries, and C8 adds only the caption buttons.
+  The C18 plan adds the grey icon entries at 3:1 and their hover entries at
+  4.5:1, so hover stays stronger than rest. Each derived entry is adjusted
+  itself, because a theme stores its own value for it. Most app icons use
+  `menuIconColor` (`windowBoldFg`) and already pass.
 
 ### Motion
 
@@ -107,9 +113,10 @@ by C2 and C7.
   built from these controls. Its plan maps the surface fills and the opaque
   hover in one `lib_ui` switch, raises three state colors, and checks the
   subgroups that paint no fill.
-- C18's icon color entries extend C3's list and can land with C17. The
-  typography and icon-shape items are decisions, not code.
+- C18 comes after C17 and before C14. Its plan raises the grey icon entries,
+  implements the system font default only if the user chooses it, and checks
+  text rendering and motion. Icon shapes stay Telegram's.
 - C19 comes after C14, whose popup Acrylic record decides the separate
   panels' frame.
-- C18 and C19 get a plan and a visual reference in the same format when
+- C19 gets a plan and a visual reference in the same format when
   requested.

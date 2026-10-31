@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C18 Foundations Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
+.crops { display: flex; gap: 18px; align-items: flex-start; }
+.crops .stack { display: grid; grid-template-columns: auto auto; gap: 10px 18px; align-content: start; }
+.rows { display: grid; gap: 12px; }
+.crop { border-radius: 8px; background-repeat: no-repeat; border: 1px solid var(--page-line); }
+
+/* Telegram palettes at the pinned lib_ui commit and night.tdesktop-theme. Icon values: today, or raised by C18 (panel D). */
+.day { --nav: rgba(255, 255, 255, .78); --conv: rgba(255, 255, 255, .79); --composer: rgba(255, 255, 255, .96); --popup: rgba(255, 255, 255, .97); --soft-over: rgba(0, 0, 0, .06); --text: #000000; --sub: #535353; --edge: rgba(0, 0, 0, .10); --accent: #40a7e3; --avatar: #c4d8ec; --avatar-fg: #213f5c;
+  --menu: #999999; --menu-over: #8a8a8a; --dmenu: #999999; --close: #999999; --close-over: #8a8a8a; --emoji: #999999; --small: #c7c7c7; --side: #8393a3; --side-active: #5eb5f7; --compose: #999999; --compose-over: #8a8a8a; --reply: #999999;
+  --side-text: #8897a6; --side-text-active: #64b9fa; }
+.day.raised { --menu: #6e6e6e; --menu-over: #535353; --dmenu: #6e6e6e; --close: #6e6e6e; --close-over: #535353; --emoji: #8e8e8e; --small: #8f8f8f; --side: #606f7f; --side-active: #0972b0; --compose: #8e8e8e; --compose-over: #6f6f6f; --reply: #8e8e8e; }
+.night { --nav: rgba(23, 33, 43, .82); --conv: rgba(23, 33, 43, .81); --composer: rgba(23, 33, 43, .96); --popup: rgba(23, 33, 43, .97); --soft-over: rgba(245, 245, 245, .07); --text: #f5f5f5; --sub: #a6bcd2; --edge: rgba(245, 245, 245, .10); --accent: #5288c1; --avatar: #40576f; --avatar-fg: #eef5fc;
+  --menu: #8c99a4; --menu-over: #dcdcdc; --dmenu: #8996a1; --close: #8c98a1; --close-over: #dcdcdc; --emoji: #6c7883; --small: #66727e; --side: #8097a9; --side-active: #5eb5f7; --compose: #6c7883; --compose-over: #dcdcdc; --reply: #737e87;
+  --side-text: #768c9e; --side-text-active: #64b9fa; }
+
+.scene { position: relative; isolation: isolate; border-radius: 8px; overflow: hidden; color: var(--text); font-size: 13px; }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.glass { position: absolute; backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); box-shadow: inset 0 0 0 1px var(--edge); overflow: hidden; }
+.navp { left: 8px; top: 8px; bottom: 8px; width: 300px; border-radius: 14px; background: var(--nav); }
+.convp { left: 316px; right: 8px; top: 8px; bottom: 8px; border-radius: 14px; background: var(--conv); }
+.layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); }
+.tag { position: absolute; left: 16px; bottom: 16px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; z-index: 3; }
+.tag.bad { background: #b42318; }
+
+.ic { width: 20px; height: 20px; display: block; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ic .dot { fill: currentColor; stroke: none; }
+.hv { position: relative; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 15px; }
+.hv.over { background: var(--soft-over); }
+
+.rail { position: absolute; left: 0; top: 0; bottom: 0; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding-top: 8px; }
+.rail .mm { color: var(--side); margin-bottom: 4px; }
+.fold { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; width: 56px; padding: 5px 0 4px; color: var(--side); font-size: 10px; }
+.fold span { color: var(--side-text); }
+.fold.on { color: var(--side-active); }
+.fold.on span { color: var(--side-text-active); font-weight: 600; }
+.fold.on::before { content: ""; position: absolute; left: -2px; top: 10px; width: 3px; height: 20px; border-radius: 2px; background: var(--side-active); }
+.list { position: absolute; left: 64px; right: 0; top: 0; bottom: 0; padding: 8px 8px 0 4px; overflow: hidden; }
+.lhead { display: flex; align-items: center; gap: 2px; height: 30px; }
+.lhead b { font-size: 13.5px; font-weight: 600; margin-right: auto; padding-left: 4px; }
+.lhead .hv { color: var(--dmenu); }
+.lhead .hv.over { color: var(--menu-over); }
+.sf { display: flex; align-items: center; gap: 4px; height: 28px; margin: 4px 0 6px; padding: 0 2px 0 8px; border-radius: 14px; background: var(--soft-over); color: var(--sub); font-size: 12px; }
+.sf .q { flex: 1; color: var(--text); }
+.sf .x { color: var(--dmenu); display: grid; place-items: center; width: 24px; height: 24px; }
+.chat { display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 4px; }
+.av { width: 28px; height: 28px; border-radius: 50%; background: var(--avatar); color: var(--avatar-fg); display: grid; place-items: center; font-weight: 600; font-size: 10.5px; flex-shrink: 0; }
+.chat .nm { font-weight: 600; font-size: 12px; line-height: 1.2; }
+.chat .tx { color: var(--sub); font-size: 11px; white-space: nowrap; }
+
+.chead { display: flex; align-items: center; height: 46px; padding: 0 6px 0 12px; }
+.chead .who { margin-right: auto; line-height: 1.2; white-space: nowrap; }
+.chead .who b { display: block; font-weight: 600; font-size: 13px; }
+.chead .who span { color: var(--sub); font-size: 11px; }
+.chead .hv { color: var(--menu); }
+.chead .hv.over { color: var(--menu-over); }
+.emojip { position: absolute; right: 12px; bottom: 96px; width: 200px; border-radius: 12px; background: var(--popup); }
+.etabs { display: flex; justify-content: space-between; padding: 8px 12px; color: var(--emoji); }
+.etabs .ic { width: 18px; height: 18px; }
+.etabs .on { color: var(--accent); }
+.compose { position: absolute; left: 8px; right: 8px; bottom: 8px; border-radius: 16px; background: var(--composer); }
+.reply { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 6px 0 12px; }
+.reply .bar { width: 2px; height: 24px; border-radius: 1px; background: var(--accent); }
+.reply .rt { flex: 1; line-height: 1.15; font-size: 11.5px; }
+.reply .rt b { display: block; color: var(--accent); font-weight: 600; }
+.reply .rt span { color: var(--sub); }
+.reply .x { color: var(--reply); display: grid; place-items: center; width: 26px; height: 26px; }
+.input { display: flex; align-items: center; gap: 2px; height: 40px; padding: 0 6px; }
+.input .ph { flex: 1; color: var(--sub); font-size: 12px; padding-left: 4px; }
+.input .hv { color: var(--compose); }
+.input .hv.over { color: var(--compose-over); }
+
+.box { left: 50%; top: 22px; width: 300px; transform: translateX(-50%); border-radius: 12px; background: var(--popup); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 28px rgba(0, 0, 0, .3); }
+.btitle { display: flex; align-items: center; gap: 2px; height: 46px; padding: 0 8px 0 16px; }
+.btitle b { margin-right: auto; font-size: 14px; font-weight: 600; }
+.btitle .hv { color: var(--close); }
+.btitle .hv.over { color: var(--close-over); }
+.sess { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 12px 0 16px; }
+.sess .dev { width: 30px; height: 30px; border-radius: 8px; background: var(--avatar); flex-shrink: 0; }
+.sess .w { flex: 1; line-height: 1.2; }
+.sess .w b { display: block; font-weight: 600; font-size: 12.5px; }
+.sess .w span { color: var(--sub); font-size: 11.5px; }
+.sess .sx { color: var(--small); }
+.sess .sx .ic { width: 14px; height: 14px; stroke-width: 2; }
+
+table { border-collapse: collapse; font-size: 12px; width: 100%; }
+th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--page-line); vertical-align: middle; }
+th { font-weight: 600; color: var(--page-muted); }
+code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid rgba(0, 0, 0, .15); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.two h3, .panel h3 { font-size: 12.5px; font-weight: 600; margin: 0 0 6px; }
+.miss { color: #b42318; font-weight: 600; }
+.ok { color: #1e7a3a; font-weight: 600; }
+.note { margin: 8px 0 0; font-size: 12px; color: var(--page-muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-chats" viewBox="0 0 24 24"><path d="M5 5h11a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-6l-4 3v-3H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/></symbol>
+  <symbol id="i-work" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle class="dot" cx="6" cy="12" r="1.5"/><circle class="dot" cx="12" cy="12" r="1.5"/><circle class="dot" cx="18" cy="12" r="1.5"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11.5l-7.8 7.8a5 5 0 0 1-7.1-7.1l8.2-8.2a3.4 3.4 0 0 1 4.8 4.8l-8.1 8.1a1.7 1.7 0 0 1-2.4-2.4l7.4-7.4"/></symbol>
+  <symbol id="i-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><circle class="dot" cx="9.3" cy="10" r="1"/><circle class="dot" cx="14.7" cy="10" r="1"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 19.5s-7.5-4.4-7.5-9.6A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M20.5 16l-5-5-8.5 8.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.5 16V10.5a5.5 5.5 0 0 1 11 0V16l1.5 2H5zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+</svg>
+<div class="sheet">
+  <h1>C18 Foundations: visual reference</h1>
+  <p>Icons are masks recolored by palette entries. Under the material the grey ones fall to 1.3–2.7:1, so C18 raises them like C3 raises text: resting icons to 3:1, hover icons to 4.5:1 so hover stays stronger. Shapes, type sizes and durations stay Telegram's.</p>
+
+  <section class="panel">
+    <h2>A. Mockup targets: icons that read on the panels</h2>
+    <p class="lead">The readable mockup draws its rail, header and composer icons in the secondary text color, so they read like the text next to them. Crops of the C7 captures at 100%. The mockup's line icons are a style; Telegram keeps its own icon set.</p>
+    <div class="crops" data-mockup></div>
+  </section>
+
+  <section class="panel">
+    <h2>B. In the main window: Navigation, Conversation, Composer and Popup roles</h2>
+    <p class="lead">The rail, the lock and search cancel in the chats list, the chat header, the reply bar's cancel, the composer and the emoji panel's tabs. One icon in each area is hovered: the call button, the lock and the attach button, on the soft hover.</p>
+    <div class="rows" data-window></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. In a box: title buttons and small close icons in the Popup role</h2>
+    <p class="lead">Box and info layer title buttons use <code>boxTitleCloseFg</code>; the session list's terminate cross uses <code>smallCloseIconFg</code>, the faintest grey in the palette.</p>
+    <div class="three" data-box></div>
+  </section>
+
+  <section class="panel">
+    <h2>D. Icon entries raised while material is active (Task 1)</h2>
+    <p class="lead">Worst contrast is over the strictest floor of the entry's roles (Navigation 0.78 day, Conversation 0.81 night for the three-role rows; Composer 0.96; Popup 0.97) on a black and a white backdrop. Values come from C3's <code>compute-fills.py</code>.</p>
+    <table data-entries></table>
+    <h3 style="margin-top:14px">Found while checking the rail: labels belong to C9</h3>
+    <table data-rail></table>
+    <p class="note">C4 paints the rail with the Navigation role, so in the day theme it turns light while its entries stay made for Telegram's dark sidebar (<code>sideBarBg</code> <code>#293a4c</code>, selected <code>sideBarBgActive</code> <code>#17212b</code>). C18 raises the rail icons. The labels and the selected fill are recorded as an open decision for C9.</p>
+  </section>
+
+  <section class="panel">
+    <h2>E. Type and motion: Telegram's values are kept</h2>
+    <div class="two">
+      <div>
+        <h3>Type scale (lib_ui <code>basic.style</code>, <code>layers.style</code>)</h3>
+        <table>
+          <tr><th>Use</th><th>Style</th><th>Telegram</th><th>Mockup</th></tr>
+          <tr><td>Messages, list text, dates</td><td><code>normalFont</code>, <code>defaultTextStyle</code></td><td>13 px regular</td><td>13 px</td></tr>
+          <tr><td>Names, headers, buttons</td><td><code>semiboldFont</code>, <code>semiboldTextStyle</code></td><td>13 px semibold</td><td>13 px, 600</td></tr>
+          <tr><td>Box text</td><td><code>boxFontSize</code></td><td>14 px</td><td>—</td></tr>
+          <tr><td>Box titles</td><td><code>boxTitleFont</code></td><td>16 px semibold</td><td>—</td></tr>
+        </table>
+        <h3 style="margin-top:12px">Font family (Settings &gt; Chat settings &gt; Font family)</h3>
+        <table>
+          <tr><th>Choice</th><th>Family on Windows</th><th>Sizing</th></tr>
+          <tr><td>Default (empty)</td><td>Open Sans, bundled in <code>lib_ui</code></td><td>As styled</td></tr>
+          <tr><td>System font</td><td>Qt's default family: Segoe UI</td><td>Scaled to Open Sans's x-height</td></tr>
+          <tr><td>Any family</td><td>Any scalable installed family</td><td>Scaled to Open Sans's x-height</td></tr>
+        </table>
+        <p class="note">The mockup asks for Segoe UI Variable Text. Making System the Soft Panels default is the user's decision (Task 2); a change restarts the app. Text on translucent surfaces loses ClearType subpixel rendering; Task 3 compares it.</p>
+      </div>
+      <div>
+        <h3>Durations (lib_ui <code>basic.style</code>, ms)</h3>
+        <table>
+          <tr><th>Value</th><th>ms</th><th>Used for</th></tr>
+          <tr><td><code>universalDuration</code></td><td>120</td><td>Hover fades, small state changes; the mockup's transitions are 120 ms</td></tr>
+          <tr><td><code>slideWrapDuration</code></td><td>150</td><td>Expanding and collapsing rows</td></tr>
+          <tr><td><code>fadeWrapDuration</code></td><td>200</td><td>Fading wraps</td></tr>
+          <tr><td><code>slideDuration</code></td><td>240</td><td>Section and folder slides (C5 grabs)</td></tr>
+          <tr><td><code>radialDuration</code></td><td>350</td><td>Progress rings</td></tr>
+        </table>
+        <h3 style="margin-top:12px">Rules for Soft Panels</h3>
+        <table>
+          <tr><th>Rule</th><th>Where it is checked</th></tr>
+          <tr><td>No new animation; every changed path keeps its upstream duration</td><td>Task 3 Step 3 lists C5, C9–C11, C14 and C17</td></tr>
+          <tr><td>Interface animations off (<code>PowerSaving::kAnimations</code>) ends each one at once</td><td>Task 3 Step 3</td></tr>
+          <tr><td>Hover pills and soft hover appear without a fade, like Telegram's row hover</td><td>C9, C10 and C17 checks</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const crop = (file, x, y, w, h, label) => `
+    <figure><div class="crop" style="width:${w}px;height:${h}px;background-image:url('${file}');background-position:-${x}px -${y}px"></div>
+      <figcaption><b>${label}</b></figcaption></figure>`;
+  const light = '../c7-shell-layout/mockup-light.png';
+  const dark = '../c7-shell-layout/mockup-dark.png';
+  document.querySelector('[data-mockup]').innerHTML =
+    crop(light, 30, 64, 64, 230, 'Rail, light')
+    + crop(dark, 30, 64, 64, 230, 'Rail, dark')
+    + `<div class="stack">`
+    + crop(light, 762, 66, 156, 42, 'Chat header, light')
+    + crop(light, 388, 560, 520, 46, 'Composer, light')
+    + crop(dark, 762, 66, 156, 42, 'Chat header, dark')
+    + crop(dark, 388, 560, 520, 46, 'Composer, dark')
+    + `</div>`;
+
+  const ic = (id) => `<svg class="ic"><use href="#i-${id}"/></svg>`;
+  const hv = (id, over) => `<span class="hv${over ? ' over' : ''}">${ic(id)}</span>`;
+  const chat = (initials, name, text) => `
+    <div class="chat"><div class="av">${initials}</div><div><div class="nm">${name}</div><div class="tx">${text}</div></div></div>`;
+  const window_ = () => `
+    <div class="glass navp">
+      <div class="rail">
+        <span class="mm">${ic('menu')}</span>
+        <div class="fold on">${ic('chats')}<span>All chats</span></div>
+        <div class="fold">${ic('user')}<span>Personal</span></div>
+        <div class="fold">${ic('work')}<span>Work</span></div>
+      </div>
+      <div class="list">
+        <div class="lhead"><b>Chats</b>${hv('lock', true)}</div>
+        <div class="sf">${ic('search')}<span class="q">trail</span><span class="x">${ic('close')}</span></div>
+        ${chat('WC', 'Weekend crew', 'James: Here is the trail map')}
+        ${chat('MC', 'Maya Chen', 'That sounds lovely, see you')}
+        ${chat('DT', 'Design team', 'Alex: Looking good to me')}
+      </div>
+    </div>
+    <div class="glass convp">
+      <div class="chead"><div class="who"><b>Weekend crew</b><span>5 members, 2 online</span></div>${hv('search')}${hv('phone', true)}${hv('more')}</div>
+      <div class="glass emojip">
+        <div class="etabs"><span class="on">${ic('clock')}</span>${ic('smile')}${ic('heart')}${ic('image')}${ic('bell')}</div>
+      </div>
+      <div class="glass compose">
+        <div class="reply"><span class="bar"></span><div class="rt"><b>Reply to Sofia</b><span>Found a quieter trail by the lake.</span></div><span class="x">${ic('close')}</span></div>
+        <div class="input">${hv('clip', true)}<span class="ph">Write a message…</span>${hv('smile')}${hv('mic')}</div>
+      </div>
+    </div>`;
+  const scene = (classes, body, tag, height) => `
+    <div class="scene ${classes}" style="height:${height}px">${tag}${body}</div>`;
+  const tagToday = '<span class="tag bad">today</span>';
+  const tagRaised = '<span class="tag">raised</span>';
+
+  document.querySelector('[data-window]').innerHTML = `
+    <figure>${scene('day', window_(), tagToday, 236)}
+      <figcaption><b>Today, day.</b> Grey icons at 1.3–2.7:1 over the material. The rail's icons and labels were made for Telegram's dark day sidebar.</figcaption></figure>
+    <figure>${scene('day raised', window_(), tagRaised, 236)}
+      <figcaption><b>Raised, day.</b> Header, lock and cancel <code>#6e6e6e</code>, hover <code>#535353</code>; composer and emoji tabs <code>#8e8e8e</code>; rail icons <code>#606f7f</code>, selected <code>#0972b0</code>. Rail labels unchanged (C9).</figcaption></figure>
+    <figure>${scene('night raised', window_(), tagRaised, 236)}
+      <figcaption><b>Raised, night.</b> Header <code>#8c99a4</code>, lock <code>#8996a1</code>, rail <code>#8097a9</code>. Hover <code>#dcdcdc</code>, composer and emoji tabs already pass and keep their values.</figcaption></figure>`;
+
+  const sess = (name, where) => `
+    <div class="sess"><div class="dev"></div><div class="w"><b>${name}</b><span>${where}</span></div><span class="sx">${ic('close')}</span></div>`;
+  const box = () => `
+    <div class="glass convp" style="left:8px"></div><div class="layer"></div>
+    <div class="glass box">
+      <div class="btitle"><b>Active sessions</b>${hv('search')}${hv('close', true)}</div>
+      ${sess('Telegram Desktop', 'Windows 11 · Berlin')}
+      ${sess('Telegram iOS', 'iPhone 15 · Berlin')}
+      ${sess('Telegram Web', 'Chrome · Hamburg')}
+    </div>`;
+  document.querySelector('[data-box]').innerHTML = `
+    <figure>${scene('day', box(), tagToday, 244)}
+      <figcaption><b>Today, day.</b> Title buttons at 2.85:1 on white and 2.66:1 over the Popup fill; the session cross <code>#c7c7c7</code> at 1.58:1.</figcaption></figure>
+    <figure>${scene('day raised', box(), tagRaised, 244)}
+      <figcaption><b>Raised, day.</b> Title buttons <code>#6e6e6e</code>, hovered close <code>#535353</code>, session cross <code>#8f8f8f</code>.</figcaption></figure>
+    <figure>${scene('night raised', box(), tagRaised, 244)}
+      <figcaption><b>Raised, night.</b> Title buttons <code>#8c98a1</code>, session cross <code>#66727e</code>.</figcaption></figure>`;
+
+  const sw = (c) => `<span class="sw" style="background:${c}"></span><code>${c}</code>`;
+  const val = (today, worst, raised, target) => {
+    const pass = parseFloat(worst) >= target;
+    return `<td>${sw(today)}</td><td class="${pass ? 'ok' : 'miss'}">${worst}</td><td>${pass ? 'unchanged' : sw(raised)}</td>`;
+  };
+  const row = ([name, roles, target, d, dw, da, n, nw, na]) => {
+    const t = target === '3:1' ? 3 : 4.5;
+    return `<tr><td><code>${name}</code></td><td>${roles}</td><td>${target}</td>${val(d, dw, da, t)}${val(n, nw, na, t)}</tr>`;
+  };
+  const head = `<tr><th>Entry</th><th>Roles</th><th>Target</th><th>Day today</th><th>Worst</th><th>Day raised</th><th>Night today</th><th>Worst</th><th>Night raised</th></tr>`;
+  const entries = [
+    ['menuIconFg', 'Nav, Conv, Popup', '3:1', '#999999', '1.69', '#6e6e6e', '#6c7883', '1.96', '#8c99a4'],
+    ['menuIconFgOver', 'Nav, Conv, Popup', '4.5:1', '#8a8a8a', '2.04', '#535353', '#dcdcdc', '6.46', '#dcdcdc'],
+    ['cancelIconFg', 'Nav, Conv, Popup', '3:1', '#999999', '1.69', '#6e6e6e', '#737e87', '2.14', '#8c98a1'],
+    ['cancelIconFgOver', 'Nav, Conv, Popup', '4.5:1', '#8a8a8a', '2.04', '#535353', '#dcdcdc', '6.46', '#dcdcdc'],
+    ['boxTitleCloseFg', 'Nav, Conv, Popup', '3:1', '#999999', '1.69', '#6e6e6e', '#737e87', '2.14', '#8c98a1'],
+    ['boxTitleCloseFgOver', 'Nav, Conv, Popup', '4.5:1', '#8a8a8a', '2.04', '#535353', '#dcdcdc', '6.46', '#dcdcdc'],
+    ['dialogsMenuIconFg', 'Nav', '3:1', '#999999', '1.69', '#6e6e6e', '#6c7883', '2.03', '#8996a1'],
+    ['dialogsMenuIconFgOver', 'Nav', '4.5:1', '#8a8a8a', '2.04', '#535353', '#dcdcdc', '6.67', '#dcdcdc'],
+    ['sideBarIconFg', 'Nav', '3:1', '#8393a3', '1.86', '#606f7f', '#768c9e', '2.62', '#8097a9'],
+    ['sideBarIconFgActive', 'Nav', '3:1', '#5eb5f7', '1.32', '#0972b0', '#5eb5f7', '4.11', '#5eb5f7'],
+    ['historyComposeIconFg', 'Composer', '3:1', '#999999', '2.61', '#8e8e8e', '#6c7883', '3.23', '#6c7883'],
+    ['historyComposeIconFgOver', 'Composer', '4.5:1', '#8a8a8a', '3.17', '#6f6f6f', '#dcdcdc', '10.63', '#dcdcdc'],
+    ['historyReplyCancelFg', 'Composer', '3:1', '#999999', '2.61', '#8e8e8e', '#737e87', '3.52', '#737e87'],
+    ['historyReplyCancelFgOver', 'Composer', '4.5:1', '#8a8a8a', '3.17', '#6f6f6f', '#dcdcdc', '10.63', '#dcdcdc'],
+    ['emojiIconFg', 'Popup', '3:1', '#999999', '2.66', '#8e8e8e', '#6c7883', '3.32', '#6c7883'],
+    ['smallCloseIconFg', 'Popup', '3:1', '#c7c7c7', '1.58', '#8f8f8f', '#55616c', '2.36', '#66727e'],
+    ['smallCloseIconFgOver', 'Popup', '4.5:1', '#a3a3a3', '2.35', '#707070', '#a3a3a3', '5.93', '#a3a3a3'],
+  ];
+  document.querySelector('[data-entries]').innerHTML = head + entries.map(row).join('');
+  const rail = [
+    ['sideBarTextFg', 'Nav', '4.5:1', '#8897a6', '1.77', '#485563', '#768c9e', '2.62', '#a2b9cc'],
+    ['sideBarTextFgActive', 'Nav', '4.5:1', '#64b9fa', '1.26', '#005788', '#64b9fa', '4.29', '#69beff'],
+  ];
+  document.querySelector('[data-rail]').innerHTML = head.replace(/raised/g, 'if raised') + rail.map(row).join('');
+})();
+</script>
+</body>
+</html>

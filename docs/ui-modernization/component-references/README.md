@@ -28,6 +28,7 @@ These are proposals derived from the mockup. The
 | C15 Info and settings | [info and settings](c15-info-settings/README.md) |
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
 | C17 Shared controls | [shared controls](c17-shared-controls/README.md) |
+| C18 Foundations | [foundations](c18-foundations/README.md) |
 
-C18 and C19 are grouped in [shared elements](../shared-elements.md) and get a
-reference with their plans.
+C19 is grouped in [shared elements](../shared-elements.md) and gets a
+reference with its plan.
