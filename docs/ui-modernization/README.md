@@ -99,6 +99,8 @@ This brief is the entry point for the redesign documentation. Current documents:
   component changes, isolated from the mockup, for every planned component.
 - [Shared controls, foundations and separate windows](shared-elements.md):
   the elements no plan covered, grouped as C17 to C19, each with a plan.
+- [Toolkit fork](toolkit-fork.md): the `lib_ui` and `lib_base` forks, the
+  branch rule and how to land changes and take upstream updates.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

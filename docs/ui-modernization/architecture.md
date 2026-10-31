@@ -34,7 +34,7 @@ execution keeps its row; note the correction in the plan.
 | C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 0 / 5 | Not started | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
 | C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 0 / 4 | Not started | `checks/grab-audit.md` |
-| C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 0 / 3 | Not started | `toolkit-fork.md` |
+| C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 1 / 3 | In progress: `lib_ui` forked and pointed at; `lib_base` not forked yet | `toolkit-fork.md` |
 | C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 0 / 4 | Not started | `checks/shell-layout.md` |
 | C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
 | C17 | Shared controls | [plan](plans/2026-10-30-shared-controls.md) | [reference](component-references/c17-shared-controls/README.md) | 0 / 4 | Not started | `checks/shared-controls.md` |
