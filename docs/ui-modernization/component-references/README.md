@@ -29,6 +29,4 @@ These are proposals derived from the mockup. The
 | C16 Verification tooling | [verification tooling](c16-verification-tooling/README.md) |
 | C17 Shared controls | [shared controls](c17-shared-controls/README.md) |
 | C18 Foundations | [foundations](c18-foundations/README.md) |
-
-C19 is grouped in [shared elements](../shared-elements.md) and gets a
-reference with its plan.
+| C19 Separate windows | [separate windows](c19-separate-windows/README.md) |

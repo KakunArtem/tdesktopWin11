@@ -128,7 +128,9 @@ instead.
 - **Depends on:** Phase 2 and a `lib_ui` fork.
 - **Produces:** Soft Panels frame, navigation and conversation panels in all
   adaptive layouts; transparent title area with existing caption buttons.
-  Material becomes usable for daily testing.
+  Then the shared controls (C17) and foundations (C18) that Phases 4–9
+  build on: soft control fills and hover, readable icon colors and the font
+  decision. Material becomes usable for daily testing.
 - **Tests:** screenshots in each adaptive layout and window state, solid and
   material; `Test-Backdrop.ps1` transparent check across the panels.
 

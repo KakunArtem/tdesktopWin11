@@ -15,9 +15,9 @@ and the [native backdrop prototype plan](plans/2026-10-28-native-backdrop-protot
 
 ## Progress
 
-Snapshot 2026-10-31: C1 to C18 each have a plan and a visual reference;
-C19 is grouped in [shared elements](shared-elements.md) with no plan yet. No
-plan has started, and no product code exists. Rows are in execution order.
+Snapshot 2026-10-31: C1 to C19 each have a plan and a visual reference.
+No plan has started, and no product code exists. Rows are in execution
+order.
 
 Update a row whenever a plan task commits: the tasks done, the status and the
 record the plan writes (paths are under `docs/ui-modernization/`). Statuses
@@ -37,16 +37,16 @@ execution keeps its row; note the correction in the plan.
 | C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 0 / 3 | Not started | `toolkit-fork.md` |
 | C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 0 / 4 | Not started | `checks/shell-layout.md` |
 | C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
+| C17 | Shared controls | [plan](plans/2026-10-30-shared-controls.md) | [reference](component-references/c17-shared-controls/README.md) | 0 / 4 | Not started | `checks/shared-controls.md` |
+| C18 | Foundations | [plan](plans/2026-10-31-foundations.md) | [reference](component-references/c18-foundations/README.md) | 0 / 3 | Not started | `checks/foundations.md` |
 | C9 | Navigation rail | [plan](plans/2026-10-29-navigation-rail.md) | [reference](component-references/c9-navigation-rail/README.md) | 0 / 4 | Not started | `checks/navigation-rail.md` |
 | C10 | Chat list and search | [plan](plans/2026-10-29-chat-list.md) | [reference](component-references/c10-chat-list/README.md) | 0 / 4 | Not started | `checks/chat-list.md` |
 | C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 0 / 4 | Not started | `checks/conversation-chrome.md` |
 | C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 0 / 4 | Not started | `checks/composer.md` |
 | C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | Not started | `checks/messages.md` |
-| C17 | Shared controls | [plan](plans/2026-10-30-shared-controls.md) | [reference](component-references/c17-shared-controls/README.md) | 0 / 4 | Not started | `checks/shared-controls.md` |
-| C18 | Foundations | [plan](plans/2026-10-31-foundations.md) | [reference](component-references/c18-foundations/README.md) | 0 / 3 | Not started | `checks/foundations.md` |
 | C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
+| C19 | Separate windows | [plan](plans/2026-10-31-separate-windows.md) | [reference](component-references/c19-separate-windows/README.md) | 0 / 4 | Not started | `checks/separate-windows.md` |
 | C15 | Info, settings and specialized screens | [plan](plans/2026-10-29-info-settings.md) | [reference](component-references/c15-info-settings/README.md) | 0 / 4 | Not started | `checks/final.md` |
-| C19 | Separate windows | not written | not made | — | Grouped | [grouping](shared-elements.md#c19-separate-windows) |
 
 ## Open decisions
 
@@ -72,7 +72,7 @@ user decisions with the date, then remove the row here.
 | Field bottom lines and slider tracks raised to 3:1 on the material (they miss it in solid mode too) | Kept as today | Any time; an adjusted entry | [C17 reference](component-references/c17-shared-controls/README.md) |
 | System font (Segoe UI) as the Soft Panels default, as in the mockup | Telegram's default font | C18 Task 2 Step 1 | [C18 reference](component-references/c18-foundations/README.md) |
 | Day theme rail: raise the labels (`sideBarTextFg`, `sideBarTextFgActive`) to 4.5:1 and choose a selected fill for a light rail (`sideBarBgActive` is `#17212b`) | Labels and selected fill unchanged; C18 raises the rail icons | C9 | [C18 reference](component-references/c18-foundations/README.md#findings) |
-| Separate panels and Telegram's notifications take the popup shape | Unchanged | C19 | [C19](shared-elements.md#c19-separate-windows) |
+| Separate panels and Telegram's notifications take the popup shape (radius 12, Popup border, opaque) | Unchanged | C19 Task 2 Step 1 | [C19 reference](component-references/c19-separate-windows/README.md) |
 
 ## Confirmed direction
 
@@ -184,20 +184,19 @@ Each component has one responsibility, one owner directory and one plan.
 | C13 | Messages | Bubbles, service messages, date pills, reactions and attachment cards. | `ui/chat/chat.style`, `history/view/`, `history/view/media/` | C3, C11 | 7 | [messages](plans/2026-10-29-messages.md) |
 | C14 | Transient surfaces | Menus, tooltips, pickers, boxes and toasts; optional popup Acrylic. | forked `lib_ui/ui/widgets/`, `lib_ui/ui/layers/`, `chat_helpers/`, `boxes/` | C6, C9–C13, C17 | 8 | [transient surfaces](plans/2026-10-29-transient-surfaces.md) |
 | C15 | Info, settings and specialized screens | Info pane, settings, lock and intro screens, final accessibility pass. | `info/`, `settings/`, `intro/`, `window/window_lock_widgets.*`, forked `lib_ui` settings rows | C14 and every earlier plan | 9 | [info and settings](plans/2026-10-29-info-settings.md) |
-| C17 | Shared controls | Buttons, fields, settings rows, list rows and dividers on the role fills; readable state colors. | forked `lib_ui/ui/widgets/soft_controls.*`, `boxes/peer_list_box.cpp`, `ui/widgets/multi_select.cpp` | C3, C4, C6, C7 | before 8 | [shared controls](plans/2026-10-30-shared-controls.md) |
-| C18 | Foundations | Readable icon colors, the default font decision and motion checks. | C3's adjusted entries, `ui/ui_material.*` (font default), `core/application.cpp`, `ui/boxes/choose_font_box.cpp` | C3, C7 | before 8 | [foundations](plans/2026-10-31-foundations.md) |
-| C19 | Separate windows | Media viewer, calls, separate panels, Instant View, notifications and the restore shell. | `media/view/`, `calls/`, `Ui::SeparatePanel` users, `iv/`, `window/notifications_manager_default.*` | C14 | — | [grouping](shared-elements.md#c19-separate-windows) |
+| C17 | Shared controls | Buttons, fields, settings rows, list rows and dividers on the role fills; readable state colors. | forked `lib_ui/ui/widgets/soft_controls.*`, `boxes/peer_list_box.cpp`, `ui/widgets/multi_select.cpp` | C3, C4, C6, C7 | 3, after C8 | [shared controls](plans/2026-10-30-shared-controls.md) |
+| C18 | Foundations | Readable icon colors, the default font decision and motion checks. | C3's adjusted entries, `ui/ui_material.*` (font default), `core/application.cpp`, `ui/boxes/choose_font_box.cpp` | C3, C7, C17 | 3, after C17 | [foundations](plans/2026-10-31-foundations.md) |
+| C19 | Separate windows | Restore shell material; the popup shape for notifications and separate panels if chosen; every other separate window checked unchanged. | `window/window_restore_shell.*`, `window/notifications_manager_default.*`, forked `lib_ui/ui/widgets/separate_panel.*` | C2, C4, C8, C14 | after 8 | [separate windows](plans/2026-10-31-separate-windows.md) |
 | C16 | Verification tooling | Backdrop, contrast and screenshot checks reused by every phase. | `docs/ui-modernization/tools/`, `tests/` | C1 | 1–9 | [verification tooling](plans/2026-10-29-verification-tooling.md) |
 
-Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8; then C9–C12
-in parallel, with C13 after C11; C17 and C18 before C14; C14; C15; C19 after
-C14. C16 grows alongside: its contrast tool is needed by C3
+Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8 → C17 → C18;
+then C9–C12 in parallel, with C13 after C11; C14; C19; C15. C16 grows alongside: its contrast tool is needed by C3
 and its screenshot matrix by C7.
 
 ## Coverage of the element map
 
-Every family of the [element map](element-map.md) has an owner. C19 is
-grouped in [shared elements](shared-elements.md) and has no plan yet.
+Every family of the [element map](element-map.md) has an owner, and every
+owner has a plan.
 
 | Element family | Owner | Notes |
 | --- | --- | --- |
@@ -212,7 +211,7 @@ grouped in [shared elements](shared-elements.md) and has no plan yet.
 | Composer | C12 | Autocomplete above the composer is C14. |
 | Transient surfaces | C14 | |
 | Info and settings | C15 | |
-| Secondary and specialized screens | C15, C19 | C15 owns lock and sign-in; C19 groups the separate windows (media viewer, stories, calls, Mini Apps, Instant View, notifications). The audio player and call bars sit in the conversation panel (C7). |
+| Secondary and specialized screens | C15, C19 | C15 owns lock and sign-in; C19 owns the separate windows (media viewer, stories, calls, Mini Apps, Instant View, notifications, restore shell) and keeps them opaque. The audio player and call bars sit in the conversation panel (C7). |
 
 ## Shared contracts
 
@@ -475,6 +474,7 @@ behavior unchanged.
 | `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()` | startup, from `SoftPanels()` | C14 |
 | `Ui::Platform::SetPopupBackdrop(bool)` | the popup option and `ActiveValue()` | C14 |
 | `Ui::SetSoftControls(bool)`, `Ui::SetSoftControlHover(QColor)`, `Ui::ControlFill(const style::color&)` | startup, from `SoftPanels()`; the hover on every palette change | C17 |
+| `Ui::SetSeparatePanelRadius(int)` / `Ui::SeparatePanelRadius()` | startup, from `SoftPanels()`, only if the user chooses the popup shape | C19 |
 
 ### Settings and switches
 

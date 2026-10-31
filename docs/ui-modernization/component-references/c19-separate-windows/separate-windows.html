@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C19 Separate Windows Reference</title>
+<style>
+:root { --page-bg: #eef1f5; --page-fg: #1b2735; --page-muted: #4a5868; --page-line: #d5dce5; --page-card: #ffffff; --mark: #d9480f; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--page-fg); font: 13px/1.4 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+.sheet { width: 1240px; padding: 20px 24px 24px; }
+.sheet > h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+.sheet > p { margin: 0 0 14px; color: var(--page-muted); }
+.panel { background: var(--page-card); border: 1px solid var(--page-line); border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+.panel .lead { margin: 0 0 12px; color: var(--page-muted); font-size: 12px; }
+figure { margin: 0; }
+figcaption { margin-top: 4px; font-size: 12px; color: var(--page-muted); }
+figcaption b { color: var(--page-fg); font-weight: 600; }
+.two { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 14px; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 14px; }
+
+/* Telegram palettes at the pinned lib_ui commit and night.tdesktop-theme. */
+.day { --bg: #ffffff; --text: #000000; --sub: #999999; --edge-today: #f1f1f1; --edge: rgba(0, 0, 0, .10); --accent: #40a7e3; --lbtn: #168acd; --lbtn-bg: #ffffff; --icon: #999999; --avatar: #c4d8ec; --avatar-fg: #213f5c; --title: #ffffff; --win: rgba(255, 255, 255, .72); --block: #e9eef3; }
+.night { --bg: #17212b; --text: #f5f5f5; --sub: #708499; --edge-today: #17212b; --edge: rgba(245, 245, 245, .10); --accent: #5288c1; --lbtn: #6ab2f2; --lbtn-bg: #17212b; --icon: #6c7883; --avatar: #40576f; --avatar-fg: #eef5fc; --title: #17212b; --win: rgba(23, 33, 43, .74); --block: #232e3c; }
+
+.scene { position: relative; isolation: isolate; border-radius: 8px; overflow: hidden; color: var(--text); font-size: 13px; }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: -2; background: conic-gradient(from 218deg at 78% 54%, #122b5b 0deg, #2860a2 11deg, #78b6eb 25deg, #142d5f 40deg, #386fb5 52deg, #b9d4ec 64deg, #162f63 67deg, #1b4582 76deg, #7eb6de 93deg, #132c5b 108deg, #1c3d77 190deg, #122b5b 360deg); }
+.scene.bright::before { background: radial-gradient(ellipse at 28% 22%, #ffffff 0 14%, transparent 42%), linear-gradient(160deg, #f7fbff 0%, #d9ecff 38%, #b8d9f6 70%, #eaf4ff 100%); }
+.tag { position: absolute; left: 12px; bottom: 10px; font: 10.5px "Cascadia Mono", Consolas, ui-monospace, monospace; color: #fff; background: var(--mark); padding: 0 5px; border-radius: 4px; z-index: 3; }
+.tag.bad { background: #b42318; }
+.taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: rgba(32, 32, 32, .55); }
+.bright .taskbar { background: rgba(243, 243, 243, .8); }
+
+.stack { position: absolute; right: 6px; bottom: 35px; display: flex; flex-direction: column; gap: 7px; width: 320px; }
+.card { position: relative; background: var(--bg); }
+.today .card { border: 1px solid var(--edge-today); }
+.soft .card { border-radius: 12px; box-shadow: inset 0 0 0 1px var(--edge); }
+.note { height: 80px; }
+.note .ph { position: absolute; left: 9px; top: 9px; width: 62px; height: 62px; border-radius: 50%; background: var(--avatar); color: var(--avatar-fg); display: grid; place-items: center; font-weight: 600; font-size: 18px; }
+.note .nm { position: absolute; left: 83px; top: 12px; right: 36px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note .tx { position: absolute; left: 83px; top: 31px; right: 14px; color: var(--text); font-size: 12.5px; line-height: 1.35; }
+.note .tx span { color: var(--lbtn); }
+.note .cl { position: absolute; right: 1px; top: 2px; width: 30px; height: 30px; display: grid; place-items: center; color: var(--icon); }
+.note .rp { position: absolute; right: 10px; bottom: 8px; height: 28px; padding: 0 12px; border-radius: 4px; background: var(--bg); color: var(--lbtn); font-weight: 600; font-size: 12.5px; display: grid; place-items: center; }
+.note.hover .tx { right: 92px; }
+.hideall { height: 36px; display: grid; place-items: center; color: var(--lbtn); font-size: 13px; }
+.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+
+.panelwin { position: absolute; left: 50%; top: 14px; width: 290px; height: 330px; transform: translateX(-50%); background: var(--bg); overflow: hidden; box-shadow: 0 6px 22px rgba(0, 0, 0, .35); }
+.r6 { border-radius: 6px; }
+.r12 { border-radius: 12px; }
+.ptitle { display: flex; align-items: center; height: 42px; padding: 0 6px 0 14px; gap: 2px; font-weight: 600; }
+.ptitle span { margin-right: auto; }
+.ptitle i { width: 30px; height: 30px; display: grid; place-items: center; color: var(--icon); font-style: normal; }
+.web { position: absolute; left: 0; right: 0; top: 42px; bottom: 52px; background: var(--bg); padding: 14px; }
+.web .hero { height: 96px; border-radius: 10px; background: linear-gradient(135deg, #7fb3e6, #b9a2f0); margin-bottom: 12px; }
+.web .ln { height: 10px; border-radius: 5px; background: var(--block); margin-bottom: 9px; }
+.web .ln.s { width: 60%; }
+.foot { position: absolute; left: 0; right: 0; bottom: 0; height: 52px; padding: 8px 12px; background: var(--bg); }
+.foot div { height: 36px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 600; display: grid; place-items: center; }
+
+.shell { position: absolute; left: 50%; top: 18px; width: 330px; height: 200px; transform: translateX(-50%); border-radius: 8px; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
+.shell .tb { height: 30px; display: flex; align-items: center; padding-left: 12px; font-size: 12px; gap: 6px; }
+.shell .tb b { margin-right: auto; font-weight: 400; }
+.shell .tb i { width: 40px; text-align: center; font-style: normal; color: var(--icon); }
+.shell .body { position: absolute; left: 0; right: 0; top: 30px; bottom: 0; display: grid; place-items: center; }
+.shell .spin { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--accent); border-right-color: var(--accent); }
+.shell.flat, .shell.flat .tb { background: var(--bg); }
+.shell.glass { background: var(--win); backdrop-filter: blur(32px) saturate(1.45); -webkit-backdrop-filter: blur(32px) saturate(1.45); box-shadow: inset 0 0 0 1px var(--edge), 0 8px 24px rgba(0, 0, 0, .3); }
+
+table { border-collapse: collapse; font-size: 12px; width: 100%; }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--page-line); vertical-align: top; }
+th { font-weight: 600; color: var(--page-muted); }
+code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
+.keep { color: var(--page-muted); }
+.chg { color: #1e7a3a; font-weight: 600; }
+.ask { color: #b25e09; font-weight: 600; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></symbol>
+</svg>
+<div class="sheet">
+  <h1>C19 Separate windows: visual reference</h1>
+  <p>Separate windows stay opaque, as the user decided. The restore shell takes the material of the window it stands in for. If the user chooses, Telegram's notifications and separate panels take the popup shape: radius 12 and the Popup role's 1 px border, with an opaque fill.</p>
+
+  <section class="panel">
+    <h2>A. Telegram's notifications (Task 2, if chosen)</h2>
+    <p class="lead">320 × 80 cards at the bottom right, 7 px apart, with a 36 px Hide all bar above them. The top card is hovered and shows Reply. Today each card is a square opaque window with a 1 px <code>windowShadowFgFallback</code> edge; in the night theme that color equals <code>windowBg</code>, so the card has no edge at all.</p>
+    <div class="two" data-notes></div>
+  </section>
+
+  <section class="panel">
+    <h2>B. Separate panels: a Mini App (Task 3, if chosen)</h2>
+    <p class="lead"><code>Ui::SeparatePanel</code> is already a rounded, shadowed window at <code>callRadius</code> 6 px. The popup shape raises the radius to 12. When a panel has no bottom bar, its web view must not reach into the larger corner (Task 3 Step 1).</p>
+    <div class="three" data-panels></div>
+  </section>
+
+  <section class="panel">
+    <h2>C. Restore shell (Task 1)</h2>
+    <p class="lead">While a separate chat window reopens at startup, a placeholder <code>RpWindow</code> fills itself with <code>windowBg</code> and shows a spinner. With material on, the window that replaces it has the material, so the placeholder flashes an upstream window first. The shell takes the Window role and the title painter instead.</p>
+    <div class="three" data-shell></div>
+  </section>
+
+  <section class="panel">
+    <h2>D. Every separate window</h2>
+    <table>
+      <tr><th>Window</th><th>Source</th><th>Today</th><th>C19</th></tr>
+      <tr><td>Media viewer, picture-in-picture, stories</td><td><code>media/view/media_view_overlay_widget.*</code>, <code>media_view_pip.*</code>, <code>media/stories/</code></td><td>Dark overlay (<code>mediaviewBg</code> <code>#222222eb</code>), GPU video</td><td class="keep">Unchanged; checked</td></tr>
+      <tr><td>Calls, group calls, screen-share chooser</td><td><code>calls/calls_window.*</code>, <code>calls/calls_panel.*</code>, <code>calls/group/</code></td><td>Own dark palette, own title, video tiles</td><td class="keep">Unchanged; checked</td></tr>
+      <tr><td>Mini Apps, payments, passport, wallet, location picker, export</td><td><code>Ui::SeparatePanel</code> users</td><td>Rounded 6 px, own shadow, web views</td><td class="ask">Radius 12 if chosen; content opaque</td></tr>
+      <tr><td>Instant View, its editor, markdown viewer</td><td><code>iv/</code></td><td><code>RpWindow</code> around a web view</td><td class="keep">Unchanged; checked</td></tr>
+      <tr><td>Telegram's notifications and Hide all</td><td><code>window/notifications_manager_default.*</code></td><td>Square, opaque, 1 px edge, no shadow</td><td class="ask">Popup shape if chosen; opaque</td></tr>
+      <tr><td>Windows native toasts</td><td><code>platform/win/notifications_manager_win.*</code></td><td>The system's; opt-in (<code>ByDefault()</code> is <code>false</code>)</td><td class="keep">Unchanged</td></tr>
+      <tr><td>Restore shell</td><td><code>window/window_restore_shell.*</code></td><td>Opaque <code>windowBg</code> with a spinner</td><td class="chg">Material, Window role and title painter when material is active</td></tr>
+    </table>
+  </section>
+</div>
+<script>
+(() => {
+  const ic = (id) => `<svg class="ic"><use href="#i-${id}"/></svg>`;
+  const note = (initials, name, text, hover) => `
+    <div class="card note${hover ? ' hover' : ''}">
+      <div class="ph">${initials}</div>
+      <div class="nm">${name}</div>
+      <div class="tx">${text}</div>
+      <div class="cl">${ic('close')}</div>
+      ${hover ? '<div class="rp">Reply</div>' : ''}
+    </div>`;
+  const notes = (classes, tag) => `
+    <div class="scene ${classes}" style="height:330px">${tag}
+      <div class="stack">
+        <div class="card hideall">Hide all</div>
+        ${note('MC', 'Maya Chen', 'Coffee at 9:30, then we can head out together.', true)}
+        ${note('WC', 'Weekend crew', '<span>James:</span> Here is the trail map for Saturday.', false)}
+      </div>
+      <div class="taskbar"></div>
+    </div>`;
+  const tagToday = '<span class="tag bad">today</span>';
+  const tagSoft = '<span class="tag">popup shape</span>';
+  document.querySelector('[data-notes]').innerHTML = `
+    <figure>${notes('bright day today', tagToday)}
+      <figcaption><b>Today, day, bright desktop.</b> Square corners; the <code>#f1f1f1</code> edge is 1.13:1 against white.</figcaption></figure>
+    <figure>${notes('bright day soft', tagSoft)}
+      <figcaption><b>Popup shape, day.</b> Radius 12, <code>windowFg</code> at 10 % as the edge, same size, place and spacing.</figcaption></figure>
+    <figure>${notes('night today', tagToday)}
+      <figcaption><b>Today, night, dark desktop.</b> The edge is <code>#17212b</code>, the card's own color: no edge.</figcaption></figure>
+    <figure>${notes('night soft', tagSoft)}
+      <figcaption><b>Popup shape, night.</b> The 10 % edge separates the card from a dark desktop.</figcaption></figure>`;
+
+  const panel = (classes, radius, tag) => `
+    <div class="scene ${classes}" style="height:380px">${tag}
+      <div class="panelwin r${radius}">
+        <div class="ptitle"><span>Trail Planner</span><i>${ic('more')}</i><i>${ic('close')}</i></div>
+        <div class="web"><div class="hero"></div><div class="ln"></div><div class="ln"></div><div class="ln s"></div><div class="ln"></div><div class="ln s"></div></div>
+        <div class="foot"><div>Plan a route</div></div>
+      </div>
+    </div>`;
+  document.querySelector('[data-panels]').innerHTML = `
+    <figure>${panel('day', 6, tagToday)}
+      <figcaption><b>Today, day.</b> <code>callRadius</code> 6 px with <code>callShadow</code>.</figcaption></figure>
+    <figure>${panel('day', 12, tagSoft)}
+      <figcaption><b>Popup shape, day.</b> Radius 12; title, web view and bottom button keep their opaque fills.</figcaption></figure>
+    <figure>${panel('night', 12, tagSoft)}
+      <figcaption><b>Popup shape, night.</b> The shadow stays; bottom bars must be 0 or at least 12 px high.</figcaption></figure>`;
+
+  const shell = (classes, kind, tag) => `
+    <div class="scene ${classes}" style="height:256px">${tag}
+      <div class="shell ${kind}">
+        <div class="tb"><b>Weekend crew</b><i>–</i><i>□</i><i>✕</i></div>
+        <div class="body"><div class="spin"></div></div>
+      </div>
+    </div>`;
+  document.querySelector('[data-shell]').innerHTML = `
+    <figure>${shell('day', 'flat', tagToday)}
+      <figcaption><b>Today, day.</b> An opaque white window, then the restored window with material replaces it.</figcaption></figure>
+    <figure>${shell('day', 'glass', '<span class="tag">material</span>')}
+      <figcaption><b>With material, day.</b> The Window role at the 0.72 floor and the title painter, as the window it stands in for.</figcaption></figure>
+    <figure>${shell('night', 'glass', '<span class="tag">material</span>')}
+      <figcaption><b>With material, night.</b> The Window role at 0.74. With material off, the shell is unchanged.</figcaption></figure>`;
+})();
+</script>
+</body>
+</html>

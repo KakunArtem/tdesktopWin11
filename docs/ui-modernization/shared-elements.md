@@ -4,8 +4,10 @@ Date: 2026-10-30. Status: grouping and proposed design direction. C17 has a
 [plan](plans/2026-10-30-shared-controls.md) and a
 [visual reference](component-references/c17-shared-controls/README.md), and
 C18 a [plan](plans/2026-10-31-foundations.md) and a
-[visual reference](component-references/c18-foundations/README.md); C19 has
-neither yet. This document covers the elements that the
+[visual reference](component-references/c18-foundations/README.md), and C19 a
+[plan](plans/2026-10-31-separate-windows.md) and a
+[visual reference](component-references/c19-separate-windows/README.md). This
+document covers the elements that the
 [component architecture](architecture.md#coverage-of-the-element-map) left
 without an owner, groups them into three proposed components, C17 to C19, and
 records what each one paints today.
@@ -101,22 +103,24 @@ by C2 and C7.
 | Window | Source | Today | Proposed direction |
 | --- | --- | --- | --- |
 | Media viewer, stories and picture-in-picture | `media/view/media_view_overlay_widget.*`, `media_view_pip.*`, `platform/win/overlay_widget_win.h` | Dark full-window overlay (`mediaviewBg` `#222222eb`) with video and GPU content | Stays as it is. It is content-first and dark, and its GPU surfaces need opaque fills. |
-| Calls and group calls, including the screen-share source chooser | `calls/calls_window.*`, `calls/calls_panel.*`, `calls/group/calls_group_panel.*`, `calls/group/ui/desktop_capture_choose_source.cpp` | Own dark palette, custom title, video tiles | Stays opaque. Align only the title bar with C8 if the hook is reused. |
-| Mini Apps and other separate panels | `Ui::SeparatePanel` users: `ui/chat/attach/attach_bot_webview.cpp`, `payments/ui/payments_panel.cpp`, `passport/passport_panel.cpp`, `wallet/wallet_panel.cpp`, `ui/controls/location_picker.cpp`, `export/view/export_view_panel_controller.cpp` | Rounded panel windows with their own shadow; Mini Apps host a web view | Web view content stays opaque. The panel frame could take the C14 popup shape, and popup Acrylic if C14 records go. |
-| Instant View, its editor and the markdown viewer | `iv/iv_controller.*`, `iv/editor/iv_editor_window.*`, `iv/markdown/iv_markdown_controller.*` | Separate `RpWindow`s around a web view | Stay opaque; align the title bar with C8. |
-| Notifications | `window/notifications_manager_default.*` | Opaque `RpWidget` windows. These are the Windows default: `Platform::Notifications::ByDefault()` is `false` in `notifications_manager_win.cpp`, so native toasts are opt-in. | The most visible separate window. A candidate for the C14 popup shape (radius 12, Popup fill), with no material behind it unless popup Acrylic goes. Native toasts stay the system's. |
-| Restore shell | `window/window_restore_shell.*` | A placeholder window shown while separate windows reopen | Takes the main window's frame and Window role when C7 is on, so restoring does not flash an upstream window. |
+| Calls and group calls, including the screen-share source chooser | `calls/calls_window.*`, `calls/calls_panel.*`, `calls/group/calls_group_panel.*`, `calls/group/ui/desktop_capture_choose_source.cpp` | Own dark palette, custom title, video tiles | Stays opaque, with its own title. |
+| Mini Apps and other separate panels | `Ui::SeparatePanel` users: `ui/chat/attach/attach_bot_webview.cpp`, `payments/ui/payments_panel.cpp`, `passport/passport_panel.cpp`, `wallet/wallet_panel.cpp`, `ui/controls/location_picker.cpp`, `export/view/export_view_panel_controller.cpp` | Rounded panel windows (`callRadius` 6) with their own shadow; Mini Apps host a web view | Opaque, as the user decided. The frame takes the popup radius 12 if the user chooses the popup shape. |
+| Instant View, its editor and the markdown viewer | `iv/iv_controller.*`, `iv/editor/iv_editor_window.*`, `iv/markdown/iv_markdown_controller.*` | Separate `RpWindow`s around a web view | Stay opaque, with their own title. |
+| Notifications | `window/notifications_manager_default.*` | Opaque `RpWidget` windows. These are the Windows default: `Platform::Notifications::ByDefault()` is `false` in `notifications_manager_win.cpp`, so native toasts are opt-in. | The most visible separate window. Opaque; if the user chooses, the popup shape (radius 12, the Popup border). Native toasts stay the system's. |
+| Restore shell | `window/window_restore_shell.*` | A placeholder window shown while separate windows reopen | Takes the material, Window role and title painter when material is active, so restoring does not flash an upstream window. |
 
 ## Order and next steps
 
-- C17 comes after C7 and before C14 and C15, because boxes and settings are
-  built from these controls. Its plan maps the surface fills and the opaque
+- C17 comes after C8 and before the element plans C9–C13, which build their
+  rows, fields and hovers on it, and so before C14 and C15. Its plan maps the surface fills and the opaque
   hover in one `lib_ui` switch, raises three state colors, and checks the
   subgroups that paint no fill.
-- C18 comes after C17 and before C14. Its plan raises the grey icon entries,
+- C18 comes after C17 and before C9–C13, whose checks include its icons. Its plan raises the grey icon entries,
   implements the system font default only if the user chooses it, and checks
   text rendering and motion. Icon shapes stay Telegram's.
-- C19 comes after C14, whose popup Acrylic record decides the separate
-  panels' frame.
-- C19 gets a plan and a visual reference in the same format when
-  requested.
+- C19 comes after C14, whose popup radius it reuses, and before C15's final
+  pass. Its plan gives the
+  restore shell the material, asks the user about the popup shape for
+  notifications and separate panels, and checks that every other separate
+  window is unchanged. No separate window gets material: the user decided
+  they stay opaque.

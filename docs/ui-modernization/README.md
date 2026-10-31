@@ -83,7 +83,7 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Component visual references](component-references/README.md): what each
   component changes, isolated from the mockup, for every planned component.
 - [Shared controls, foundations and separate windows](shared-elements.md):
-  the elements no plan covered, grouped as C17 to C19; C17 and C18 are planned.
+  the elements no plan covered, grouped as C17 to C19, each with a plan.
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

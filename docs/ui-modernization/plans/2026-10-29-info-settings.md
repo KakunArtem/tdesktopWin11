@@ -12,7 +12,7 @@
 
 **Visual reference:** [C15 info and settings](../component-references/c15-info-settings/README.md): the info pane in the third column and as a layer, settings rows with and without their resting fill, lock and sign-in cards over the test wallpapers, and the promoted setting.
 
-**Depends on:** [transient surfaces](2026-10-29-transient-surfaces.md), [shared controls](2026-10-30-shared-controls.md) (settings rows, peer lists and dividers) and every earlier plan.
+**Depends on:** [transient surfaces](2026-10-29-transient-surfaces.md), [shared controls](2026-10-30-shared-controls.md) (settings rows, peer lists and dividers), [separate windows](2026-10-31-separate-windows.md) and every earlier plan.
 
 ## Global Constraints
 
@@ -20,7 +20,7 @@
 - The info pane in the third column fills the third panel; as a layer it keeps the layer's rounded box shape with the Popup role.
 - Settings rows keep their ripple; their resting fill and hover follow C17's mapping.
 - Lock and sign-in screens: Window role on the body, content on a centered card with the Popup role and `softPanelsPopupRadius`.
-- Media viewer, calls, group calls, Mini Apps and notification windows are not changed; the check record states this.
+- Media viewer, calls, group calls, Mini Apps and notification windows belong to C19, which keeps them opaque; this plan does not change them, and the check record states their state.
 - Promotion keeps the user's current values: a user who had the experimental switch on keeps Soft Panels on.
 
 ## Review Focus
@@ -144,7 +144,7 @@ Tab through the whole main window, settings and a box: focus is always visible. 
 
 - [ ] **Step 3: Separate windows**
 
-Open the media viewer, a call, a Mini App and a notification: unchanged; note it.
+Open the media viewer, a call, a Mini App and a notification: each matches `checks/separate-windows.md` (C19); note it.
 
 - [ ] **Step 4: Commit**
 

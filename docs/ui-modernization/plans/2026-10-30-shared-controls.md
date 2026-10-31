@@ -12,7 +12,7 @@
 
 **Visual reference:** [C17 shared controls](../component-references/c17-shared-controls/README.md): the mockup's switch and field, every control group on a panel and in a box in day and night, before and after, and the contrast of the control colors on the role fills.
 
-**Depends on:** [material fills](2026-10-29-material-fills.md) (adjusted entries), [surface roles](2026-10-29-surface-roles.md), [toolkit fork](2026-10-29-toolkit-fork.md), [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`). Must finish before [transient surfaces](2026-10-29-transient-surfaces.md) and [info and settings](2026-10-29-info-settings.md), which build on it.
+**Depends on:** [material fills](2026-10-29-material-fills.md) (adjusted entries), [surface roles](2026-10-29-surface-roles.md), [toolkit fork](2026-10-29-toolkit-fork.md), [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`). Comes after the [title bar](2026-10-29-title-bar.md) and before the element plans C9–C13, which build their rows, fields and hovers on it; must finish before [transient surfaces](2026-10-29-transient-surfaces.md) and [info and settings](2026-10-29-info-settings.md), which use it too.
 
 ## Global Constraints
 

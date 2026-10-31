@@ -18,22 +18,26 @@ before starting any of them.
 | any time before 7 | C6 Toolkit fork | [2026-10-29-toolkit-fork.md](2026-10-29-toolkit-fork.md) |
 | 6 | C7 Shell layout | [2026-10-29-shell-layout.md](2026-10-29-shell-layout.md) |
 | 7 | C8 Title bar | [2026-10-29-title-bar.md](2026-10-29-title-bar.md) |
-| 8, parallel | C9 Navigation rail | [2026-10-29-navigation-rail.md](2026-10-29-navigation-rail.md) |
-| 8, parallel | C10 Chat list and search | [2026-10-29-chat-list.md](2026-10-29-chat-list.md) |
-| 8, parallel | C11 Conversation chrome | [2026-10-29-conversation-chrome.md](2026-10-29-conversation-chrome.md) |
-| 8, parallel | C12 Composer | [2026-10-29-composer.md](2026-10-29-composer.md) |
-| 8, after C11 | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
-| 9 | C17 Shared controls | [2026-10-30-shared-controls.md](2026-10-30-shared-controls.md) |
-| 10 | C18 Foundations | [2026-10-31-foundations.md](2026-10-31-foundations.md) |
+| 8 | C17 Shared controls | [2026-10-30-shared-controls.md](2026-10-30-shared-controls.md) |
+| 9 | C18 Foundations | [2026-10-31-foundations.md](2026-10-31-foundations.md) |
+| 10, parallel | C9 Navigation rail | [2026-10-29-navigation-rail.md](2026-10-29-navigation-rail.md) |
+| 10, parallel | C10 Chat list and search | [2026-10-29-chat-list.md](2026-10-29-chat-list.md) |
+| 10, parallel | C11 Conversation chrome | [2026-10-29-conversation-chrome.md](2026-10-29-conversation-chrome.md) |
+| 10, parallel | C12 Composer | [2026-10-29-composer.md](2026-10-29-composer.md) |
+| 10, after C11 | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
 | 11 | C14 Transient surfaces | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
-| 12 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
+| 12 | C19 Separate windows | [2026-10-31-separate-windows.md](2026-10-31-separate-windows.md) |
+| 13 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
 
 "Parallel" plans touch disjoint directories; they can run in separate
 sessions or worktrees, but each still lands as its own commits. C13 consumes
 C11's chat background state, so it starts after C11 lands.
 
-C19 Separate windows is grouped in [shared elements](../shared-elements.md)
-and has no plan yet. When planned, it goes after C14.
+C17 and C18 come before the element plans: C9–C13 build their rows, fields
+and hovers on C17's mapping, their contrast checks include the icons C18
+raises, and C18's font decision changes every screenshot after it. C8, C17
+and C18 each add entries to C3's table in `window/window_material.cpp`, so
+they run one after another. Decide the day rail colors before C9.
 
 ## Ground rules
 

@@ -12,7 +12,7 @@
 
 **Visual reference:** [C18 foundations](../component-references/c18-foundations/README.md): the mockup's icons, every grey icon group on its role today and raised, day and night, the entry table with contrast before and after, the type scale and the motion values.
 
-**Depends on:** [material fills](2026-10-29-material-fills.md) (the adjusted-entry table and `ReadableOver`), [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`). Comes after [shared controls](2026-10-30-shared-controls.md) and before [transient surfaces](2026-10-29-transient-surfaces.md), whose menus and emoji panel show these icons.
+**Depends on:** [material fills](2026-10-29-material-fills.md) (the adjusted-entry table and `ReadableOver`), [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`). Comes after [shared controls](2026-10-30-shared-controls.md), whose entries it appends to the same table, and before the element plans C9–C13: their contrast checks include these icons, and the font decision changes every screenshot after it.
 
 ## Global Constraints
 
