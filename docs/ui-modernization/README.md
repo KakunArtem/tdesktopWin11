@@ -99,6 +99,8 @@ This brief is the entry point for the redesign documentation. Current documents:
   component changes, isolated from the mockup, for every planned component.
 - [Shared controls, foundations and separate windows](shared-elements.md):
   the elements no plan covered, grouped as C17 to C19, each with a plan.
+- [Windows runbook](windows-runbook.md): the first steps on the Windows
+  machine, from the toolchain to Phase 1.
 - [Plan preflight](preflight.md): the plans checked against the pinned
   sources before implementation.
 - [Toolkit fork](toolkit-fork.md): the `lib_ui` and `lib_base` forks, the
