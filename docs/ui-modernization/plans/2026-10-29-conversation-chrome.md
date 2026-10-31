@@ -17,7 +17,7 @@
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules).
-- Header height stays `topBarHeight` (54 px); the exploration's 56 px is not adopted.
+- Header height under Soft Panels: `softPanelsTopBarHeight` 56 px, the exploration's (user decision 2026-10-31); upstream keeps `topBarHeight` (54 px). The chats list header aligns with it, as it does today.
 - Bar pill at 100 % scale: margins `12, 0, 12, 4` inside the bar's row, radius `9`, Bar role, border `Border(Surface::Bar)`; the existing accent line of `Ui::MessageBar` stays.
 - Chat background pref: key `window_material_chat_background`, `bool`, default `false`; label "Show window material behind messages"; shown only when `Window::Material::Capable()`.
 - With the pref off, the user's wallpaper fills the message area exactly as today, also with material active.
@@ -28,7 +28,7 @@
 - Several bars at once (group call, requests, pinned and translate in a large group): pills stack with the 4 px gap and no double borders. Pinned by Task 2 Step 4.
 - Pinned bar with multiple pinned messages: the bar's vertical position indicator and message switching animation stay inside the pill. Pinned by Task 2 Step 4.
 - Chat theme (per-chat theme set by the other side) with the material background pref on: the chat theme's bubble colors stay, but the canvas shows material. Pinned by Task 3 Step 4.
-- Header selection mode and search mode: header still fills the panel, no square corners at the panel's top. Pinned by Task 1 Step 3.
+- Header selection mode and search mode: header still fills the panel, no square corners at the panel's top. Pinned by Task 1 Step 4.
 - Topic tabs (`SubsectionTabs`, horizontal and vertical): their `st::windowBg` fills follow the Conversation role. Pinned by Task 2 Step 3.
 
 ---
@@ -38,23 +38,29 @@
 **Files:**
 - Modify: `Telegram/SourceFiles/history/history_widget.cpp`
 - Modify: `Telegram/SourceFiles/history/view/history_view_chat_section.cpp`, `history_view_pinned_section.cpp`, `history_view_scheduled_section.cpp`, `history_view_welcome_messages_section.cpp`
+- Modify: `Telegram/SourceFiles/history/view/history_view_top_bar_widget.cpp`, `history/view/controls/history_view_compose_search.cpp`, `dialogs/dialogs_widget.cpp`, `profile/profile_back_button.cpp`
+- Modify: `Telegram/SourceFiles/window/window_soft_panels.style`, `window_soft_panels.h`, `window_soft_panels.cpp`
 
 - [ ] **Step 1: Hide header shadows under Soft Panels**
 
 `HistoryWidget::_topShadow` and each section's `_topBarShadow` stay hidden while `Ui::Material::SoftPanels()`; wherever the code shows them, add the condition. The header's bottom edge is then the panel's continuous fill, as in the exploration.
 
-- [ ] **Step 2: Build**
+- [ ] **Step 2: Header height**
+
+Add `softPanelsTopBarHeight: 56px` to `window/window_soft_panels.style` and `[[nodiscard]] int Window::SoftPanels::TopBarHeight();` to `window_soft_panels.h`: the new value under Soft Panels, `st::topBarHeight` otherwise. Replace the reads of `st::topBarHeight` in `history_view_top_bar_widget.cpp`, `history_view_chat_section.cpp`, `history_view_compose_search.cpp`, `dialogs_widget.cpp` and `profile_back_button.cpp` with it; the theme preview (`window_theme_preview.cpp`) keeps the upstream value. Recheck at the pinned commit for reads through other styles that copy `topBarHeight`.
+
+- [ ] **Step 3: Build**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
 
-- [ ] **Step 3: Check**
+- [ ] **Step 4: Check**
 
 With Soft Panels on, material on and off: an ordinary chat, a topic, pinned messages, scheduled messages, header search mode and message selection mode. The header blends into the panel; its top corners are rounded by the panel frame in every mode.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add Telegram/SourceFiles/history/history_widget.cpp Telegram/SourceFiles/history/view
+git add Telegram/SourceFiles/history/history_widget.cpp Telegram/SourceFiles/history/view Telegram/SourceFiles/dialogs/dialogs_widget.cpp Telegram/SourceFiles/profile/profile_back_button.cpp Telegram/SourceFiles/window/window_soft_panels.style Telegram/SourceFiles/window/window_soft_panels.h Telegram/SourceFiles/window/window_soft_panels.cpp
 git commit -m "Merged the chat header into the Soft Panels conversation panel."
 ```
 

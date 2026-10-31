@@ -23,7 +23,7 @@
 - Shapes, sizes, radii and durations of every control stay Telegram's.
 - The toggle knob keeps its `windowBg` fill, as the mockup's switch keeps its knob. The avatar selection ring (`RoundCheckbox` border) stays: it sits on the avatar, and its boxes have the 0.97 Popup fill.
 - Adjusted entries at the roles Navigation, Conversation and Popup: `checkboxFg` and `activeLineFg` at 3:1, `lightButtonFg` at 4.5:1.
-- Field bottom lines (`inputBorderFg`) and slider tracks (`sliderBgInactive`) keep their colors until the user decides; they miss 3:1 in today's solid look too.
+- Field bottom lines (`inputBorderFg`) and slider tracks (`sliderBgInactive`) keep their colors (user decision 2026-10-31), although they miss 3:1 in today's solid look too. Text fields keep their bottom line, and filled buttons keep Telegram's 34 px height (user decision 2026-10-31).
 - Divider bands (`boxDividerBg`, which is `windowBgOver` in both default themes) go through the same mapping, so they become a soft band of the same tint as the hover.
 
 ## Review Focus
@@ -44,6 +44,7 @@
 
 **Files (tdesktop):**
 - Modify: `Telegram/SourceFiles/window/window_soft_panels.cpp` (sets the switch and the hover)
+- Modify: `Telegram/SourceFiles/ui/ui_material.h`, `ui_material.cpp` (`SelectedFill()`)
 - Modify: `Telegram/cmake/test_window_material.cmake`
 - Test: `Telegram/SourceFiles/tests/test_window_material.cpp`
 
@@ -53,6 +54,7 @@
   - `[[nodiscard]] QColor ResolveControlFill(const QColor &fill, const SoftControlColors &colors);` — pure: a fully transparent color when `fill` is opaque and equals `windowBg` or `boxBg`; `colors.hover` when it equals `windowBgOver`; `fill` otherwise.
   - `void SetSoftControls(bool enabled);`, `[[nodiscard]] bool SoftControls();` and `void SetSoftControlHover(QColor hover);` — process-wide; off by default.
   - `[[nodiscard]] QColor ControlFill(const style::color &fill);` — `fill->c` while off; otherwise `ResolveControlFill` with `st::windowBg`, `st::boxBg`, `st::windowBgOver` and the hover.
+- Produces, in `namespace Ui::Material` (tdesktop, `ui/ui_material.h`): `[[nodiscard]] QColor SelectedFill();` — `st::windowBgActive` at alpha 0.30, the selected pill of the rail (C9) and the open chat row (C10), as the [element styling](../architecture.md#element-styling-c9c15) contract defines it.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -97,7 +99,7 @@ Read `RoundButton::paintEvent`, `FlatButton::paintEvent`, `SettingsButton::paint
 
 - [ ] **Step 4: Implement the mapping and apply it**
 
-Implement the functions. Then paint `ControlFill(color)` where each site painted `color`, skipping the paint when its alpha is 0:
+Implement the functions, and `Ui::Material::SelectedFill()` in the app. Then paint `ControlFill(color)` where each site painted `color`, skipping the paint when its alpha is 0:
 - `RoundButton::paintEvent`: for `_roundRect` (`textBg`) and `_roundRectOver` (`textBgOver`). When `ControlFill` differs from the style color, draw the rounded rect with it directly, as the `_brushOverride` path does, because the cached `RoundRect` holds the style color. Paths with `_brushOverride` are unchanged.
 - `FlatButton::paintEvent`: the chosen `bgColor` or `overBgColor`.
 - `SettingsButton::paintBg`: the chosen `textBg` or `textBgOver`.
@@ -121,7 +123,7 @@ Run: `cmd /c .ai\setup\build-target.cmd Telegram`. With Soft Panels and material
 git -C Telegram/lib_ui add ui/widgets/soft_controls.h ui/widgets/soft_controls.cpp
 git -C Telegram/lib_ui commit -am "Added soft controls fill mapping."
 git -C Telegram/lib_ui push fork HEAD
-git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/cmake/test_window_material.cmake Telegram/SourceFiles/tests/test_window_material.cpp
+git add Telegram/lib_ui Telegram/SourceFiles/window/window_soft_panels.cpp Telegram/SourceFiles/ui/ui_material.h Telegram/SourceFiles/ui/ui_material.cpp Telegram/cmake/test_window_material.cmake Telegram/SourceFiles/tests/test_window_material.cpp
 git commit -m "Let shared controls rest on the Soft Panels surfaces."
 ```
 

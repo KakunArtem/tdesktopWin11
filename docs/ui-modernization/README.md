@@ -27,6 +27,21 @@ Windows 11 as the design target.
   Acrylic is the working guideline for now (2026-10-28).
 - Focus on Windows for now: the Soft Panels layout and material are judged and
   built for Windows, and macOS and Linux keep the upstream look (2026-10-30).
+- Platform and setup (2026-10-31): material needs Windows 11 22H2 (build
+  22621) or later; it is refused while the system window frame is on; `lib_ui`
+  and `lib_base` are forked as `KakunArtem/lib_ui` and `KakunArtem/lib_base`,
+  branch `soft-panels`; `lib_ui`'s default styles stay upstream, and Soft
+  Panels uses parallel app styles and fork flags.
+- Look (2026-10-31): under Soft Panels, Default font means the system font
+  (Segoe UI); Telegram's notifications and separate panels take the popup
+  shape (radius 12, the Popup border, opaque); the day theme rail becomes a
+  light rail with readable labels and the mockup's light selected pill.
+- Mockup values adopted (2026-10-31): rail width 64 px, chat header height
+  56 px, bubble radius 14 px, and a light selected chat row with normal text
+  colors instead of the accent-filled row.
+- Kept as Telegram has them (2026-10-31): night theme unread badge fills,
+  text fields with a bottom line, filled buttons 34 px high, and today's field
+  bottom lines and slider tracks.
 
 The approved reference remains the earlier baseline; the readable mockup
 refines it. Detailed element states, the final native material and
@@ -61,8 +76,8 @@ requests.
   records.
 - Chat wallpaper and custom theme behavior on the translucent conversation
   panel.
-- Supported Windows versions and behavior when translucency is unavailable or
-  disabled.
+- Behavior when translucency is unavailable or disabled (the minimum build
+  is decided above).
 
 ## Working documents
 

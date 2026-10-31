@@ -18,7 +18,7 @@
 
 - All [ground rules](README.md#ground-rules), including the `lib_ui` recheck rule.
 - At 100 % scale: in-app panel and box radius `12`, menu item highlight radius `8`, border `Border(Surface::Popup)`; fills use the Popup role (floor 0.97).
-- Default `lib_ui` styles are not changed for all platforms without a user decision; Soft Panels values go into app-side parallel styles where the app chooses the style, and into the fork only behind a runtime flag.
+- Default `lib_ui` styles stay upstream on every platform (user decision 2026-10-31); Soft Panels values go into app-side parallel styles where the app chooses the style, and into the fork only behind a runtime flag.
 - Popup Acrylic switch: `base::options` toggle id `popup-material-prototype`, scope Windows, off by default, restart required.
 - Every surface keeps its keyboard navigation, dismissal (Escape, outside click), and positioning rules.
 

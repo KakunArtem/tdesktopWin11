@@ -70,11 +70,9 @@ mockup has only a switch and a field; the rest follows C9, C10 and C15.
 - The sheet draws toggles, checkboxes, radios and sliders in the shape
   Telegram uses, simplified; C17 changes none of these shapes.
 - The filled Save button is drawn 28 px high with radius 4, at the user's
-  request. Radius 4 is Telegram's `buttonRadius`; Telegram's
-  `defaultActiveButton` is 34 px high, so the smaller height is an open
-  decision, not part of the plan.
-- Field lines and slider tracks keep their colors; whether to raise them to
-  3:1 is an open decision in the
-  [architecture](../../architecture.md#open-decisions).
+  request. Radius 4 is Telegram's `buttonRadius`. The user then kept
+  Telegram's 34 px `defaultActiveButton` height for the app (2026-10-31).
+- Field lines and slider tracks keep their colors, and text fields keep their
+  bottom line, as the user decided (2026-10-31).
 
 ![C17 shared controls reference](shared-controls.png)

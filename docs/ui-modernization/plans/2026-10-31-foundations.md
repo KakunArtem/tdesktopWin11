@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Keep icons readable on the role fills, make the default font the user's decision, and confirm that Soft Panels adds no motion of its own, without changing Telegram's icon shapes, type scale or durations.
+**Goal:** Keep icons readable on the role fills, make the system font the Soft Panels default, as the user decided, and confirm that Soft Panels adds no motion of its own, without changing Telegram's icon shapes, type scale or durations.
 
-**Architecture:** Icons are monochrome masks recolored by palette entries, so their readability is a color problem that C3 already solves for text. This plan appends the grey icon entries to C3's adjusted-entry table: resting icons at 3:1, hover icons at 4.5:1 so hover stays stronger than rest. Typography keeps Telegram's sizes. The font family already has a Default / System / custom setting, and `lib_ui` sizes a system or custom family to Open Sans's x-height. If the user chooses the system font, one pure function makes "Default" mean the system font under Soft Panels, used at startup and in the font box preview. Motion needs no code: the last task checks that every Soft Panels path keeps Telegram's durations and honors power saving.
+**Architecture:** Icons are monochrome masks recolored by palette entries, so their readability is a color problem that C3 already solves for text. This plan appends the grey icon entries to C3's adjusted-entry table: resting icons at 3:1, hover icons at 4.5:1 so hover stays stronger than rest. Typography keeps Telegram's sizes. The font family already has a Default / System / custom setting, and `lib_ui` sizes a system or custom family to Open Sans's x-height. The user chose the system font, so one pure function makes "Default" mean the system font under Soft Panels, used at startup and in the font box preview. Motion needs no code: the last task checks that every Soft Panels path keeps Telegram's durations and honors power saving.
 
 **Tech Stack:** C++20, Qt 6.11 Widgets, `window/window_material.cpp` (C3's table), `ui/ui_material.*` (C7's `SoftPanels()`), `core/application.cpp`, `ui/boxes/choose_font_box.cpp`, `style::SetCustomFont`, `PowerSaving`.
 
@@ -23,7 +23,7 @@
 - Entries and roles are the ones in [Adjusted palette entries](../architecture.md#adjusted-palette-entries) marked C18.
 - Not adjusted, with the reason: `menuIconColor` and `infoIconFg` (both `windowBoldFg`, already strong); `windowSubTextFg`, `windowActiveTextFg` and `lightButtonFg` (C3 and C17 adjust them); `historyToDownFg` (drawn on its own opaque round button); icons on accent or media fills (`activeButtonFg`, `historyFileInIconFg` and similar); separate windows (C19).
 - Type sizes stay Telegram's: `fsize` 13 px, box text 14 px (`boxFontSize`), box titles 16 px semibold (`boxTitleFont`). They match the mockup's 13 px base and 600 weight.
-- The font family default changes only if the user chooses the system font (Task 2 Step 1). No new strings; changing the family still restarts.
+- Under Soft Panels, Default means the system font (Segoe UI on Windows) (user decision 2026-10-31); an explicitly chosen family, Open Sans included, wins. No new strings; changing the family still restarts.
 - Motion: no new animation. Durations stay `lib_ui`'s (`universalDuration` 120, `slideDuration` 240, `fadeWrapDuration` 200, `slideWrapDuration` 150). Anything that animates honors `PowerSaving::kAnimations`.
 
 ## Review Focus
@@ -103,7 +103,6 @@ git commit -m "Kept grey icons readable on the window material."
 **Files:**
 - Modify: `Telegram/SourceFiles/ui/ui_material.h`, `ui/ui_material.cpp`
 - Modify: `Telegram/SourceFiles/core/application.cpp`, `ui/boxes/choose_font_box.cpp`
-- Modify: `docs/ui-modernization/README.md`, `docs/ui-modernization/architecture.md`
 - Test: `Telegram/SourceFiles/tests/test_window_material.cpp`
 
 **Interfaces:**
@@ -111,9 +110,9 @@ git commit -m "Kept grey icons readable on the window material."
   - `[[nodiscard]] QString DefaultFontFamily(const QString &chosen, bool softPanels);` — pure: `style::SystemFontTag()` when `chosen` is empty and `softPanels` is true; `chosen` otherwise.
   - `[[nodiscard]] QString FontFamily(const QString &chosen);` — `DefaultFontFamily(chosen, SoftPanels())`.
 
-- [ ] **Step 1: Ask the user**
+- [ ] **Step 1: Record the font pair**
 
-On Windows 11, take two screenshots of the main window and Settings > Chat settings: Font family set to Default (Open Sans), then to System font (Segoe UI), at 100 % and 150 %. Present them with panel D of the visual reference and ask whether Soft Panels should default to the system font. Record the answer in the README's direction section as a user decision with the date, and close the row in [Open decisions](../architecture.md#open-decisions). If the answer is to keep Telegram's font, commit the docs, mark this task done with no code in the Progress row, and skip to Task 3.
+The user chose the system font on 2026-10-31. On Windows 11, take two screenshots of the main window and Settings > Chat settings, with Font family set to Default (Open Sans) and then to System font (Segoe UI), at 100 % and 150 %, and keep them with the checks record as the before and after of this task.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -157,7 +156,7 @@ Run: `cmd /c .ai\setup\build-target.cmd Telegram`. With Soft Panels on and Font 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add Telegram/SourceFiles/ui/ui_material.h Telegram/SourceFiles/ui/ui_material.cpp Telegram/SourceFiles/core/application.cpp Telegram/SourceFiles/ui/boxes/choose_font_box.cpp Telegram/SourceFiles/tests/test_window_material.cpp docs/ui-modernization/README.md docs/ui-modernization/architecture.md
+git add Telegram/SourceFiles/ui/ui_material.h Telegram/SourceFiles/ui/ui_material.cpp Telegram/SourceFiles/core/application.cpp Telegram/SourceFiles/ui/boxes/choose_font_box.cpp Telegram/SourceFiles/tests/test_window_material.cpp
 git commit -m "Used the system font as the Soft Panels default."
 ```
 
@@ -193,5 +192,5 @@ git commit -m "Recorded foundations checks."
 
 - `test_window_material.exe` reports `failures: 0`.
 - With material on, every icon group in Task 3 Step 1 reaches 3:1 at rest and hover stays stronger than rest; with material off, every entry is unchanged.
-- The font decision is recorded and, if the user chose the system font, implemented.
+- Under Soft Panels, Default renders in the system font, and an explicit family still wins.
 - The motion check finds no new animation and no animation that ignores power saving.

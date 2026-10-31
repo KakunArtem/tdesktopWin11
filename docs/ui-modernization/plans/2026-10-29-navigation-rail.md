@@ -10,26 +10,28 @@
 
 **Spec:** [architecture.md, Element styling](../architecture.md#element-styling-c9c15); exploration CSS `.rail`, `.rail button`, `.folder-badge`, `.main-menu`, `.menu-item`; the [exploration's main menu notes](../explorations/README.md#proposed-changes).
 
-**Visual reference:** [C9 navigation rail](../component-references/c9-navigation-rail/README.md): the mockup rail and drawer, and every button state at 72 px in light and dark.
+**Visual reference:** [C9 navigation rail](../component-references/c9-navigation-rail/README.md): the mockup rail and drawer, and every button state in light and dark. It was drawn at 72 px, before the 64 px width was adopted.
 
 **Depends on:** [shell layout](2026-10-29-shell-layout.md) (`SoftPanels()`, navigation panel), [surface roles](2026-10-29-surface-roles.md).
 
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules).
-- Rail width stays `windowFiltersWidth` (72 px); the exploration's 64 px is not adopted without a user decision.
+- Rail width under Soft Panels: `windowFiltersSoftPanelsWidth` 64 px, the exploration's (user decision 2026-10-31); upstream keeps `windowFiltersWidth` (72 px).
 - At 100 % scale: buttons `54` px minimum height (icons-only and main menu already use it), corner radius `10`, `4` px vertical gap, container padding `4, 6, 8` (top, sides, bottom); marker `3 × 20` px, radius `2`, at the rail's left edge, accent color.
 - Hover fill: primary text at alpha `0.06` (light) / `0.07` (dark), the exploration's `--hover`.
-- Selected fill: `st::sideBarBgActive` (recheck name) at full alpha in solid mode, `Fill(Surface::Bar)` tinted by it in material mode.
+- Light rail (user decision 2026-10-31): under Soft Panels the rail is part of the navigation panel, so its solid color is `dialogsBg` and its parallel styles take the chats list's colors: labels `windowSubTextFg`, icons `menuIconFg`, and the selected label and icon `windowActiveTextFg`. Each is already adjusted by C3 or C18 while material is active.
+- Selected fill: `Ui::Material::SelectedFill()` ([element styling](../architecture.md#element-styling-c9c15)), in solid and material mode. `sideBarBgActive` (`#17212b` in the day theme) is not used under Soft Panels.
+- Without Soft Panels the rail keeps its upstream colors; while material is active they are raised by C3 (`sideBarTextFg`, `sideBarTextFgActive`, added here) and C18 (the icons).
 - Main menu: width stays `mainMenuWidth`; right corner radius `14`; row radius `8`; Popup role.
 - Every behavior stays: folder click, drag reorder in edit mode, context menu, unread counters, muted badges, "Edit" entry, premium lock, tab and keyboard order.
 
 ## Review Focus
 
-- Reordering folders by drag (Edit folders mode): the selected pill and marker must follow the moved button during the drag. Pinned by Task 1 Step 5.
+- Reordering folders by drag (Edit folders mode): the selected pill and marker must follow the moved button during the drag. Pinned by Task 1 Step 6.
 - Text-only and icons-only rail modes (`windowFiltersButtonTextOnly`, `windowFiltersButtonIconsOnly`): both need their parallel styles. Pinned by Task 1 Step 2.
 - A folder with unread muted chats only: grey badge plus the existing muted icon, never accent. Pinned by Task 2 Step 2.
-- Keyboard focus moving through the rail: a visible focus ring on the pill shape. Pinned by Task 1 Step 5.
+- Keyboard focus moving through the rail: a visible focus ring on the pill shape. Pinned by Task 1 Step 6.
 - Opening the main menu over material: the layer dim must still show outside the drawer's rounded corners. Pinned by Task 3 Step 3.
 
 ---
@@ -40,9 +42,13 @@
 - Modify: `Telegram/SourceFiles/window/window.style`
 - Modify: `Telegram/SourceFiles/window/window_filters_menu.h`, `window_filters_menu.cpp`
 - Modify: `Telegram/SourceFiles/window/window_filters_favorite.cpp`
+- Modify: `Telegram/SourceFiles/window/window_session_controller.cpp`
+- Modify: `Telegram/SourceFiles/window/window_material.cpp` (C3's table)
 
 **Interfaces:**
 - Produces style objects: `windowFiltersButtonSoftPanels`, `windowFiltersButtonTextOnlySoftPanels`, `windowFiltersButtonIconsOnlySoftPanels`, `windowFiltersMainMenuSoftPanels` (each inheriting its upstream counterpart with background fields set to `transparent`), and `windowFiltersSoftPanelsRadius: 10px`, `windowFiltersSoftPanelsMarker: size(3px, 20px)`, `windowFiltersSoftPanelsPadding: margins(6px, 4px, 6px, 8px)`, `windowFiltersSoftPanelsSkip: 4px`.
+- Produces, in `namespace Window` (`window_filters_menu.h`): `[[nodiscard]] int FiltersMenuWidth();` — `st::windowFiltersSoftPanelsWidth` under Soft Panels, `st::windowFiltersWidth` otherwise.
+- Consumes: `Ui::Material::SelectedFill()` from [shared controls](2026-10-30-shared-controls.md).
 - Produces, in `FiltersMenu`: `[[nodiscard]] const style::SideBarButton &buttonStyle(ChatsFiltersTabsMode mode) const;` — returns the parallel style when `SoftPanels()`.
 
 - [ ] **Step 1: Recheck `SideBarButton` style fields**
@@ -59,17 +65,21 @@ In the `_container` paint (add a `paintRequest()` subscription), when `SoftPanel
 
 - [ ] **Step 4: Spacing**
 
-When `SoftPanels()`, lay out buttons with `windowFiltersSoftPanelsPadding` and `windowFiltersSoftPanelsSkip`; otherwise unchanged.
+When `SoftPanels()`, lay out buttons with `windowFiltersSoftPanelsPadding` and `windowFiltersSoftPanelsSkip`; otherwise unchanged. Replace the three reads of `st::windowFiltersWidth` (`SessionController::filtersWidth`, the width check next to it, and the button width in `window_filters_menu.cpp`) with `FiltersMenuWidth()`. Long folder names elide as they do today; check "Personal" and a long custom name.
 
-- [ ] **Step 5: Build and check**
+- [ ] **Step 5: Light rail colors**
+
+Set the parallel styles' label, icon and selected colors from the light rail constraint and append `sideBarTextFg` and `sideBarTextFgActive` (Navigation, 4.5:1) to C3's table for the rail without Soft Panels. Expected day values over the material: `#485563` and `#005788`.
+
+- [ ] **Step 6: Build and check**
 
 Run: `cmd /c .ai\setup\build-target.cmd Telegram`
 Switch folders, hover, open Edit folders and drag a folder, Tab through the rail, switch text-only and icons-only modes in folder settings. Pills and marker follow every change; focus is visible. Compare with panel B of the visual reference.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add Telegram/SourceFiles/window/window.style Telegram/SourceFiles/window/window_filters_menu.h Telegram/SourceFiles/window/window_filters_menu.cpp Telegram/SourceFiles/window/window_filters_favorite.cpp
+git add Telegram/SourceFiles/window/window.style Telegram/SourceFiles/window/window_filters_menu.h Telegram/SourceFiles/window/window_filters_menu.cpp Telegram/SourceFiles/window/window_filters_favorite.cpp Telegram/SourceFiles/window/window_session_controller.cpp Telegram/SourceFiles/window/window_material.cpp
 git commit -m "Restyled folder rail for Soft Panels."
 ```
 

@@ -8,8 +8,8 @@ Date: 2026-10-31. Status: proposal. Component: C18 in the
 C18 keeps Telegram's type scale, icon shapes and durations, and changes only
 what fails on the material: the grey icon colors. While material is active,
 resting icon entries are raised to 3:1 and hover entries to 4.5:1, the way C3
-raises secondary text. The default font is a user decision, and motion is
-only checked.
+raises secondary text. The user chose the system font as the Soft Panels
+default, and motion is only checked.
 
 ## Files
 
@@ -51,9 +51,9 @@ only checked.
   `#17212b`. C4 paints the rail with the Navigation role, so with material
   active it turns light while those entries stay. C18 raises the icons. The
   labels would need `#485563` and `#005788` for 4.5:1, and the near-black
-  selected fill does not suit a light rail. Both are an open decision for C9;
-  C9's reference had assumed C3 adjusts them, and now points to the
-  decision.
+  selected fill does not suit a light rail. The user chose a light rail
+  (2026-10-31): C9 gives it the chats list's colors and the shared selected
+  pill.
 - **Fonts are sized to match already.** `ResolveFont` in `lib_ui`'s
   `style_core_font.cpp` uses bundled Open Sans for Default, and Qt's default
   family (Segoe UI on Windows) for System. It scales a System or custom

@@ -104,9 +104,9 @@ by C2 and C7.
 | --- | --- | --- | --- |
 | Media viewer, stories and picture-in-picture | `media/view/media_view_overlay_widget.*`, `media_view_pip.*`, `platform/win/overlay_widget_win.h` | Dark full-window overlay (`mediaviewBg` `#222222eb`) with video and GPU content | Stays as it is. It is content-first and dark, and its GPU surfaces need opaque fills. |
 | Calls and group calls, including the screen-share source chooser | `calls/calls_window.*`, `calls/calls_panel.*`, `calls/group/calls_group_panel.*`, `calls/group/ui/desktop_capture_choose_source.cpp` | Own dark palette, custom title, video tiles | Stays opaque, with its own title. |
-| Mini Apps and other separate panels | `Ui::SeparatePanel` users: `ui/chat/attach/attach_bot_webview.cpp`, `payments/ui/payments_panel.cpp`, `passport/passport_panel.cpp`, `wallet/wallet_panel.cpp`, `ui/controls/location_picker.cpp`, `export/view/export_view_panel_controller.cpp` | Rounded panel windows (`callRadius` 6) with their own shadow; Mini Apps host a web view | Opaque, as the user decided. The frame takes the popup radius 12 if the user chooses the popup shape. |
+| Mini Apps and other separate panels | `Ui::SeparatePanel` users: `ui/chat/attach/attach_bot_webview.cpp`, `payments/ui/payments_panel.cpp`, `passport/passport_panel.cpp`, `wallet/wallet_panel.cpp`, `ui/controls/location_picker.cpp`, `export/view/export_view_panel_controller.cpp` | Rounded panel windows (`callRadius` 6) with their own shadow; Mini Apps host a web view | Opaque, as the user decided. The frame takes the popup radius 12, as the user chose. |
 | Instant View, its editor and the markdown viewer | `iv/iv_controller.*`, `iv/editor/iv_editor_window.*`, `iv/markdown/iv_markdown_controller.*` | Separate `RpWindow`s around a web view | Stay opaque, with their own title. |
-| Notifications | `window/notifications_manager_default.*` | Opaque `RpWidget` windows. These are the Windows default: `Platform::Notifications::ByDefault()` is `false` in `notifications_manager_win.cpp`, so native toasts are opt-in. | The most visible separate window. Opaque; if the user chooses, the popup shape (radius 12, the Popup border). Native toasts stay the system's. |
+| Notifications | `window/notifications_manager_default.*` | Opaque `RpWidget` windows. These are the Windows default: `Platform::Notifications::ByDefault()` is `false` in `notifications_manager_win.cpp`, so native toasts are opt-in. | The most visible separate window. Opaque, with the popup shape (radius 12, the Popup border) the user chose. Native toasts stay the system's. |
 | Restore shell | `window/window_restore_shell.*` | A placeholder window shown while separate windows reopen | Takes the material, Window role and title painter when material is active, so restoring does not flash an upstream window. |
 
 ## Order and next steps
@@ -116,11 +116,11 @@ by C2 and C7.
   hover in one `lib_ui` switch, raises three state colors, and checks the
   subgroups that paint no fill.
 - C18 comes after C17 and before C9–C13, whose checks include its icons. Its plan raises the grey icon entries,
-  implements the system font default only if the user chooses it, and checks
+  implements the system font default the user chose, and checks
   text rendering and motion. Icon shapes stay Telegram's.
 - C19 comes after C14, whose popup radius it reuses, and before C15's final
   pass. Its plan gives the
-  restore shell the material, asks the user about the popup shape for
-  notifications and separate panels, and checks that every other separate
+  restore shell the material, gives notifications and separate panels
+  the popup shape the user chose, and checks that every other separate
   window is unchanged. No separate window gets material: the user decided
   they stay opaque.

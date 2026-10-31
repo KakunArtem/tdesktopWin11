@@ -6,10 +6,10 @@ Date: 2026-10-31. Status: proposal. Component: C19 in the
 [shared elements](../../shared-elements.md#c19-separate-windows).
 
 Separate windows stay opaque, as the user decided. C19 changes only the
-restore shell, which stands in for a main window. If the user chooses, it also
-gives Telegram's notifications and separate panels the popup shape: radius 12
-and the Popup role's 1 px border, with opaque fills. Everything else is
-checked to be unchanged.
+restore shell, which stands in for a main window, and, as the user chose
+(2026-10-31), gives Telegram's notifications and separate panels the popup
+shape: radius 12 and the Popup role's 1 px border, with opaque fills.
+Everything else is checked to be unchanged.
 
 ## Files
 

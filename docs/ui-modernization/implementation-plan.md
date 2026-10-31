@@ -217,17 +217,18 @@ Made on 2026-10-28:
 - Acrylic is the working guideline for the native material. Mica stays an
   alternative if Acrylic cannot match the mockup.
 
-Still needed (tracked, with the plan each one blocks, in
-[Open decisions](architecture.md#open-decisions)):
+The roadmap's decisions:
 
-1. Minimum Windows build for material; proposed: Windows 11 22H2 (22621).
-2. Fork `lib_ui` and `lib_base` under your account before Phase 3.
-3. Whether transparency is on by default, and the default chat background in
-   material mode.
+1. Decided on 2026-10-31: material needs Windows 11 22H2 (22621) or later.
+2. Decided on 2026-10-31: `lib_ui` and `lib_base` are forked as
+   `KakunArtem/lib_ui` and `KakunArtem/lib_base` before Phase 3.
+3. Still needed: whether transparency is on by default, and the default chat
+   background in material mode. Tracked, with the plan it blocks, in
+   [Open decisions](architecture.md#open-decisions).
 4. Decided on 2026-10-30: Windows first. The Soft Panels layout and material
    are Windows-only for now; macOS and Linux keep the upstream look.
-5. Whether material is disabled when the native window frame is on. Phase 1
-   assumes yes.
+5. Decided on 2026-10-31: material is refused while the native window frame
+   is on.
 
 ## Execution handoff
 

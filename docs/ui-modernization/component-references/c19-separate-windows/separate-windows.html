@@ -75,7 +75,6 @@ th { font-weight: 600; color: var(--page-muted); }
 code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
 .keep { color: var(--page-muted); }
 .chg { color: #1e7a3a; font-weight: 600; }
-.ask { color: #b25e09; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -85,16 +84,16 @@ code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
 </svg>
 <div class="sheet">
   <h1>C19 Separate windows: visual reference</h1>
-  <p>Separate windows stay opaque, as the user decided. The restore shell takes the material of the window it stands in for. If the user chooses, Telegram's notifications and separate panels take the popup shape: radius 12 and the Popup role's 1 px border, with an opaque fill.</p>
+  <p>Separate windows stay opaque, as the user decided. The restore shell takes the material of the window it stands in for. As the user chose, Telegram's notifications and separate panels take the popup shape: radius 12 and the Popup role's 1 px border, with an opaque fill.</p>
 
   <section class="panel">
-    <h2>A. Telegram's notifications (Task 2, if chosen)</h2>
+    <h2>A. Telegram's notifications (Task 2)</h2>
     <p class="lead">320 × 80 cards at the bottom right, 7 px apart, with a 36 px Hide all bar above them. The top card is hovered and shows Reply. Today each card is a square opaque window with a 1 px <code>windowShadowFgFallback</code> edge; in the night theme that color equals <code>windowBg</code>, so the card has no edge at all.</p>
     <div class="two" data-notes></div>
   </section>
 
   <section class="panel">
-    <h2>B. Separate panels: a Mini App (Task 3, if chosen)</h2>
+    <h2>B. Separate panels: a Mini App (Task 3)</h2>
     <p class="lead"><code>Ui::SeparatePanel</code> is already a rounded, shadowed window at <code>callRadius</code> 6 px. The popup shape raises the radius to 12. When a panel has no bottom bar, its web view must not reach into the larger corner (Task 3 Step 1).</p>
     <div class="three" data-panels></div>
   </section>
@@ -111,9 +110,9 @@ code { font: 11.5px "Cascadia Mono", Consolas, ui-monospace, monospace; }
       <tr><th>Window</th><th>Source</th><th>Today</th><th>C19</th></tr>
       <tr><td>Media viewer, picture-in-picture, stories</td><td><code>media/view/media_view_overlay_widget.*</code>, <code>media_view_pip.*</code>, <code>media/stories/</code></td><td>Dark overlay (<code>mediaviewBg</code> <code>#222222eb</code>), GPU video</td><td class="keep">Unchanged; checked</td></tr>
       <tr><td>Calls, group calls, screen-share chooser</td><td><code>calls/calls_window.*</code>, <code>calls/calls_panel.*</code>, <code>calls/group/</code></td><td>Own dark palette, own title, video tiles</td><td class="keep">Unchanged; checked</td></tr>
-      <tr><td>Mini Apps, payments, passport, wallet, location picker, export</td><td><code>Ui::SeparatePanel</code> users</td><td>Rounded 6 px, own shadow, web views</td><td class="ask">Radius 12 if chosen; content opaque</td></tr>
+      <tr><td>Mini Apps, payments, passport, wallet, location picker, export</td><td><code>Ui::SeparatePanel</code> users</td><td>Rounded 6 px, own shadow, web views</td><td class="chg">Radius 12; content opaque</td></tr>
       <tr><td>Instant View, its editor, markdown viewer</td><td><code>iv/</code></td><td><code>RpWindow</code> around a web view</td><td class="keep">Unchanged; checked</td></tr>
-      <tr><td>Telegram's notifications and Hide all</td><td><code>window/notifications_manager_default.*</code></td><td>Square, opaque, 1 px edge, no shadow</td><td class="ask">Popup shape if chosen; opaque</td></tr>
+      <tr><td>Telegram's notifications and Hide all</td><td><code>window/notifications_manager_default.*</code></td><td>Square, opaque, 1 px edge, no shadow</td><td class="chg">Popup shape; opaque</td></tr>
       <tr><td>Windows native toasts</td><td><code>platform/win/notifications_manager_win.*</code></td><td>The system's; opt-in (<code>ByDefault()</code> is <code>false</code>)</td><td class="keep">Unchanged</td></tr>
       <tr><td>Restore shell</td><td><code>window/window_restore_shell.*</code></td><td>Opaque <code>windowBg</code> with a spinner</td><td class="chg">Material, Window role and title painter when material is active</td></tr>
     </table>

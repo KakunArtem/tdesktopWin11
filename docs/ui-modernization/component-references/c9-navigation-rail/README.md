@@ -29,13 +29,14 @@ every button state the plan lists at Telegram's own rail width.
 
 ## Notes
 
-- The mockup's rail is 64 px; Telegram keeps `windowFiltersWidth` (72 px)
-  unless the user decides otherwise. Panel B uses 72 px.
+- The mockup's rail is 64 px. Panel B uses Telegram's 72 px; the user then
+  adopted 64 px under Soft Panels (2026-10-31).
 - Colors are the mockup's tokens (`--selected`, `--hover`, `--accent`,
   `--muted-fill`). The app uses its palette entries (`sideBarBgActive`,
   `sideBarBadgeBgMuted` and others). In the day theme they were made for a
-  dark sidebar: C18 raises the rail icons, and the labels and selected fill
-  are an [open decision](../../architecture.md#open-decisions).
+  dark sidebar. The user chose a light rail (2026-10-31): under Soft Panels
+  it takes the chats list's colors and `Ui::Material::SelectedFill()`, close
+  to the mockup's `--selected`.
 - The keyboard focus ring is a proposal: a 2 px accent outline on the pill.
   Telegram's current focus style for `SideBarButton` must be rechecked in
   `lib_ui`.

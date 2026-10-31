@@ -48,14 +48,14 @@ the Navigation fill (0.82 of `#17212b`) over black and white backdrops:
   outline against the list is a different matter. The muted badge is 2.08:1
   today and falls to 1.17:1 over a white backdrop. The unread badge falls
   from 3.99:1 to 2.24:1. Task 3 Step 2 asks for exactly this check. The
-  result is that both badges trigger it, so the decision is whether to
-  adjust the badge fills or accept today's contrast.
+  result is that both badges trigger it. The user kept today's fills
+  (2026-10-31): the white count stays readable on its own badge.
 
 ## Notes
 
-- The mockup's selection is a light pill with dark text. Telegram keeps
-  `dialogsBgActive` with its active text colors, as the plan says; changing
-  it is a user decision.
+- The mockup's selection is a light pill with dark text. The user adopted it
+  (2026-10-31): under Soft Panels the open chat is a `SelectedFill()` pill
+  with normal text colors, which this sheet, drawn before, does not show.
 - Row height (62), avatar size (46) and badge height (19) are Telegram's.
   The pill is painted inside the row, so hit testing and scrolling do not
   change.

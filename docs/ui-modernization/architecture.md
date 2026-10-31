@@ -58,21 +58,10 @@ user decisions with the date, then remove the row here.
 | Decision | Plans assume | Needed before | Raised in |
 | --- | --- | --- | --- |
 | Phase 1 result: go with Acrylic, Mica or no-go | Go with Acrylic | C2 | C1 decision record; see [What a Phase 1 no-go changes](#what-a-phase-1-no-go-changes) |
-| Minimum Windows build for material | 22621 (Windows 11 22H2) | C2 | Roadmap decision 1 |
-| Material refused while the native frame is on | Yes | C2 | Roadmap decision 5 |
-| Fork `lib_ui` and `lib_base` under your account | `KakunArtem/lib_ui` and `KakunArtem/lib_base`, branch `soft-panels` | C6 Task 1 Step 2 | Roadmap decision 2 |
-| Default `lib_ui` styles changed on every platform | No; parallel app styles and fork flags | C14 | C14 Global Constraints |
-| Night theme badge contrast: both unread badges are below 3:1 on the material, the muted one already 2.08:1 on the opaque list | Keep today's fills | C10 Task 3 Step 2 | [C10 reference](component-references/c10-chat-list/README.md#findings) |
-| Mockup values not adopted: rail width 64 (72 kept), header 56 (54 kept), bubble radius 14 (16 kept), light active chat row, composer drop shadow | Telegram's values | Any time; each is a style value | C9–C13 Global Constraints |
+| Composer drop shadow from the mockup (the other mockup values were adopted on 2026-10-31) | No shadow | Any time; a style value | C12 Global Constraints |
 | Window transparency on by default; chat background default | Off; the user's wallpaper | C15 Task 3 | Roadmap decision 3 |
 | Soft Panels layout on by default | Off | C15 Task 3 | C15 |
 | Popup Acrylic kept and promoted to a setting | Off, experimental | C15 Task 3 | C14 Task 4 decision record |
-| Text fields on panels: keep the bottom line or become pills like the search field | Keep the bottom line | Any time; a parallel style | [C17](shared-elements.md#c17-shared-controls) |
-| Filled buttons under Soft Panels 28 px high, as in the C17 mockup (radius 4 is already Telegram's) | Telegram's 34 px (`defaultActiveButton`) | Any time; needs a parallel style or a fork change, and layouts that place buttons by height | [C17 reference](component-references/c17-shared-controls/README.md) |
-| Field bottom lines and slider tracks raised to 3:1 on the material (they miss it in solid mode too) | Kept as today | Any time; an adjusted entry | [C17 reference](component-references/c17-shared-controls/README.md) |
-| System font (Segoe UI) as the Soft Panels default, as in the mockup | Telegram's default font | C18 Task 2 Step 1 | [C18 reference](component-references/c18-foundations/README.md) |
-| Day theme rail: raise the labels (`sideBarTextFg`, `sideBarTextFgActive`) to 4.5:1 and choose a selected fill for a light rail (`sideBarBgActive` is `#17212b`) | Labels and selected fill unchanged; C18 raises the rail icons | C9 | [C18 reference](component-references/c18-foundations/README.md#findings) |
-| Separate panels and Telegram's notifications take the popup shape (radius 12, Popup border, opaque) | Unchanged | C19 Task 2 Step 1 | [C19 reference](component-references/c19-separate-windows/README.md) |
 
 ## Confirmed direction
 
@@ -87,17 +76,17 @@ can refer to it:
 
 ## Assumptions used by every plan
 
-These are the roadmap's proposals for its open decisions. Each plan depends
-on them; if the user decides otherwise, the plans named in the last column
-change.
+These began as the roadmap's proposals; the source column says which the
+user has since decided. Each plan depends on them; if one changes, the plans
+named in the last column change.
 
 | Assumption | Source | Plans affected |
 | --- | --- | --- |
-| Material requires Windows 11 build 22621 or later. | Roadmap decision 1 | Material state |
-| `lib_ui` and `lib_base` are forked under the user's account before Phase 3. | Roadmap decision 2 | Toolkit fork, Title bar, Transient surfaces |
+| Material requires Windows 11 build 22621 or later. | User decision 2026-10-31 | Material state |
+| `lib_ui` and `lib_base` are forked as `KakunArtem/lib_ui` and `KakunArtem/lib_base`, branch `soft-panels`, before Phase 3. | User decision 2026-10-31 | Toolkit fork, Title bar, Transient surfaces |
 | "Window transparency" is off by default until Phase 9; the chat background in material mode stays the user's wallpaper. | Roadmap decision 3 | Material state, Conversation chrome |
 | The Soft Panels layout and element styles are compiled for every platform, but the layout switch and material exist only on Windows. | User decision 2026-10-30: Windows first | Shell layout and every element plan |
-| Material is refused while the native window frame is on. | Roadmap decision 5 | Material state, Title bar |
+| Material is refused while the native window frame is on. | User decision 2026-10-31 | Material state, Title bar |
 | The Phase 1 prototype ends in go or conditional go with Acrylic. | Phase 1 plan | Every plan after Phase 1 |
 
 A no-go in Phase 1 does not cancel the layout and element plans: they work in
@@ -186,7 +175,7 @@ Each component has one responsibility, one owner directory and one plan.
 | C15 | Info, settings and specialized screens | Info pane, settings, lock and intro screens, final accessibility pass. | `info/`, `settings/`, `intro/`, `window/window_lock_widgets.*`, forked `lib_ui` settings rows | C14 and every earlier plan | 9 | [info and settings](plans/2026-10-29-info-settings.md) |
 | C17 | Shared controls | Buttons, fields, settings rows, list rows and dividers on the role fills; readable state colors. | forked `lib_ui/ui/widgets/soft_controls.*`, `boxes/peer_list_box.cpp`, `ui/widgets/multi_select.cpp` | C3, C4, C6, C7 | 3, after C8 | [shared controls](plans/2026-10-30-shared-controls.md) |
 | C18 | Foundations | Readable icon colors, the default font decision and motion checks. | C3's adjusted entries, `ui/ui_material.*` (font default), `core/application.cpp`, `ui/boxes/choose_font_box.cpp` | C3, C7, C17 | 3, after C17 | [foundations](plans/2026-10-31-foundations.md) |
-| C19 | Separate windows | Restore shell material; the popup shape for notifications and separate panels if chosen; every other separate window checked unchanged. | `window/window_restore_shell.*`, `window/notifications_manager_default.*`, forked `lib_ui/ui/widgets/separate_panel.*` | C2, C4, C8, C14 | after 8 | [separate windows](plans/2026-10-31-separate-windows.md) |
+| C19 | Separate windows | Restore shell material; the popup shape for notifications and separate panels; every other separate window checked unchanged. | `window/window_restore_shell.*`, `window/notifications_manager_default.*`, forked `lib_ui/ui/widgets/separate_panel.*` | C2, C4, C8, C14 | after 8 | [separate windows](plans/2026-10-31-separate-windows.md) |
 | C16 | Verification tooling | Backdrop, contrast and screenshot checks reused by every phase. | `docs/ui-modernization/tools/`, `tests/` | C1 | 1–9 | [verification tooling](plans/2026-10-29-verification-tooling.md) |
 
 Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8 → C17 → C18;
@@ -405,6 +394,11 @@ are style values, so they follow the interface scale.
 - Text and icon colors stay palette keys. Readability is reached by fills and
   by C3's runtime adjustment of existing entries, not by new palette keys, so
   custom and cloud themes work unchanged.
+- The selected pill of the rail (C9) and of the open chat row (C10) is
+  `[[nodiscard]] QColor Ui::Material::SelectedFill()` in `ui/ui_material.h`:
+  `windowBgActive` at alpha 0.30, painted over the panel. Over white and the
+  night panel it is close to the mockup's `#cbdff4` and `#284661`. Content on
+  it keeps its normal, not its `*Active`, colors.
 
 ### Adjusted palette entries
 
@@ -419,7 +413,7 @@ its row here and to C3's table in `window/window_material.cpp`.
 | `titleButtonFg`, `titleButtonFgActive`, `titleButtonCloseFg`, `titleButtonCloseFgActive` | Window | 3:1 | C8 |
 | `titleFg`, `titleFgActive` (the canary build label) | Window | 4.5:1 | C8 |
 | `placeholderFg` | Navigation, Bar | 4.5:1 | C10 |
-| `dialogsUnreadBgMuted`, only if the user chooses to adjust the badges | Navigation | 3:1 | C10 |
+| `sideBarTextFg`, `sideBarTextFgActive` (the rail without Soft Panels) | Navigation | 4.5:1 | C9 |
 | `checkboxFg`, `activeLineFg` | Navigation, Conversation, Popup | 3:1 | C17 |
 | `lightButtonFg` | Navigation, Conversation, Popup | 4.5:1 | C17 |
 | `menuIconFg`, `cancelIconFg`, `boxTitleCloseFg` | Navigation, Conversation, Popup | 3:1 | C18 |
@@ -474,7 +468,7 @@ behavior unchanged.
 | `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()` | startup, from `SoftPanels()` | C14 |
 | `Ui::Platform::SetPopupBackdrop(bool)` | the popup option and `ActiveValue()` | C14 |
 | `Ui::SetSoftControls(bool)`, `Ui::SetSoftControlHover(QColor)`, `Ui::ControlFill(const style::color&)` | startup, from `SoftPanels()`; the hover on every palette change | C17 |
-| `Ui::SetSeparatePanelRadius(int)` / `Ui::SeparatePanelRadius()` | startup, from `SoftPanels()`, only if the user chooses the popup shape | C19 |
+| `Ui::SetSeparatePanelRadius(int)` / `Ui::SeparatePanelRadius()` | startup, from `SoftPanels()` | C19 |
 
 ### Settings and switches
 
