@@ -15,9 +15,9 @@ and the [native backdrop prototype plan](plans/2026-10-28-native-backdrop-protot
 
 ## Progress
 
-Snapshot 2026-10-31: C1 to C19 each have a plan and a visual reference.
-No plan has started, and no product code exists. Rows are in execution
-order.
+Snapshot 2026-11-04: C1 to C19 each have a plan and a visual reference.
+C1 is in progress on the Windows checkout; its prototype code is committed
+behind an experimental option. Rows are in execution order.
 
 Update a row whenever a plan task commits: the tasks done, the status and the
 record the plan writes (paths are under `docs/ui-modernization/`). Statuses
@@ -28,7 +28,7 @@ execution keeps its row; note the correction in the plan.
 
 | ID | Component | Plan | Visual reference | Tasks done | Status | Record |
 | --- | --- | --- | --- | --- | --- | --- |
-| C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 0 / 7 | Not started | `decisions/2026-10-native-backdrop.md` |
+| C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 6 / 7 | In progress: Tasks 0–5 committed; Task 6 automated rows recorded, manual rows and Task 2's Settings check pending | `decisions/2026-10-native-backdrop.md` |
 | C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | In progress: `tools/wallpapers.html` written | `tools/`, `checks/README.md` |
 | C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 0 / 4 | Not started | `checks/material-state.md` |
 | C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |

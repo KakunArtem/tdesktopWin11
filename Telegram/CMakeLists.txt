@@ -68,6 +68,10 @@ if (DESKTOP_APP_TEST_APPS OR TDESKTOP_BUILD_UPDATE_TESTS)
     endif()
 endif()
 
+if (DESKTOP_APP_TEST_APPS OR TDESKTOP_BUILD_MATERIAL_TESTS)
+    include(cmake/test_window_material.cmake)
+endif()
+
 set_target_properties(Telegram PROPERTIES AUTOMOC ON)
 
 target_link_libraries(Telegram
@@ -1852,6 +1856,8 @@ PRIVATE
     platform/win/wallet_protection_win.cpp
     platform/win/wallet_protection_win.h
     platform/win/webauthn_win.cpp
+    platform/win/window_material_win.cpp
+    platform/win/window_material_win.h
     platform/win/windows_app_user_model_id.cpp
     platform/win/windows_app_user_model_id.h
     platform/win/windows_dlls.cpp
@@ -2409,6 +2415,8 @@ PRIVATE
     window/window_main_menu.h
     window/window_main_menu_helpers.cpp
     window/window_main_menu_helpers.h
+    window/window_material_policy.cpp
+    window/window_material_policy.h
     window/window_media_preview.cpp
     window/window_media_preview.h
     window/window_no_paid_token.cpp

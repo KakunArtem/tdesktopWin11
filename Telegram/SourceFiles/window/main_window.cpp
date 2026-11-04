@@ -55,6 +55,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "platform/mac/global_menu_mac.h"
 #endif // Q_OS_MAC
 
+#ifdef Q_OS_WIN
+#include "platform/win/window_material_win.h"
+#endif // Q_OS_WIN
+
 #include <QtCore/QMimeData>
 #include <QtGui/QWindow>
 #include <QtGui/QScreen>
@@ -89,6 +93,15 @@ using Core::WindowPosition;
 	return result;
 }
 
+[[nodiscard]] bool UseMaterialPrototype() {
+#ifdef Q_OS_WIN
+	return Platform::Material::Decide().backdrop
+		!= Window::Material::Backdrop::None;
+#else // Q_OS_WIN
+	return false;
+#endif // Q_OS_WIN
+}
+
 base::options::toggle OptionNewWindowsSizeAsFirst({
 	.id = kOptionNewWindowsSizeAsFirst,
 	.name = "Adjust size of new chat windows",
@@ -108,6 +121,15 @@ base::options::toggle OptionDisableTouchbar({
 		return false;
 #endif // !Q_OS_MAC
 	},
+	.restartRequired = true,
+});
+
+base::options::toggle OptionWindowMaterialPrototype({
+	.id = kOptionWindowMaterialPrototype,
+	.name = "Window material prototype",
+	.description = "Show the Windows 11 Acrylic backdrop above the chats list."
+		" For testing the redesign.",
+	.scope = base::options::windows,
 	.restartRequired = true,
 });
 
@@ -139,6 +161,7 @@ base::options::toggle OptionDisableTouchbar({
 
 const char kOptionNewWindowsSizeAsFirst[] = "new-windows-size-as-first";
 const char kOptionDisableTouchbar[] = "touchbar-disabled";
+const char kOptionWindowMaterialPrototype[] = "window-material-prototype";
 
 const QImage &Logo() {
 	static const auto result = QImage(u":/gui/art/logo_256.png"_q);
@@ -402,7 +425,8 @@ QImage WithSmallCounter(QImage image, CounterLayerArgs &&args) {
 }
 
 MainWindow::MainWindow(not_null<Controller*> controller)
-: _controller(controller)
+: RpWindow(UseMaterialPrototype())
+, _controller(controller)
 , _positionUpdatedTimer([=] { savePosition(); })
 , _outdated(Ui::CreateOutdatedBar(body(), cWorkingDir()))
 , _screenReaderBar(Ui::CreateScreenReaderBar(body(), [=] {

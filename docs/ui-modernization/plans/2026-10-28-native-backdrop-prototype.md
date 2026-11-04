@@ -12,6 +12,8 @@
 
 **Visual reference:** [C1 native backdrop](../component-references/c1-native-backdrop/README.md): the target backdrop, the expected prototype strip and the unchanged option-off window, light and dark, over four wallpapers.
 
+**Corrections during execution (2026-11-04):** Task 1's test used `qAbs`, which the repository's house-rules hook bans; it uses `std::abs` from `<cmath>` instead. Task 5's script picked a 320x36 helper window of the process and measured the invisible resize border; it now takes the largest visible window or `-WindowHandle`, and samples DWM's visible frame bounds inset by 2 px.
+
 ---
 
 ## Ground rules for this repository
@@ -124,8 +126,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_material_policy.h"
 
-#include <QtCore/QtGlobal>
-
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -211,7 +212,7 @@ void TestPrototypeFill() {
 		fill.red() == 10 && fill.green() == 20 && fill.blue() == 30,
 		"fill keeps the palette color");
 	Check(
-		qAbs(fill.alphaF() - kPrototypeFillAlpha) < 0.01,
+		std::abs(fill.alphaF() - kPrototypeFillAlpha) < 0.01,
 		"fill uses the prototype alpha");
 }
 
@@ -848,29 +849,62 @@ Create `docs/ui-modernization/tools/Test-Backdrop.ps1`:
 param(
   [ValidateSet('Transparent', 'Opaque')][string]$Expect = 'Transparent',
   [string]$OutDir = (Join-Path $env:TEMP 'tdesktop-backdrop-check'),
-  [int]$Step = 3
+  [int]$Step = 3,
+  [long]$WindowHandle = 0
 )
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 Add-Type @'
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 public static class BackdropWin32 {
   [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+  public delegate bool EnumProc(IntPtr hWnd, IntPtr lParam);
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
   [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+  [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc proc, IntPtr lParam);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
+  [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+  [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out RECT rect, int size);
+  public static RECT VisibleBounds(IntPtr hWnd) {
+    RECT r;
+    if (DwmGetWindowAttribute(hWnd, 9, out r, Marshal.SizeOf(typeof(RECT))) != 0) { GetWindowRect(hWnd, out r); }
+    return r;
+  }
+  public static IntPtr LargestVisibleWindow(uint pid) {
+    IntPtr best = IntPtr.Zero; long bestArea = 0;
+    EnumWindows((hWnd, l) => {
+      uint owner; GetWindowThreadProcessId(hWnd, out owner);
+      RECT r;
+      if (owner == pid && IsWindowVisible(hWnd) && GetWindowRect(hWnd, out r)) {
+        long area = (long)(r.Right - r.Left) * (r.Bottom - r.Top);
+        if (area > bestArea) { bestArea = area; best = hWnd; }
+      }
+      return true;
+    }, IntPtr.Zero);
+    return best;
+  }
 }
 '@
 [BackdropWin32]::SetProcessDPIAware() | Out-Null
 
-$process = Get-Process Telegram -ErrorAction SilentlyContinue |
-  Where-Object { $_.Path -like '*tdesktopWin11*' -and $_.MainWindowHandle -ne 0 } |
-  Select-Object -First 1
-if (-not $process) { Write-Error 'Start out\Debug\Telegram.exe first.'; exit 2 }
-$telegram = $process.MainWindowHandle
+if ($WindowHandle -ne 0) {
+  $telegram = [IntPtr]$WindowHandle
+} else {
+  $process = Get-Process Telegram -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -like '*tdesktopWin11*' } |
+    Select-Object -First 1
+  if (-not $process) { Write-Error 'Start out\Debug\Telegram.exe first.'; exit 2 }
+  $telegram = [BackdropWin32]::LargestVisibleWindow([uint32]$process.Id)
+}
+if ($telegram -eq [IntPtr]::Zero) { Write-Error 'No visible Telegram window found.'; exit 2 }
+$bounds = [BackdropWin32]::VisibleBounds($telegram)
+$inset = 2
 $rect = New-Object BackdropWin32+RECT
-[BackdropWin32]::GetWindowRect($telegram, [ref]$rect) | Out-Null
+$rect.Left = $bounds.Left + $inset; $rect.Top = $bounds.Top + $inset
+$rect.Right = $bounds.Right - $inset; $rect.Bottom = $bounds.Bottom - $inset
 $width = $rect.Right - $rect.Left
 $height = $rect.Bottom - $rect.Top
 

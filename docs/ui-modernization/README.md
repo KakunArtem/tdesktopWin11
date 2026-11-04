@@ -105,6 +105,7 @@ This brief is the entry point for the redesign documentation. Current documents:
   sources before implementation.
 - [Toolkit fork](toolkit-fork.md): the `lib_ui` and `lib_base` forks, the
   branch rule and how to land changes and take upstream updates.
+- [Native backdrop prototype results](decisions/2026-10-native-backdrop.md).
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

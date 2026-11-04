@@ -71,6 +71,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_slide_animation.h"
 #include "window/window_connecting_widget.h"
 #include "window/window_main_menu.h"
+#include "window/window_material_policy.h"
 #include "storage/storage_media_prepare.h"
 #include "storage/storage_account.h"
 #include "storage/storage_domain.h"
@@ -4970,7 +4971,15 @@ void Widget::paintEvent(QPaintEvent *e) {
 		_childListShown.current());
 	auto above = QRect(0, 0, width(), _scroll->y());
 	if (above.intersects(r)) {
-		p.fillRect(above.intersected(r), bg);
+		if (window()->testAttribute(Qt::WA_TranslucentBackground)) {
+			p.setCompositionMode(QPainter::CompositionMode_Source);
+			p.fillRect(
+				above.intersected(r),
+				Window::Material::PrototypeFill(st::dialogsBg->c));
+			p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+		} else {
+			p.fillRect(above.intersected(r), bg);
+		}
 	}
 
 	auto belowTop = _scroll->y() + _scroll->height();
