@@ -7,10 +7,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "platform/win/window_material_win.h"
 
-#include "base/options.h"
 #include "core/application.h"
 #include "core/core_settings.h"
-#include "window/main_window.h"
+#include "window/window_material.h"
 
 #include <QtCore/QOperatingSystemVersion>
 
@@ -49,10 +48,14 @@ constexpr auto kDWMSBT_TRANSIENTWINDOW = DWORD(3);
 
 } // namespace
 
+bool Supported() {
+	return QOperatingSystemVersion::current().microVersion()
+		>= Window::Material::kMinimumBackdropBuild;
+}
+
 Window::Material::Environment ReadEnvironment() {
 	return {
-		.requested = base::options::value<bool>(
-			Window::kOptionWindowMaterialPrototype),
+		.requested = Window::Material::SettingEnabled(),
 		.windowsBuild = QOperatingSystemVersion::current().microVersion(),
 		.transparencyEffects = TransparencyEffectsEnabled(),
 		.highContrast = HighContrastEnabled(),

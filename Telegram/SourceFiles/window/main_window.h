@@ -56,7 +56,6 @@ struct CounterLayerArgs {
 
 extern const char kOptionNewWindowsSizeAsFirst[];
 extern const char kOptionDisableTouchbar[];
-extern const char kOptionWindowMaterialPrototype[];
 
 [[nodiscard]] QImage GenerateCounterLayer(CounterLayerArgs &&args);
 [[nodiscard]] QImage WithSmallCounter(QImage image, CounterLayerArgs &&args);

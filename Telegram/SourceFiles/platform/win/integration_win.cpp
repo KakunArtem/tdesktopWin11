@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mainwindow.h"
 #include "tray.h"
 #include "window/window_controller.h"
+#include "window/window_material.h"
 
 
 #include <QtCore/QAbstractNativeEventFilter>
@@ -239,6 +240,7 @@ bool WindowsIntegration::processEvent(
 
 	case WM_SETTINGCHANGE:
 		RefreshTaskbarThemeValue();
+		Window::Material::Refresh();
 #if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
 		Core::App().settings().setSystemDarkMode(Platform::IsDarkMode());
 #endif // Qt < 6.5.0

@@ -30,7 +30,7 @@ execution keeps its row; note the correction in the plan.
 | --- | --- | --- | --- | --- | --- | --- |
 | C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 6 / 7 | In progress: Tasks 0–5 committed; Task 6 automated rows recorded, manual rows and Task 2's Settings check pending | `decisions/2026-10-native-backdrop.md` |
 | C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | In progress: `tools/wallpapers.html` written | `tools/`, `checks/README.md` |
-| C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 0 / 4 | Not started | `checks/material-state.md` |
+| C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 3 / 4 | In progress: service and native-frame fallback tested; manual Windows toggles pending | `checks/material-state.md` |
 | C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 0 / 5 | Not started | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
 | C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 0 / 4 | Not started | `checks/grab-audit.md` |
@@ -229,10 +229,12 @@ The material code is therefore split:
 | Name | Meaning |
 | --- | --- |
 | `bool Capable()` | Fixed at startup: the main window was created translucent and the backdrop call succeeded. |
-| `bool Active()` / `rpl::producer<bool> ActiveValue()` | `Capable()` and the live environment still allows material (transparency effects on, high contrast off). Changes at runtime without restart. |
+| `bool Active()` / `rpl::producer<bool> ActiveValue()` | `Capable()` and the live environment still allows material (transparency effects on, high contrast off, native frame off). Changes at runtime without restart. |
 | `void Refresh()` | Re-read the environment after `WM_SETTINGCHANGE` and update `ActiveValue()`. |
 
 Every `ActiveValue()` change is forwarded to `Ui::Material::SetActive`.
+The service also observes `nativeWindowFrameChanges()`: the existing checkbox
+applies live, so enabling the frame immediately switches material to solid.
 
 ### Paint-time state (C4)
 

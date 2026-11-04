@@ -66,6 +66,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 #include "window/window_controller.h"
+#include "window/window_material.h"
 #include "window/window_saved_windows.h"
 #include "window/window_session_controller.h"
 #include "styles/style_layers.h"
@@ -305,6 +306,24 @@ void BuildAutoDownloadSection(SectionBuilder &builder) {
 	builder.addSkip(st::settingsCheckboxesSkip);
 }
 
+void SetupWindowMaterialCheckbox(
+		not_null<Ui::Checkbox*> checkbox,
+		Window::SessionController *controller) {
+	checkbox->checkedChanges(
+	) | rpl::filter([](bool checked) {
+		return checked != Window::Material::SettingEnabled();
+	}) | rpl::on_next([=](bool checked) {
+		Window::Material::SetSettingEnabled(checked);
+		if (controller) {
+			controller->show(Ui::MakeConfirmBox({
+				.text = tr::lng_settings_need_restart(),
+				.confirmed = [] { Core::Restart(); },
+				.confirmText = tr::lng_settings_restart_now(),
+			}));
+		}
+	}, checkbox->lifetime());
+}
+
 void BuildWindowTitleSection(SectionBuilder &builder) {
 	const auto settings = &Core::App().settings();
 
@@ -393,6 +412,18 @@ void BuildWindowTitleSection(SectionBuilder &builder) {
 				Core::App().settings().setNativeWindowFrame(checked);
 				Core::App().saveSettingsDelayed();
 			}, nativeFrame->lifetime());
+		}
+	}
+
+	if (Window::Material::SettingAvailable()) {
+		const auto material = builder.addCheckbox({
+			.id = u"advanced/window_material"_q,
+			.title = tr::lng_settings_window_material(),
+			.checked = Window::Material::SettingEnabled(),
+			.keywords = { u"transparency"_q, u"acrylic"_q, u"window"_q },
+		});
+		if (material) {
+			SetupWindowMaterialCheckbox(material, builder.controller());
 		}
 	}
 
@@ -1695,6 +1726,12 @@ void SetupWindowTitleContent(
 			Core::App().settings().setNativeWindowFrame(checked);
 			Core::App().saveSettingsDelayed();
 		}, nativeFrame->lifetime());
+	}
+
+	if (Window::Material::SettingAvailable()) {
+		SetupWindowMaterialCheckbox(addCheckbox(
+			tr::lng_settings_window_material(),
+			Window::Material::SettingEnabled()), controller);
 	}
 }
 

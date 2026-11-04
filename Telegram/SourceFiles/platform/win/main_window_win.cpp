@@ -29,6 +29,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/gl/gl_surface.h"
 #include "window/themes/window_theme.h"
 #include "window/window_controller.h"
+#include "window/window_material.h"
 #include "history/history.h"
 
 #include <QtWidgets/QStyleFactory>
@@ -432,8 +433,10 @@ void MainWindow::setupNativeWindowFrame() {
 		Window::Theme::IsNightModeValue()
 	) | rpl::skip(1) | rpl::on_next([=](bool native, bool night) {
 		validateWindowTheme(native, night);
-		if (testAttribute(Qt::WA_TranslucentBackground)) {
-			Platform::Material::ApplyBackdrop(_hWnd, night);
+		if (Window::Material::Capable()
+			&& !native
+			&& !Platform::Material::ApplyBackdrop(_hWnd, night)) {
+			Window::Material::ReportBackdropFailure();
 		}
 	}, lifetime());
 }
@@ -692,10 +695,13 @@ void MainWindow::initHook() {
 	validateWindowTheme(
 		Core::App().settings().nativeWindowFrame(),
 		Window::Theme::IsNightMode());
-	if (testAttribute(Qt::WA_TranslucentBackground)) {
-		Platform::Material::ApplyBackdrop(
-			_hWnd,
-			Window::Theme::IsNightMode());
+	if (Window::Material::Capable()
+		&& !Core::App().settings().nativeWindowFrame()) {
+		if (!Platform::Material::ApplyBackdrop(
+				_hWnd,
+				Window::Theme::IsNightMode())) {
+			Window::Material::ReportBackdropFailure();
+		}
 		Ui::GL::LogWindowRhi("material", this);
 	}
 }

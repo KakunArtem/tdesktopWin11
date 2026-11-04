@@ -52,6 +52,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/rect.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "lang/lang_keys.h"
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -4971,7 +4972,7 @@ void Widget::paintEvent(QPaintEvent *e) {
 		_childListShown.current());
 	auto above = QRect(0, 0, width(), _scroll->y());
 	if (above.intersects(r)) {
-		if (window()->testAttribute(Qt::WA_TranslucentBackground)) {
+		if (Ui::Material::Active()) {
 			p.setCompositionMode(QPainter::CompositionMode_Source);
 			p.fillRect(
 				above.intersected(r),

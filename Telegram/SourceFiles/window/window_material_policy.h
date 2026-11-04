@@ -42,6 +42,7 @@ struct Decision {
 };
 
 [[nodiscard]] Decision Decide(const Environment &environment);
+[[nodiscard]] bool LiveAllows(const Environment &environment);
 [[nodiscard]] const char *RefusalName(Refusal refusal);
 [[nodiscard]] QColor PrototypeFill(QColor opaque);
 

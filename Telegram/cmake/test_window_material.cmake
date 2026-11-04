@@ -13,12 +13,16 @@ nice_target_sources(test_window_material ${src_loc}
 PRIVATE
     window/window_material_policy.cpp
     window/window_material_policy.h
+    ui/ui_material.cpp
+    ui/ui_material.h
     tests/test_window_material.cpp
 )
 
 target_link_libraries(test_window_material
 PRIVATE
     desktop-app::external_qt
+    desktop-app::lib_base
+    desktop-app::lib_rpl
 )
 
 set_target_properties(test_window_material PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

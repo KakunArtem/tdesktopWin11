@@ -2417,6 +2417,8 @@ PRIVATE
     window/window_main_menu_helpers.h
     window/window_material_policy.cpp
     window/window_material_policy.h
+    window/window_material.cpp
+    window/window_material.h
     window/window_media_preview.cpp
     window/window_media_preview.h
     window/window_no_paid_token.cpp

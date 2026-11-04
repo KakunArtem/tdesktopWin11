@@ -6,10 +6,14 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_material_policy.h"
+#include "ui/ui_material.h"
+
+#include "rpl/lifetime.h"
 
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -78,6 +82,39 @@ void TestDecide() {
 		"the request is checked first");
 }
 
+void TestLiveAllows() {
+	Check(LiveAllows(Supported()), "supported system allows live");
+
+	auto opaque = Supported();
+	opaque.transparencyEffects = false;
+	Check(!LiveAllows(opaque), "transparency off stops live material");
+
+	auto contrast = Supported();
+	contrast.highContrast = true;
+	Check(!LiveAllows(contrast), "high contrast stops live material");
+
+	auto notRequested = Supported();
+	notRequested.requested = false;
+	Check(LiveAllows(notRequested), "the request is a startup decision");
+}
+
+void TestMaterialMirror() {
+	Check(!Ui::Material::Active(), "UI material starts inactive");
+	auto values = std::vector<bool>();
+	auto lifetime = rpl::lifetime();
+	Ui::Material::ActiveValue() | rpl::on_next([&](bool active) {
+		values.push_back(active);
+	}, lifetime);
+	Ui::Material::SetActive(true);
+	Check(Ui::Material::Active(), "UI material publishes activation");
+	Ui::Material::SetActive(true);
+	Ui::Material::SetActive(false);
+	Check(!Ui::Material::Active(), "UI material publishes fallback");
+	Check(
+		values == std::vector<bool>{ false, true, false },
+		"UI material replays current state and suppresses duplicates");
+}
+
 void TestNames() {
 	Check(
 		std::string(RefusalName(Refusal::OldWindows)) == "old windows",
@@ -101,6 +138,8 @@ void TestPrototypeFill() {
 
 int main() {
 	TestDecide();
+	TestLiveAllows();
+	TestMaterialMirror();
 	TestNames();
 	TestPrototypeFill();
 	std::cout << "Checks: " << TotalChecks

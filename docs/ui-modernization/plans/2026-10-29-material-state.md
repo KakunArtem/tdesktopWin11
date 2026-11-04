@@ -14,6 +14,19 @@
 
 **Depends on:** the Phase 1 plan executed, with its decision record in `docs/ui-modernization/decisions/2026-10-native-backdrop.md` saying go or conditional go.
 
+**Execution correction (2026-11-04):** the existing native-frame checkbox
+applies immediately through `MainWindow::refreshTitleWidget()`; it does not
+request a restart. Keep that behavior. `Refresh()` also refuses a live native
+frame, and the service observes `nativeWindowFrameChanges()`. `Capable()` stays
+cached; turning the frame off restores material only when startup allowed it.
+Native backdrop application skips windows currently using the native frame.
+Until C4 replaces the prototype strip, it also follows `Ui::Material::Active()`
+instead of the window's fixed translucent attribute. Existing windows repaint
+on state changes, so live fallback and native failures immediately paint solid.
+The account-free restart check found that `resetOnLastLogout()` clears generic KV
+preferences at startup with no authorized account. Preserve `window_material`
+there, like the native-frame setting, so a controller-free save survives restart.
+
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules).
@@ -27,7 +40,7 @@
 
 - Transparency effects turned off in Windows Settings while the app runs: `ActiveValue()` must emit `false` without a restart. Pinned by Task 1 `TestLiveAllows` and Task 4 Step 4.
 - High contrast turned on while the app runs: the same. Pinned by Task 1 and Task 4 Step 5.
-- Native frame turned on while material is on: material must stay off after the restart the native frame setting already triggers. Pinned by Task 4 Step 6.
+- Native frame turned on while material is on: material becomes inactive immediately, and stays off after a restart. Pinned by Task 4 Step 6.
 - A separate chat window (opened via "Open in new window"): it must get the same backdrop as the primary window or none, never a black background. Pinned by Task 3 Step 3.
 - Settings opened on Windows 10 or an older Windows 11 build: the checkbox must not appear. Pinned by Task 2 Step 6.
 
@@ -42,7 +55,7 @@
 
 **Interfaces:**
 - Consumes: `Environment`, `Decide`, `kMinimumBackdropBuild` from Phase 1.
-- Produces: `[[nodiscard]] bool LiveAllows(const Environment &environment);` — true when transparency effects are on and high contrast is off; ignores `requested`, `windowsBuild` and `nativeFrame`, which are startup-only.
+- Produces: `[[nodiscard]] bool LiveAllows(const Environment &environment);` - true when transparency effects are on and high contrast is off. The service enforces the native-frame guard separately.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -96,6 +109,7 @@ git commit -m "Added live environment check to window material policy."
 - Modify: `Telegram/SourceFiles/window/main_window.h`, `main_window.cpp`
 - Modify: `Telegram/SourceFiles/settings/settings_experimental.cpp`
 - Modify: `Telegram/SourceFiles/settings/sections/settings_advanced.cpp`
+- Modify: `Telegram/SourceFiles/core/core_settings.cpp` (preserve the global window preference on account reset)
 - Modify: `Telegram/Resources/langs/lang.strings`
 - Modify: `Telegram/CMakeLists.txt`
 
@@ -155,12 +169,13 @@ git commit -m "Added window transparency setting."
 - Modify: `Telegram/SourceFiles/window/main_window.cpp`
 - Modify: `Telegram/SourceFiles/platform/win/main_window_win.cpp`
 - Modify: `Telegram/SourceFiles/platform/win/integration_win.cpp`
+- Modify: `Telegram/SourceFiles/dialogs/dialogs_widget.cpp` (prototype strip only)
 
 **Interfaces:**
 - Consumes: `Platform::Material::Decide()`, `ReadEnvironment()`, `ApplyBackdrop(HWND, bool)` from Phase 1; `LiveAllows` from Task 1.
 - Produces, in `namespace Window::Material`:
   - `[[nodiscard]] bool Capable();` — the startup decision was `Backdrop::Acrylic` and no `ApplyBackdrop` call has failed.
-  - `[[nodiscard]] bool Active();` and `[[nodiscard]] rpl::producer<bool> ActiveValue();` — `Capable()` and `LiveAllows(ReadEnvironment())`; the producer starts with the current value and emits only on change.
+  - `[[nodiscard]] bool Active();` and `[[nodiscard]] rpl::producer<bool> ActiveValue();` — `Capable()`, `LiveAllows(ReadEnvironment())` and no native frame; the producer starts with the current value and emits only on change.
   - `void Refresh();` — re-reads the environment and updates `Active()`.
   - `void ReportBackdropFailure();` — makes `Capable()` false for the rest of the process and logs once.
 - Produces, in `namespace Ui::Material` (`ui/ui_material.h`, `td_ui`; see [Two namespaces, two targets](../architecture.md#two-namespaces-two-targets)): `[[nodiscard]] bool Active();`, `[[nodiscard]] rpl::producer<bool> ActiveValue();` and `void SetActive(bool active);` — a mirror that code in `td_ui` can read. Later plans add fills (C3), painting helpers (C4), grabs (C5) and the Soft Panels switch (C7) to this file.
@@ -173,9 +188,12 @@ State is a file-local `rpl::variable<bool>` plus a `std::optional<bool>` holding
 
 In `WindowsIntegration`'s `WM_SETTINGCHANGE` case in `integration_win.cpp`, call `Window::Material::Refresh()` after `RefreshTaskbarThemeValue()`.
 
+Also refresh on `Core::Settings::nativeWindowFrameChanges()`, because that
+checkbox changes the window immediately without a Windows setting broadcast.
+
 - [ ] **Step 3: Apply the backdrop to every main window**
 
-In `MainWindow::initHook()` in `main_window_win.cpp`, replace the Phase 1 `testAttribute(Qt::WA_TranslucentBackground)` check with `Window::Material::Capable()`. When `ApplyBackdrop` returns `false`, call `ReportBackdropFailure()`. Keep the night-mode re-application in `setupNativeWindowFrame()` under the same condition. Separate chat windows are `Window::MainWindow` instances too, so they take this path; verify by opening a chat in a new window.
+In `MainWindow::initHook()` in `main_window_win.cpp`, replace the Phase 1 `testAttribute(Qt::WA_TranslucentBackground)` check with `Window::Material::Capable()` and no current native frame. When `ApplyBackdrop` returns `false`, call `ReportBackdropFailure()`. Keep the night-mode re-application in `setupNativeWindowFrame()` under the same condition. Separate chat windows are `Window::MainWindow` instances too, so they take this path; verify by opening a chat in a new window.
 
 - [ ] **Step 4: Build and check startup logging**
 
@@ -197,7 +215,9 @@ No code. Record results in `docs/ui-modernization/checks/material-state.md` (for
 
 - [ ] **Step 1: Add a temporary observer**
 
-In a local, uncommitted change to `window_material.cpp`, log every `ActiveValue()` emission as `Material: active <value>`.
+In the disposable `test/test_scenario.cpp` overlay, subscribe to the real
+`Window::Material::ActiveValue()` and log its values alongside the Windows
+environment flags. Keep the observer out of production translation units.
 
 - [ ] **Step 2: Setting off**
 
@@ -217,12 +237,15 @@ Press Left Alt + Left Shift + Print Screen to turn high contrast on, then off. E
 
 - [ ] **Step 6: Native frame**
 
-Turn on "Use system window frame" and restart. Expected: `refusal: native frame`, no `extend frame` line, and the window is opaque.
+Turn on "Use system window frame". Expected immediately: `active false`.
+Turn it off: `active true` when startup allowed material. Turn it on again
+and restart. Expected: `refusal: native frame`, no `extend frame` line, and
+the window is opaque.
 
 - [ ] **Step 7: Revert the observer and commit the record**
 
 ```bash
-git checkout Telegram/SourceFiles/window/window_material.cpp
+git restore -- Telegram/SourceFiles/test/test_scenario.cpp
 git add docs/ui-modernization/checks/material-state.md
 git commit -m "Recorded window material state checks."
 ```

@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 namespace Platform::Material {
 
+[[nodiscard]] bool Supported();
 [[nodiscard]] Window::Material::Environment ReadEnvironment();
 [[nodiscard]] Window::Material::Decision Decide();
 bool ApplyBackdrop(HWND handle, bool dark);

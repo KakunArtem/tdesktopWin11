@@ -19,6 +19,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_separate_id.h"
 #include "window/window_session_controller.h"
 #include "window/window_lock_widgets.h"
+#include "window/window_material.h"
 #include "window/window_controller.h"
 #include "main/main_account.h" // Account::sessionValue.
 #include "main/main_domain.h"
@@ -44,6 +45,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "ui/unread_counter_format.h"
 #include "apiwrap.h"
 #include "mainwidget.h" // session->content()->windowShown().
@@ -54,10 +56,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #ifdef Q_OS_MAC
 #include "platform/mac/global_menu_mac.h"
 #endif // Q_OS_MAC
-
-#ifdef Q_OS_WIN
-#include "platform/win/window_material_win.h"
-#endif // Q_OS_WIN
 
 #include <QtCore/QMimeData>
 #include <QtGui/QWindow>
@@ -93,13 +91,8 @@ using Core::WindowPosition;
 	return result;
 }
 
-[[nodiscard]] bool UseMaterialPrototype() {
-#ifdef Q_OS_WIN
-	return Platform::Material::Decide().backdrop
-		!= Window::Material::Backdrop::None;
-#else // Q_OS_WIN
-	return false;
-#endif // Q_OS_WIN
+[[nodiscard]] bool UseMaterial() {
+	return Window::Material::Capable();
 }
 
 base::options::toggle OptionNewWindowsSizeAsFirst({
@@ -121,15 +114,6 @@ base::options::toggle OptionDisableTouchbar({
 		return false;
 #endif // !Q_OS_MAC
 	},
-	.restartRequired = true,
-});
-
-base::options::toggle OptionWindowMaterialPrototype({
-	.id = kOptionWindowMaterialPrototype,
-	.name = "Window material prototype",
-	.description = "Show the Windows 11 Acrylic backdrop above the chats list."
-		" For testing the redesign.",
-	.scope = base::options::windows,
 	.restartRequired = true,
 });
 
@@ -161,7 +145,6 @@ base::options::toggle OptionWindowMaterialPrototype({
 
 const char kOptionNewWindowsSizeAsFirst[] = "new-windows-size-as-first";
 const char kOptionDisableTouchbar[] = "touchbar-disabled";
-const char kOptionWindowMaterialPrototype[] = "window-material-prototype";
 
 const QImage &Logo() {
 	static const auto result = QImage(u":/gui/art/logo_256.png"_q);
@@ -425,7 +408,7 @@ QImage WithSmallCounter(QImage image, CounterLayerArgs &&args) {
 }
 
 MainWindow::MainWindow(not_null<Controller*> controller)
-: RpWindow(UseMaterialPrototype())
+: RpWindow(UseMaterial())
 , _controller(controller)
 , _positionUpdatedTimer([=] { savePosition(); })
 , _outdated(Ui::CreateOutdatedBar(body(), cWorkingDir()))
@@ -593,6 +576,10 @@ void MainWindow::init() {
 	initHook();
 
 	updatePalette();
+	Ui::Material::ActiveValue(
+	) | rpl::skip(1) | rpl::on_next([=](bool) {
+		updatePalette();
+	}, lifetime());
 
 	if (Ui::Platform::NativeWindowFrameSupported()) {
 		Core::App().settings().nativeWindowFrameChanges(

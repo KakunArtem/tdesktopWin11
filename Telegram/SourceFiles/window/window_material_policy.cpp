@@ -27,6 +27,10 @@ Decision Decide(const Environment &environment) {
 	return { .backdrop = Backdrop::Acrylic, .refusal = Refusal::None };
 }
 
+bool LiveAllows(const Environment &environment) {
+	return environment.transparencyEffects && !environment.highContrast;
+}
+
 const char *RefusalName(Refusal refusal) {
 	switch (refusal) {
 	case Refusal::None: return "none";

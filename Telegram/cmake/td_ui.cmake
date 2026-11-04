@@ -8,6 +8,12 @@ add_library(td_ui OBJECT)
 init_non_host_target(td_ui)
 add_library(tdesktop::td_ui ALIAS td_ui)
 
+nice_target_sources(td_ui ${src_loc}
+PRIVATE
+    ui/ui_material.cpp
+    ui/ui_material.h
+)
+
 include(lib_ui/cmake/generate_styles.cmake)
 include(cmake/generate_numbers.cmake)
 
