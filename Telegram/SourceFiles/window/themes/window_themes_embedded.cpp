@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_theme.h"
 #include "ui/style/style_palette_colorizer.h"
 #include "window/themes/window_theme.h"
+#include "window/window_material.h"
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QPalette>
@@ -479,7 +480,7 @@ Fn<void(style::palette&)> PreparePaletteCallback(
 }
 
 Fn<void(style::palette&)> PrepareCurrentPaletteCallback() {
-	return [=, data = style::main_palette::save()](style::palette &palette) {
+	return [=, data = Material::UnadjustedPalette()](style::palette &palette) {
 		palette.load(data);
 	};
 }

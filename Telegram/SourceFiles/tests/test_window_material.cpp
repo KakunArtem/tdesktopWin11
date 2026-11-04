@@ -6,7 +6,9 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_material_policy.h"
+#include "window/window_material_fills.h"
 #include "ui/ui_material.h"
+#include "ui/color_contrast.h"
 
 #include "rpl/lifetime.h"
 
@@ -134,6 +136,110 @@ void TestPrototypeFill() {
 		"fill uses the prototype alpha");
 }
 
+[[nodiscard]] bool Near(float64 a, float64 b) {
+	return std::abs(a - b) < 0.005;
+}
+
+void TestMaterialFills() {
+	const auto light = FillInputs{
+		.surface = QColor(0xe9, 0xee, 0xf5),
+		.text = QColor(0x13, 0x23, 0x35),
+		.secondaryText = QColor(0x3a, 0x4b, 0x5f),
+	};
+	Check(Near(ComputeFill(Surface::Navigation, light).alphaF(), 0.78),
+		"mockup light navigation fill is 0.78");
+	Check(Near(ComputeFill(Surface::Window, light).alphaF(), 0.78),
+		"window floor is raised until text is readable");
+	const auto dark = FillInputs{
+		.surface = QColor(0x1b, 0x28, 0x38),
+		.text = QColor(0xf2, 0xf6, 0xfb),
+		.secondaryText = QColor(0xc2, 0xcf, 0xdd),
+		.dark = true,
+	};
+	const auto fill = ComputeFill(Surface::Navigation, dark);
+	Check(Near(fill.alphaF(), 0.82), "dark navigation keeps its floor");
+	Check(fill.rgb() == dark.surface.rgb(), "fill keeps surface color");
+	const auto weak = FillInputs{
+		.surface = QColor(255, 255, 255),
+		.text = QColor(0, 0, 0),
+		.secondaryText = QColor(0x99, 0x99, 0x99),
+	};
+	Check(Near(ComputeFill(Surface::Navigation, weak).alphaF(), 1.),
+		"weak solid text needs opaque fill");
+	const auto unreadable = FillInputs{
+		.surface = QColor(128, 128, 128),
+		.text = QColor(128, 128, 128),
+		.secondaryText = QColor(128, 128, 128),
+	};
+	Check(Near(ComputeFill(Surface::Bar, unreadable).alphaF(), 1.),
+		"unreadable custom theme falls back to opaque");
+	const auto translucentText = FillInputs{
+		.surface = QColor(255, 255, 255),
+		.text = QColor(0, 0, 0, 128),
+		.secondaryText = QColor(0, 0, 0, 128),
+	};
+	Check(Near(ComputeFill(Surface::Navigation, translucentText).alphaF(), 1.),
+		"text alpha participates in the contrast target");
+	const auto roles = std::array{
+		Surface::Window, Surface::Navigation, Surface::Conversation,
+		Surface::Bar, Surface::Composer, Surface::Popup,
+	};
+	const auto floors = std::array{
+		std::pair(0.72, 0.74), std::pair(0.78, 0.82),
+		std::pair(0.79, 0.81), std::pair(0.90, 0.90),
+		std::pair(0.96, 0.96), std::pair(0.97, 0.97),
+	};
+	for (auto i = 0; i != int(roles.size()); ++i) {
+		Check(Near(Floor(roles[i], false), floors[i].first), "light floor");
+		Check(Near(Floor(roles[i], true), floors[i].second), "dark floor");
+	}
+	const auto border = BorderColor(light.text);
+	Check(border.rgb() == light.text.rgb() && Near(border.alphaF(), 0.10),
+		"border is primary text at ten percent");
+	Check(Composite(QColor(0, 0, 0, 128), QColor(255, 255, 255))
+		== QColor(127, 127, 127), "straight alpha composite rounds channels");
+}
+
+void TestReadableOver() {
+	const auto surface = QColor(255, 255, 255);
+	const auto grey = QColor(0x99, 0x99, 0x99);
+	const auto readable = ReadableOver(grey, surface, Surface::Navigation, false);
+	auto fill = surface;
+	fill.setAlphaF(Floor(Surface::Navigation, false));
+	Check(Ui::CountContrast(readable, Composite(fill, QColor(0, 0, 0))) >= 4.5
+		&& Ui::CountContrast(readable, Composite(fill, QColor(255, 255, 255))) >= 4.5,
+		"adjusted text reads over both navigation backdrops");
+	Check(readable.lightness() < grey.lightness(), "light theme text darkens");
+	const auto strong = QColor(0x13, 0x23, 0x35);
+	Check(ReadableOver(strong, QColor(0xe9, 0xee, 0xf5), Surface::Navigation, false)
+		== strong, "already readable text is unchanged");
+}
+
+void TestMaterialFillMirror() {
+	Ui::Material::SetActive(true);
+	auto count = 0;
+	auto lifetime = rpl::lifetime();
+	Ui::Material::FillsChanged() | rpl::on_next([&] {
+		++count;
+	}, lifetime);
+	auto fill = QColor(233, 238, 245);
+	fill.setAlphaF(0.78);
+	const auto border = BorderColor(QColor(19, 35, 53));
+	Ui::Material::SetFills({ { Surface::Navigation, fill } },
+		{ { Surface::Navigation, border } });
+	Check(Ui::Material::Fill(Surface::Navigation) == fill,
+		"UI mirror publishes the material fill");
+	Check(Ui::Material::Border(Surface::Navigation) == border,
+		"UI mirror publishes border");
+	Ui::Material::SetActive(false);
+	fill.setAlpha(255);
+	Ui::Material::SetFills({ { Surface::Navigation, fill } },
+		{ { Surface::Navigation, border } });
+	Check(Ui::Material::Fill(Surface::Navigation) == fill,
+		"UI mirror publishes opaque fallback");
+	Check(count == 2, "each completed fill publication notifies once");
+}
+
 } // namespace
 
 int main() {
@@ -142,6 +248,9 @@ int main() {
 	TestMaterialMirror();
 	TestNames();
 	TestPrototypeFill();
+	TestMaterialFills();
+	TestReadableOver();
+	TestMaterialFillMirror();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;

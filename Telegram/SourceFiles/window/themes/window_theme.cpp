@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/themes/window_themes_embedded.h"
 #include "window/themes/window_theme_editor.h"
 #include "window/window_controller.h"
+#include "window/window_material.h"
 #include "platform/platform_specific.h"
 #include "mainwidget.h"
 #include "main/main_session.h"
@@ -220,7 +221,7 @@ bool loadColorScheme(
 		const style::colorizer &colorizer,
 		Instance *out) {
 	auto unsupported = QMap<QLatin1String, QLatin1String>();
-	return ReadPaletteValues(content, [&](QLatin1String name, QLatin1String value) {
+	const auto result = ReadPaletteValues(content, [&](QLatin1String name, QLatin1String value) {
 		// Find the named value in the already read unsupported list.
 		value = unsupported.value(value, value);
 
@@ -230,6 +231,10 @@ bool loadColorScheme(
 		}
 		return true;
 	});
+	if (result && !out) {
+		Material::PaletteReplaced();
+	}
+	return result;
 }
 
 void EnsureAccentReadable(
@@ -397,7 +402,7 @@ bool LoadTheme(
 		if (out) {
 			cache->colors = out->palette.save();
 		} else {
-			cache->colors = style::main_palette::save();
+			cache->colors = Material::UnadjustedPalette();
 		}
 		cache->paletteChecksum = style::palette::Checksum();
 		cache->contentChecksum = base::crc32(content.constData(), content.size());
@@ -428,6 +433,7 @@ bool InitializeFromCache(
 	if (!style::main_palette::load(cache.colors)) {
 		return false;
 	}
+	Material::PaletteReplaced();
 	Background()->saveAdjustableColors();
 	if (!background.isNull()) {
 		applyBackground(std::move(background), cache.tiled, nullptr);
@@ -463,6 +469,7 @@ bool InitializeFromSaved(Saved &&saved) {
 		auto preview = PreviewFromChatTheme(saved.object.cloud, IsNightMode());
 		if (preview) {
 			style::main_palette::apply(preview->instance.palette);
+			Material::PaletteReplaced();
 			Background()->saveAdjustableColors();
 			saved.object.content = std::move(preview->object.content);
 			saved.cache = std::move(preview->instance.cached);
@@ -1105,6 +1112,7 @@ void ChatBackground::restoreAdjustableColors() {
 
 void ChatBackground::setTestingTheme(Instance &&theme) {
 	style::main_palette::apply(theme.palette);
+	Material::PaletteReplaced();
 	saveAdjustableColors();
 
 	auto switchToThemeBackground = !theme.background.isNull()
@@ -1147,6 +1155,7 @@ void ChatBackground::setTestingDefaultTheme() {
 void ChatBackground::applyDefaultThemeAccentColorizer() {
 	const auto colorizer = ColorizerForTheme(QString());
 	style::main_palette::reset(colorizer);
+	Material::PaletteReplaced();
 	if (colorizer) {
 		auto reference = style::palette();
 		reference.finalize();
@@ -1382,7 +1391,7 @@ bool Apply(std::unique_ptr<Preview> preview) {
 	GlobalApplying.data.object = std::move(preview->object);
 	GlobalApplying.data.cache = std::move(preview->instance.cached);
 	if (GlobalApplying.paletteForRevert.isEmpty()) {
-		GlobalApplying.paletteForRevert = style::main_palette::save();
+		GlobalApplying.paletteForRevert = Material::UnadjustedPalette();
 	}
 	Background()->setTestingTheme(std::move(preview->instance));
 	return true;
@@ -1396,7 +1405,7 @@ void ApplyDefaultWithPath(const QString &themePath) {
 	} else {
 		GlobalApplying.data = Saved();
 		if (GlobalApplying.paletteForRevert.isEmpty()) {
-			GlobalApplying.paletteForRevert = style::main_palette::save();
+			GlobalApplying.paletteForRevert = Material::UnadjustedPalette();
 		}
 		Background()->setTestingDefaultTheme();
 	}
@@ -1408,6 +1417,7 @@ bool ApplyEditedPalette(const QByteArray &content) {
 		return false;
 	}
 	style::main_palette::apply(out.palette);
+	Material::PaletteReplaced();
 	Background()->appliedEditedPalette();
 	return true;
 }
@@ -1443,7 +1453,7 @@ void KeepFromEditor(
 	auto saved = Saved();
 	auto &cache = saved.cache;
 	auto &object = saved.object;
-	cache.colors = style::main_palette::save();
+	cache.colors = Material::UnadjustedPalette();
 	cache.paletteChecksum = style::palette::Checksum();
 	cache.contentChecksum = base::crc32(content.constData(), content.size());
 	cache.background = themeParsed.background;
@@ -1467,7 +1477,9 @@ void Revert() {
 	if (!AreTestingTheme()) {
 		return;
 	}
-	style::main_palette::load(GlobalApplying.paletteForRevert);
+	if (style::main_palette::load(GlobalApplying.paletteForRevert)) {
+		Material::PaletteReplaced();
+	}
 	Background()->saveAdjustableColors();
 
 	ClearApplying();

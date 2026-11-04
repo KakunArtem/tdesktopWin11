@@ -59,7 +59,7 @@ Add to `test_window_material.cpp`, include `window/window_material_fills.h`, and
 
 ```cpp
 [[nodiscard]] bool Near(float64 a, float64 b) {
-	return qAbs(a - b) < 0.005;
+	return std::abs(a - b) < 0.005;
 }
 
 void TestMockupFills() {
@@ -131,7 +131,7 @@ Expected: CMake reports `Cannot find source file: window/window_material_fills.c
 
 - [ ] **Step 3: Implement the calculator**
 
-For each alpha from `Floor(surface, inputs.dark)` upward in 0.01 steps, accept the first alpha where, for both `text` and `secondaryText`, `Ui::CountContrast(color, Composite(fill, backdrop))` is at least `std::min(4.5, Ui::CountContrast(color, opaque surface))` for both backdrops; return alpha 1.0 when none is accepted. Register both files in the `window/` block of `Telegram/CMakeLists.txt`.
+For each alpha from `Floor(surface, inputs.dark)` upward in 0.01 steps, accept the first alpha where both text colors meet their target on both backdrops. Composite alpha-bearing text onto each background before measuring. The target is the lower of 4.5 and that text's contrast on the opaque surface. When either original contrast is 1:1, return an opaque fill, as `TestUnreadableTheme` requires; a target of 1 alone would accept any alpha. Return alpha 1.0 when no candidate is accepted. Register both files in the `window/` block of `Telegram/CMakeLists.txt`.
 
 - [ ] **Step 4: Run the tests**
 
@@ -216,6 +216,7 @@ git commit -m "Added readable text adjustment for window material."
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_material.h`, `window_material.cpp`
 - Modify: `Telegram/SourceFiles/ui/ui_material.h`, `ui_material.cpp`
+- Modify: `Telegram/SourceFiles/window/themes/window_theme.cpp`, `window_themes_embedded.cpp` (canonical snapshots and replacement boundaries)
 
 **Interfaces:**
 - Consumes: `ComputeFill`, `ReadableOver`, `BorderColor` (Tasks 1–2); `ActiveValue()` (C2).
@@ -225,6 +226,8 @@ git commit -m "Added readable text adjustment for window material."
   - `[[nodiscard]] QColor Border(Surface surface);` — `BorderColor` of the role's `text`, also while `Active()` is false.
   - `[[nodiscard]] rpl::producer<> FillsChanged();` — fires after every recomputation, so widgets can repaint.
 - `Window::Material` computes the maps below and publishes them with `Ui::Material::SetFills`.
+- `Window::Material::PaletteReplaced()` marks a successful full main-palette load, apply or reset before its notification. Partial color updates retain unaffected originals.
+- `Window::Material::UnadjustedPalette()` returns canonical theme bytes without changing live colors. Theme rollback, persistence and per-chat copies use it instead of serializing material adjustments.
 
 Role inputs, all `st::` palette colors (recheck each name in `lib_ui/ui/colors.palette` at the pinned commit; drop and note any that are missing):
 
@@ -241,19 +244,25 @@ Entries adjusted while active, each against the Navigation and Conversation floo
 
 - [ ] **Step 1: Implement the cache**
 
-On `ActiveValue()` becoming true: save each listed entry's color into a file-local `base::flat_map<const style::color*, Adjustment>`, set each to `ReadableOver` the strictest floor among its roles at its target (both backdrops), then compute fills. On `false`: write every saved `original` back, clear the map, compute opaque fills. Change colors through the same setter `chat_theme_readability.cpp` uses; then call `style::NotifyPaletteChanged()` once.
+On `ActiveValue()` becoming true: save each listed entry's color into a file-local `base::flat_map<const style::color*, Adjustment>`. Preserve each role's original 1:1 primary or secondary condition as an opaque requirement. Collect the black and white composites at each role's coverage using its actual surface color, then adjust against that complete background set. Validate every adjustment: if a target is impossible at the floors, increase the affected coverage in 0.01 steps and retry. Recheck after the calculator raises a fill. The search is bounded by the finite role coverage steps and rule count. If no shared color works even on opaque roles, preserve the original color and opaque coverage for those roles. On `false`: restore every saved `original`, clear the map and compute opaque fills. Change colors through the same setter `chat_theme_readability.cpp` uses; call `style::NotifyPaletteChanged()` once if any entry changed.
 
 - [ ] **Step 2: Recompute on theme changes**
 
-Subscribe to `style::PaletteChanged()`. When a notification arrives while the file-local `bool adjusting` is false: forget saved originals (the new palette replaced them), re-run Step 1's activation path if active, and fire `FillsChanged()`.
+Subscribe to `style::PaletteChanged()`. When a notification arrives while the file-local `bool adjusting` is false and palette bytes differ from the last published snapshot, retain originals whose entries still equal their published adjustments; entries changed by the caller get new originals. Full replacements explicitly call `PaletteReplaced()` so intentional original colors equal to an old adjustment are retained correctly. Recompute and fire `FillsChanged()`. Ignore byte-identical notifications. Canonical snapshots patch saved originals into a copy of the palette bytes; never temporarily change the live palette to serialize it.
 
 - [ ] **Step 3: Guard against self-notification**
 
-Set `adjusting = true` around the adjuster's own `NotifyPaletteChanged()` call. Verify with a temporary log in `PaletteChanged()`'s handler: one theme switch produces exactly one recomputation.
+Set `adjusting = true` around the adjuster's own `NotifyPaletteChanged()` call. Verify by counting `FillsChanged()` in a disposable test overlay: one theme switch produces exactly one recomputation. Keep observation state and temporary logs out of production files.
 
 - [ ] **Step 4: Check restore**
 
 Build. With material active, open Settings > Chat settings and screenshot the chat list; turn transparency effects off in Windows (material becomes inactive live) and compare the subtitle color with a screenshot taken with the setting off: identical pixels.
+
+Implementation verification ruling (2026-11-04): exact whole-palette byte
+comparisons through the live native-frame fallback and reported native failure
+cover C3's restore contract without changing the user's OS settings. Native
+OS-toggle and pixel acceptance remains listed separately in the C2 and C16
+records; no screenshot pass is inferred from these state tests.
 
 - [ ] **Step 5: Check night mode**
 

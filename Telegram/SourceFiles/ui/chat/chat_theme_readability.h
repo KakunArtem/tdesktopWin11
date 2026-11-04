@@ -27,6 +27,11 @@ void EnsureBubblesReadable(
 
 [[nodiscard]] bool IsDarkPalette(const style::palette &palette);
 
+[[nodiscard]] QColor EnsureTextContrast(
+	const QColor &color,
+	const std::vector<QColor> &backgrounds,
+	float64 floor);
+
 [[nodiscard]] QColor EnsurePeerNameReadable(
 	const QColor &color,
 	const QColor &background,

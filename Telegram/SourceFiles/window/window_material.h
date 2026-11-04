@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "rpl/producer.h"
 
+#include <QtCore/QByteArray>
+
 namespace Window::Material {
 
 [[nodiscard]] bool SettingAvailable();
@@ -20,5 +22,7 @@ void SetSettingEnabled(bool enabled);
 [[nodiscard]] rpl::producer<bool> ActiveValue();
 void Refresh();
 void ReportBackdropFailure();
+void PaletteReplaced();
+[[nodiscard]] QByteArray UnadjustedPalette();
 
 } // namespace Window::Material

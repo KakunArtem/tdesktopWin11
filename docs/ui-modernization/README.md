@@ -4,8 +4,8 @@ Status: the Soft Panels visual baseline is approved and
 [saved in the repository](reference/README.md). An
 [implementation architecture and phased plan](implementation-plan.md) is
 proposed, with a [component architecture](architecture.md) and
-[one plan per component](plans/README.md); product implementation has not
-started. Progress and open decisions are tracked in the architecture's
+[one plan per component](plans/README.md). Implementation is underway at the
+user's request. Progress and open decisions are tracked in the architecture's
 [Progress](architecture.md#progress) section.
 
 ## Purpose
@@ -61,8 +61,8 @@ Refine the selected concept into visual elements, starting with translucent
 panels, contacts/search, conversation chrome, messages and the composer. The
 user explicitly chose visual refinement before changes to the Qt client.
 The user then requested a general implementation plan, to be split into
-smaller plans later. Product source changes and builds remain for later
-requests.
+smaller plans later, then requested implementation. Execute the component
+plans in order and keep incomplete acceptance checks visible in the tracker.
 
 ## Decisions for later
 

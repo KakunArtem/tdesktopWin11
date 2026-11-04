@@ -560,6 +560,13 @@ bool IsDarkPalette(const style::palette &palette) {
 		< CountContrast(background, QColor(255, 255, 255));
 }
 
+QColor EnsureTextContrast(
+		const QColor &color,
+		const std::vector<QColor> &backgrounds,
+		float64 floor) {
+	return EnsureContrast(color, backgrounds, floor, true);
+}
+
 QColor EnsurePeerNameReadable(
 		const QColor &color,
 		const QColor &background,

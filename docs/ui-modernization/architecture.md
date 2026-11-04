@@ -29,9 +29,9 @@ execution keeps its row; note the correction in the plan.
 | ID | Component | Plan | Visual reference | Tasks done | Status | Record |
 | --- | --- | --- | --- | --- | --- | --- |
 | C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 6 / 7 | In progress: Tasks 0–5 committed; Task 6 automated rows recorded, manual rows and Task 2's Settings check pending | `decisions/2026-10-native-backdrop.md` |
-| C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 0 / 4 | In progress: `tools/wallpapers.html` written | `tools/`, `checks/README.md` |
+| C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 2 / 4 | In progress: all tools implemented; native fixture suite passed, Telegram and 150% monitor acceptance pending | `tools/`, `checks/README.md` |
 | C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 3 / 4 | In progress: service and native-frame fallback tested; manual Windows toggles pending | `checks/material-state.md` |
-| C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 0 / 3 | Not started | unit tests |
+| C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 3 / 3 | Implemented: 49 unit, 142 service and 79 regression checks passed; native visual acceptance tracked separately | `checks/material-fills.md` |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 0 / 5 | Not started | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
 | C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 0 / 4 | Not started | `checks/grab-audit.md` |
 | C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 1 / 3 | In progress: `lib_ui` forked and pointed at; `lib_base` not forked yet | `toolkit-fork.md` |
@@ -302,6 +302,17 @@ mechanism `Ui::EnsureBubblesReadable` already uses in
 stronger text colors. Results are recomputed on `style::PaletteChanged()` and
 on every `ActiveValue()` change. Each adjusted entry has its roles and its
 target; the list is under [Adjusted palette entries](#adjusted-palette-entries).
+
+Each adjusted entry is validated on its final role fills. Coverage increases
+when the initial floors cannot support the target; an originally 1:1 role
+stays opaque. When even opaque role backgrounds cannot share readable text,
+the original text is retained and those roles stay opaque.
+
+Successful full main-palette loads, applies and resets call
+`Window::Material::PaletteReplaced()` before their notification. Partial
+palette changes retain unaffected originals. Rollback, persistence and
+per-chat snapshots use `Window::Material::UnadjustedPalette()` so material
+adjustments do not become saved theme colors.
 
 `Border(surface)` is `BorderColor` of the role's text in both modes. The
 shell's panel frames (C7) use `st::shadowFg` instead while material is

@@ -44,7 +44,8 @@ under the C2 execution workspace, not committed with account data or captures.
 - The `window_material` KV preference survives the account-reset path, like
   the existing native-frame preference. No binary-stream field was added.
 - C2 remains in progress until the pending rows are resolved or explicitly
-  deferred by the user. C3 and later component work has not started.
+  deferred by the user. Subsequent component work tracks these pending rows
+  separately.
 - A fresh whole-branch review found no code issues. The original no-op test
   scenario was restored, the normal Debug executable rebuilt successfully,
   and the 21-check standalone suite passed again.

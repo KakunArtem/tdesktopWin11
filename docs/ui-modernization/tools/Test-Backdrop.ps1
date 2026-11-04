@@ -1,106 +1,99 @@
-# Places a solid window behind Telegram, captures Telegram's window in red
-# and in blue, and reports how many pixels changed between the captures.
+[CmdletBinding()]
 param(
   [ValidateSet('Transparent', 'Opaque')][string]$Expect = 'Transparent',
-  [string]$OutDir = (Join-Path $env:TEMP 'tdesktop-backdrop-check'),
-  [int]$Step = 3,
-  [long]$WindowHandle = 0
+  [string]$OutDir = (Join-Path $env:LOCALAPPDATA ('tdesktop-ui-checks/backdrop/' + [DateTime]::Now.ToString('yyyyMMdd-HHmmss-fff'))),
+  [ValidateRange(1, 100)][int]$Step = 3,
+  [long]$WindowHandle = 0,
+  [string[]]$Region,
+  [ValidateSet('Main', 'Popup')][string]$Window = 'Main',
+  [switch]$SelfTest,
+  [switch]$AllowInactive,
+  [ValidateRange(0, 15)][int]$Monitor = 0
 )
-Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-Add-Type @'
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-public static class BackdropWin32 {
-  [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
-  public delegate bool EnumProc(IntPtr hWnd, IntPtr lParam);
-  [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
-  [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
-  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
-  [DllImport("user32.dll")] public static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
-  [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc proc, IntPtr lParam);
-  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hWnd);
-  [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
-  [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr hWnd, int attribute, out RECT rect, int size);
-  public static RECT VisibleBounds(IntPtr hWnd) {
-    RECT r;
-    if (DwmGetWindowAttribute(hWnd, 9, out r, Marshal.SizeOf(typeof(RECT))) != 0) { GetWindowRect(hWnd, out r); }
-    return r;
-  }
-  public static IntPtr LargestVisibleWindow(uint pid) {
-    IntPtr best = IntPtr.Zero; long bestArea = 0;
-    EnumWindows((hWnd, l) => {
-      uint owner; GetWindowThreadProcessId(hWnd, out owner);
-      RECT r;
-      if (owner == pid && IsWindowVisible(hWnd) && GetWindowRect(hWnd, out r)) {
-        long area = (long)(r.Right - r.Left) * (r.Bottom - r.Top);
-        if (area > bestArea) { bestArea = area; best = hWnd; }
+$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'Show-Backdrop.ps1') -WindowHandle $WindowHandle
+Assert-CheckOutput $OutDir
+
+function Compare-Backdrops {
+  param([IntPtr]$Handle, [int[]]$SampleRegion, [string]$Directory, [switch]$AllowInactiveCapture)
+  New-Item -ItemType Directory -Path $Directory -Force | Out-Null
+  $backdrop = $null; $red = $null; $blue = $null
+  $initial = [UiChecks.Native]::ClientBounds($Handle)
+  $initialActive = [UiChecks.Native]::Active($Handle)
+  try {
+    $backdrop = Show-Backdrop -Color '#ff0000' -WindowHandle $Handle.ToInt64()
+    $red = Get-CheckCapture -Handle $Handle -Region $SampleRegion -Inset 2 -AllowInactive:$AllowInactiveCapture
+    if ([bool]$red.Tag -ne $initialActive) { throw 'Target activation changed before first capture; retry.' }
+    $red.Save((Join-Path $Directory 'behind-red.png'))
+    $backdrop.BackColor = [Drawing.Color]::Blue
+    $backdrop.Refresh(); Wait-CheckPaint
+    if ([UiChecks.Native]::ClientBounds($Handle) -ne $initial) { throw 'Target moved or resized between backdrops; retry.' }
+    $blue = Get-CheckCapture -Handle $Handle -Region $SampleRegion -Inset 2 -AllowInactive:$AllowInactiveCapture
+    if ([bool]$blue.Tag -ne $initialActive) { throw 'Target activation changed between backdrops; retry.' }
+    $blue.Save((Join-Path $Directory 'behind-blue.png'))
+    $difference = [UiChecks.Pixels]::Compare($red, $blue, 30, $Step, $true)
+    $difference | Add-Member -NotePropertyName Active -NotePropertyValue $initialActive
+    if ($difference.Changed -gt 0) {
+      $bounds = $difference.Bounds
+      if ($SampleRegion) { $bounds.Offset($SampleRegion[0], $SampleRegion[1]) }
+      else {
+        $frame = [UiChecks.Native]::FrameBounds($Handle)
+        $bounds.Offset(($frame.X + 2 - $initial.X), ($frame.Y + 2 - $initial.Y))
       }
-      return true;
-    }, IntPtr.Zero);
-    return best;
+      $difference.Bounds = $bounds
+    }
+    return $difference
+  } finally {
+    if ($red) { $red.Dispose() }; if ($blue) { $blue.Dispose() }
+    Hide-Backdrop $backdrop
   }
 }
-'@
-[BackdropWin32]::SetProcessDPIAware() | Out-Null
 
-if ($WindowHandle -ne 0) {
-  $telegram = [IntPtr]$WindowHandle
-} else {
-  $process = Get-Process Telegram -ErrorAction SilentlyContinue |
-    Where-Object { $_.Path -like '*tdesktopWin11*' } |
-    Select-Object -First 1
-  if (-not $process) { Write-Error 'Start out\Debug\Telegram.exe first.'; exit 2 }
-  $telegram = [BackdropWin32]::LargestVisibleWindow([uint32]$process.Id)
-}
-if ($telegram -eq [IntPtr]::Zero) { Write-Error 'No visible Telegram window found.'; exit 2 }
-$bounds = [BackdropWin32]::VisibleBounds($telegram)
-$inset = 2
-$rect = New-Object BackdropWin32+RECT
-$rect.Left = $bounds.Left + $inset; $rect.Top = $bounds.Top + $inset
-$rect.Right = $bounds.Right - $inset; $rect.Bottom = $bounds.Bottom - $inset
-$width = $rect.Right - $rect.Left
-$height = $rect.Bottom - $rect.Top
-
-$form = New-Object System.Windows.Forms.Form
-$form.FormBorderStyle = 'None'
-$form.ShowInTaskbar = $false
-$form.StartPosition = 'Manual'
-$form.Bounds = New-Object System.Drawing.Rectangle(($rect.Left - 40), ($rect.Top - 40), ($width + 80), ($height + 80))
-$form.BackColor = [System.Drawing.Color]::Red
-$form.Show()
-$SWP_NOACTIVATE = 0x0010
-[BackdropWin32]::SetWindowPos($form.Handle, $telegram, $form.Left, $form.Top, $form.Width, $form.Height, $SWP_NOACTIVATE) | Out-Null
-[BackdropWin32]::SetForegroundWindow($telegram) | Out-Null
-
-function Capture([string]$name) {
-  [System.Windows.Forms.Application]::DoEvents()
-  Start-Sleep -Milliseconds 900
-  $bitmap = New-Object System.Drawing.Bitmap($width, $height)
-  $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-  $graphics.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bitmap.Size)
-  $graphics.Dispose()
-  $bitmap.Save((Join-Path $OutDir "$name.png"))
-  return $bitmap
+if ($SelfTest) {
+  $fixture = New-Object UiChecks.BackdropForm
+  $fixture.Bounds = Get-CheckFixtureBounds -Monitor $Monitor -Width 320 -Height 180
+  $fixture.TopMost = $true; $fixture.BackColor = [Drawing.Color]::White
+  $popup = $null
+  try {
+    $fixture.Show(); Wait-CheckPaint
+    $opaque = Compare-Backdrops $fixture.Handle @(12, 9, 80, 40) (Join-Path $OutDir 'opaque') -AllowInactiveCapture
+    if ($opaque.Changed -ne 0) { throw 'Opaque fixture changed' }
+    $fixture.Opacity = 0.7; Wait-CheckPaint
+    $transparent = Compare-Backdrops $fixture.Handle @(12, 9, 80, 40) (Join-Path $OutDir 'transparent') -AllowInactiveCapture
+    if ($transparent.SampledChanged -ne $transparent.SampledTotal -or $transparent.Bounds -ne (New-Object Drawing.Rectangle(12, 9, 80, 40))) { throw 'Transparent region bounds incorrect' }
+    $popup = New-Object UiChecks.BackdropForm
+    $popup.Bounds = Get-CheckFixtureBounds -Monitor $Monitor -Width 180 -Height 100 -X 420
+    $popup.TopMost = $true; $popup.BackColor = [Drawing.Color]::White
+    $popup.Show(); Wait-CheckPaint
+    if ([UiChecks.Native]::SelectWindow([uint32]$PID, $false) -ne $fixture.Handle -or
+        [UiChecks.Native]::SelectWindow([uint32]$PID, $true) -ne $popup.Handle) { throw 'Main/popup selection incorrect' }
+    $popupResult = Compare-Backdrops $popup.Handle @(0, 0, 180, 100) (Join-Path $OutDir 'popup') -AllowInactiveCapture
+    if ($popupResult.Changed -ne 0) { throw 'Opaque popup changed' }
+    $invalid = $false
+    try { Get-CheckCapture -Handle $popup.Handle -Region @(170, 0, 20, 10) | Out-Null }
+    catch { $invalid = $_.Exception.Message -match 'INVALID region' }
+    if (-not $invalid) { throw 'Invalid client region was accepted' }
+    "SELFTEST PASS: opaque, transparent bounds 12,9,80,40, popup selection, invalid region; DPI $([UiChecks.Native]::GetDpiForWindow($fixture.Handle)). Evidence: $OutDir"
+  } finally { if ($popup) { $popup.Dispose() }; $fixture.Dispose() }
+  exit 0
 }
 
-New-Item -ItemType Directory -Force $OutDir | Out-Null
-$red = Capture 'behind-red'
-$form.BackColor = [System.Drawing.Color]::Blue
-$form.Refresh()
-$blue = Capture 'behind-blue'
-$form.Close()
-
-$changed = 0; $total = 0
-for ($y = 0; $y -lt $height; $y += $Step) {
-  for ($x = 0; $x -lt $width; $x += $Step) {
-    $a = $red.GetPixel($x, $y); $b = $blue.GetPixel($x, $y)
-    $total++
-    if ([math]::Abs($a.R - $b.R) + [math]::Abs($a.G - $b.G) + [math]::Abs($a.B - $b.B) -gt 30) { $changed++ }
+$sampleRegion = @()
+if ($Region) {
+  foreach ($part in (($Region -join ',') -split ',')) {
+    $number = 0
+    if (-not [int]::TryParse($part, [ref]$number)) { throw 'INVALID region: expected four integers.' }
+    $sampleRegion += $number
   }
+  if ($sampleRegion.Count -ne 4) { throw 'INVALID region: expected x,y,width,height.' }
 }
-$red.Dispose(); $blue.Dispose()
-$fraction = $changed / [math]::Max(1, $total)
-"Changed pixels: $changed of $total sampled ({0:P2}). Captures: $OutDir" -f $fraction
-if ($Expect -eq 'Transparent') { if ($fraction -gt 0.002) { 'PASS: backdrop shows what is behind the window'; exit 0 } else { 'FAIL: window is opaque'; exit 1 } }
-else { if ($fraction -le 0.002) { 'PASS: window is opaque'; exit 0 } else { 'FAIL: window shows what is behind it'; exit 1 } }
+$target = Get-CheckWindow -WindowHandle $WindowHandle -Window $Window
+$difference = Compare-Backdrops $target $sampleRegion $OutDir -AllowInactiveCapture:$AllowInactive
+$fraction = $difference.SampledChanged / [Math]::Max(1, $difference.SampledTotal)
+$bounds = $difference.Bounds
+"Changed pixels: $($difference.SampledChanged) of $($difference.SampledTotal) sampled ($($fraction.ToString('P2'))). Captures: $OutDir"
+"Changed bounds: $($bounds.X),$($bounds.Y),$($bounds.Width),$($bounds.Height)"
+"Activation: $($difference.Active); AllowInactive: $AllowInactive"
+$transparent = $fraction -gt 0.002
+if (($Expect -eq 'Transparent') -eq $transparent) { "PASS: expected $Expect"; exit 0 }
+"FAIL: expected $Expect"; exit 1
