@@ -6,6 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "history/view/controls/history_view_compose_controls.h"
+#include "ui/ui_material.h"
 
 #include "history/view/controls/history_view_bot_menu_button.h"
 
@@ -141,6 +142,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_iv.h"
 #include "styles/style_layers.h"
 
+#include <QtGui/QPainterPath>
+
 namespace HistoryView {
 namespace {
 
@@ -200,11 +203,12 @@ public:
 	FieldHeader(
 		QWidget *parent,
 		std::shared_ptr<ChatHelpers::Show> show,
-		Fn<bool()> hasSendText);
+		Fn<bool()> hasSendText,
+		bool windowMaterial);
 
 	void setHistory(const SetHistoryArgs &args);
 	void updateTopicRootId(MsgId topicRootId);
-	void init();
+	void init(bool windowMaterial);
 
 	void editMessage(
 		FullMsgId id,
@@ -345,7 +349,8 @@ private:
 FieldHeader::FieldHeader(
 	QWidget *parent,
 	std::shared_ptr<ChatHelpers::Show> show,
-	Fn<bool()> hasSendText)
+	Fn<bool()> hasSendText,
+	bool windowMaterial)
 : RpWidget(parent)
 , _show(std::move(show))
 , _hasSendText(std::move(hasSendText))
@@ -353,10 +358,13 @@ FieldHeader::FieldHeader(
 	std::make_unique<ForwardPanel>([=] { customEmojiRepaint(); }))
 , _data(&_show->session().data())
 , _cancel(Ui::CreateChild<Ui::IconButton>(this, st::historyReplyCancel)) {
+	if (windowMaterial) {
+		Ui::Material::RepaintOnFillsChanged(this);
+	}
 	_cancel->setAccessibleName(tr::lng_cancel(tr::now));
 	_updateEditTimeLeftDisplay.setCallback([=] { update(); });
 	resize(QSize(parent->width(), st::historyReplyHeight));
-	init();
+	init(windowMaterial);
 }
 
 void FieldHeader::setHistory(const SetHistoryArgs &args) {
@@ -369,7 +377,7 @@ void FieldHeader::updateTopicRootId(MsgId topicRootId) {
 	_topicRootId = topicRootId;
 }
 
-void FieldHeader::init() {
+void FieldHeader::init(bool windowMaterial) {
 	sizeValue(
 	) | rpl::on_next([=](QSize size) {
 		updateControlsGeometry(size);
@@ -395,7 +403,12 @@ void FieldHeader::init() {
 	) | rpl::on_next([=] {
 		Painter p(this);
 		p.setInactive(_show->paused(Window::GifPauseReason::Any));
-		p.fillRect(rect(), st::historyComposeAreaBg);
+		if (windowMaterial) {
+			Ui::Material::PaintSurface(p, rect(),
+				Ui::Material::Surface::Composer, st::historyComposeAreaBg);
+		} else {
+			p.fillRect(rect(), st::historyComposeAreaBg);
+		}
 
 		const auto position = st::historyReplyIconPosition;
 		if (_suggestOptions) {
@@ -1278,7 +1291,8 @@ ComposeControls::ComposeControls(
 , _header(std::make_unique<FieldHeader>(
 	_wrap.get(),
 	_show,
-	[=] { return _field->isVisible() && HasSendText(_field); }))
+	[=] { return _field->isVisible() && HasSendText(_field); },
+	_regularWindow != nullptr))
 , _voiceRecordBar(std::make_unique<VoiceRecordBar>(
 	_wrap.get(),
 	Controls::VoiceRecordBarDescriptor{
@@ -1298,6 +1312,9 @@ ComposeControls::ComposeControls(
 , _unavailableEmojiPasted(std::move(descriptor.unavailableEmojiPasted))
 , _saveDraftTimer([=] { saveDraft(); })
 , _saveCloudDraftTimer([=] { saveCloudDraft(); }) {
+	if (_regularWindow) {
+		Ui::Material::RepaintOnFillsChanged(_wrap.get());
+	}
 	if (_st.radius > 0) {
 		_backgroundRect.emplace(_st.radius, _st.bg);
 	}
@@ -5711,6 +5728,30 @@ void ComposeControls::updateAttachBotsMenu() {
 }
 
 void ComposeControls::paintBackground(QPainter &p, QRect full, QRect clip) {
+	if (_regularWindow && Ui::Material::Active()) {
+		if (_backgroundRect) {
+			auto shape = QPainterPath();
+			const auto r = _st.radius;
+			if (_commentsShown && !_commentsShown->isHidden()) {
+				shape.addRoundedRect(_commentsShown->geometry(), r, r);
+				full.setLeft(full.left()
+					+ _commentsShown->width()
+					+ _st.commentsSkip);
+			}
+			if (_starsReaction) {
+				full.setWidth(full.width()
+					- _starsReaction->width()
+					- _st.starsSkip);
+			}
+			shape.addRoundedRect(full, r, r);
+			Ui::Material::PaintSurface(
+				p, shape, Ui::Material::Surface::Composer, _st.bg);
+		} else {
+			Ui::Material::PaintSurface(
+				p, clip, Ui::Material::Surface::Composer, _st.bg);
+		}
+		return;
+	}
 	if (_backgroundRect) {
 		auto hq = PainterHighQualityEnabler(p);
 		p.setBrush(_st.bg);

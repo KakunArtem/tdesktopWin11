@@ -106,6 +106,8 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Toolkit fork](toolkit-fork.md): the `lib_ui` and `lib_base` forks, the
   branch rule and how to land changes and take upstream updates.
 - [Native backdrop prototype results](decisions/2026-10-native-backdrop.md).
+- [Surface roles evidence](checks/surface-roles.md) and
+  [opaque paint ownership](checks/opaque-paint-audit.md).
 
 The translucency scope above is confirmed. Other recommendations in these
 documents remain proposals unless explicitly recorded as user decisions.

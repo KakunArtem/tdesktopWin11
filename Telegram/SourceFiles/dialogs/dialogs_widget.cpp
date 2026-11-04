@@ -72,7 +72,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_slide_animation.h"
 #include "window/window_connecting_widget.h"
 #include "window/window_main_menu.h"
-#include "window/window_material_policy.h"
 #include "storage/storage_media_prepare.h"
 #include "storage/storage_account.h"
 #include "storage/storage_domain.h"
@@ -433,6 +432,7 @@ Widget::Widget(
 , _searchTimer([=] { search(); })
 , _peerSearch(&controller->session(), Api::PeerSearch::Type::WithSponsored)
 , _singleMessageSearch(&controller->session()) {
+	Ui::Material::RepaintOnFillsChanged(this);
 	const auto makeChildListShown = [](PeerId peerId, float64 shown) {
 		return InnerWidget::ChildListShown{ peerId, shown };
 	};
@@ -2634,13 +2634,15 @@ void Widget::startChatsFilterSlide(
 	_chatsFilterSlideCanvas = std::make_unique<Ui::RpWidget>(this);
 	const auto canvas = _chatsFilterSlideCanvas.get();
 	canvas->setAttribute(Qt::WA_TransparentForMouseEvents);
-	canvas->setAttribute(Qt::WA_OpaquePaintEvent);
+	Ui::Material::SetOpaquePaint(canvas, true);
+	Ui::Material::RepaintOnFillsChanged(canvas);
 	canvas->setGeometry(_scroll->geometry());
 	const auto animation
 		= canvas->lifetime().make_state<Ui::SlideAnimation>();
 	animation->setSnapshots(std::move(wasCache), std::move(nowCache));
 	canvas->paintOn([=](QPainter &p) {
-		p.fillRect(canvas->rect(), st::dialogsBg);
+		Ui::Material::PaintSurface(
+			p, canvas->rect(), Ui::Material::Surface::Navigation, st::dialogsBg);
 		animation->paintFrame(p, 0, 0, canvas->width());
 	});
 	canvas->show();
@@ -4973,11 +4975,8 @@ void Widget::paintEvent(QPaintEvent *e) {
 	auto above = QRect(0, 0, width(), _scroll->y());
 	if (above.intersects(r)) {
 		if (Ui::Material::Active()) {
-			p.setCompositionMode(QPainter::CompositionMode_Source);
-			p.fillRect(
-				above.intersected(r),
-				Window::Material::PrototypeFill(st::dialogsBg->c));
-			p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+			Ui::Material::PaintSurface(p, above.intersected(r),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
 		} else {
 			p.fillRect(above.intersected(r), bg);
 		}
@@ -4997,7 +4996,13 @@ void Widget::paintEvent(QPaintEvent *e) {
 			+ suggestionsSkip;
 		const auto aboveBottom = above.y() + above.height();
 		if (top > aboveBottom) {
-			p.fillRect(0, aboveBottom, width(), top - aboveBottom, bg);
+			const auto between = QRect(0, aboveBottom, width(), top - aboveBottom);
+			if (Ui::Material::Active()) {
+				Ui::Material::PaintSurface(p, between,
+					Ui::Material::Surface::Navigation, st::dialogsBg);
+			} else {
+				p.fillRect(between, bg);
+			}
 		}
 		p.drawPixmapLeft(0, top, width(), _widthAnimationCache);
 		belowTop = top
@@ -5006,7 +5011,12 @@ void Widget::paintEvent(QPaintEvent *e) {
 
 	auto below = QRect(0, belowTop, width(), height() - belowTop);
 	if (below.intersects(r)) {
-		p.fillRect(below.intersected(r), bg);
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintSurface(p, below.intersected(r),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
+		} else {
+			p.fillRect(below.intersected(r), bg);
+		}
 	}
 }
 

@@ -427,6 +427,15 @@ MainWindow::MainWindow(not_null<Controller*> controller)
 	}));
 }))
 , _body(body()) {
+	if (Window::Material::Capable()) {
+		_body->paintRequest() | rpl::on_next([=](QRect clip) {
+			auto p = QPainter(_body);
+			Ui::Material::PaintSurface(
+				p, clip, Ui::Material::Surface::Window, st::windowBg);
+		}, _body->lifetime());
+		Ui::Material::RepaintOnFillsChanged(_body);
+	}
+
 	style::PaletteChanged(
 	) | rpl::on_next([=] {
 		updatePalette();
@@ -669,7 +678,9 @@ void MainWindow::updatePalette() {
 	Ui::ForceFullRepaint(this);
 
 	auto p = palette();
-	p.setColor(QPalette::Window, st::windowBg->c);
+	p.setColor(QPalette::Window, Ui::Material::Active()
+		? QColor(Qt::transparent)
+		: st::windowBg->c);
 	setPalette(p);
 }
 

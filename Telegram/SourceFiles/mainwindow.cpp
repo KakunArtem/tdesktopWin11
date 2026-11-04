@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/effects/layer_backdrop.h"
 #include "ui/emoji_config.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "lang/lang_cloud_manager.h"
 #include "lang/lang_instance.h"
 #include "core/sandbox.h"
@@ -105,7 +106,7 @@ MainWindow::MainWindow(not_null<Window::Controller*> controller)
 		Ui::ForceFullRepaint(this);
 	}, lifetime());
 
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	Ui::Material::SetOpaquePaint(this, true);
 }
 
 void MainWindow::initHook() {

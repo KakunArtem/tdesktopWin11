@@ -6,6 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "dialogs/dialogs_inner_widget.h"
+#include "ui/ui_material.h"
 
 #include "dialogs/dialogs_three_state_icon.h"
 #include "dialogs/ui/chat_search_empty.h"
@@ -320,7 +321,8 @@ InnerWidget::InnerWidget(
 	+ st::defaultDialogRow.padding.left())
 , _childListShown(std::move(childListShown))
 , _freezeTimer([=] { _shownList->unfreeze(); update(); }) {
-	setAttribute(Qt::WA_OpaquePaintEvent, true);
+	Ui::Material::SetOpaquePaint(this, true);
+	Ui::Material::RepaintOnFillsChanged(this);
 	setAccessibleName(tr::lng_recent_chats(tr::now));
 
 	_communityViewable.setRepaint([=] { update(); });
@@ -1036,6 +1038,10 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 	if (!_savedSublists && _controller->contentOverlapped(this, e)) {
 		return;
 	}
+	if (Ui::Material::Active()) {
+		Ui::Material::PaintSurface(
+			p, rect(), Ui::Material::Surface::Navigation, st::dialogsBg);
+	}
 	const auto activeEntry = _controller->activeChatEntryCurrent();
 	const auto videoPaused = _controller->isGifPausedAtLeastFor(
 		Window::GifPauseReason::Any);
@@ -1066,6 +1072,10 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 			not_null<Row*> row,
 			bool selected,
 			bool mayBeActive) {
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintSurface(p, QRect(0, 0, fullWidth, row->height()),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
+		}
 		const auto &key = row->key();
 		const auto active = mayBeActive && isRowActive(row, activeEntry);
 		const auto history = key.history();
@@ -1111,7 +1121,8 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 			: _chatPreviewRow.key
 			? (row->key() == _chatPreviewRow.key)
 			: selected;
-		const auto cacheAllowed = _rowsScrollCache.scrolling()
+		const auto cacheAllowed = !Ui::Material::Active()
+			&& _rowsScrollCache.scrolling()
 			&& (!videoUserpic || !context.narrow)
 			&& !active
 			&& !cacheSelected
@@ -2016,6 +2027,9 @@ void InnerWidget::paintPeerSearchResult(
 }
 
 QBrush InnerWidget::currentBg() const {
+	if (Ui::Material::Active()) {
+		return Qt::transparent;
+	}
 	return anim::brush(
 		st::dialogsBg,
 		st::dialogsBgOver,

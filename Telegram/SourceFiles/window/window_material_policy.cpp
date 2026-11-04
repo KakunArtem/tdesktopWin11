@@ -43,9 +43,4 @@ const char *RefusalName(Refusal refusal) {
 	return "unknown";
 }
 
-QColor PrototypeFill(QColor opaque) {
-	opaque.setAlphaF(kPrototypeFillAlpha);
-	return opaque;
-}
-
 } // namespace Window::Material

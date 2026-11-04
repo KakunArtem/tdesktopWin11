@@ -9,8 +9,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_material_fills.h"
 #include "ui/ui_material.h"
 #include "ui/color_contrast.h"
+#include "ui/style/style_core_color.h"
 
 #include "rpl/lifetime.h"
+
+#include <QtGui/QImage>
+#include <QtGui/QPainter>
+#include <QtGui/QPainterPath>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QWidget>
 
 #include <cmath>
 #include <iostream>
@@ -126,16 +133,6 @@ void TestNames() {
 		"an accepted decision is named");
 }
 
-void TestPrototypeFill() {
-	const auto fill = PrototypeFill(QColor(10, 20, 30));
-	Check(
-		fill.red() == 10 && fill.green() == 20 && fill.blue() == 30,
-		"fill keeps the palette color");
-	Check(
-		std::abs(fill.alphaF() - kPrototypeFillAlpha) < 0.01,
-		"fill uses the prototype alpha");
-}
-
 [[nodiscard]] bool Near(float64 a, float64 b) {
 	return std::abs(a - b) < 0.005;
 }
@@ -240,17 +237,115 @@ void TestMaterialFillMirror() {
 	Check(count == 2, "each completed fill publication notifies once");
 }
 
+void TestPaintFillReplaces() {
+	auto image = QImage(8, 8, QImage::Format_ARGB32_Premultiplied);
+	image.fill(QColor(255, 0, 0));
+	{
+		auto p = QPainter(&image);
+		p.setCompositionMode(QPainter::CompositionMode_Multiply);
+		for (auto i = 0; i != 5; ++i) {
+			Ui::Material::PaintFill(p, image.rect(), QColor(0, 0, 255, 128));
+		}
+		Check(p.compositionMode() == QPainter::CompositionMode_Multiply,
+			"fill restores the painter composition mode");
+	}
+	Check(image.pixelColor(3, 3) == QColor(0, 0, 255, 128),
+		"repeated fills replace alpha and color");
+	image.fill(QColor(255, 0, 0));
+	{
+		auto p = QPainter(&image);
+		p.setClipRect(QRect(2, 2, 2, 2));
+		Ui::Material::PaintFill(p, image.rect(), QColor(0, 0, 255, 128));
+	}
+	Check(image.pixelColor(0, 0) == QColor(255, 0, 0),
+		"fill respects the existing clip");
+	Check(image.pixelColor(2, 2) == QColor(0, 0, 255, 128),
+		"fill covers the clipped region");
+}
+
+void TestShapeAndSurfaceFill() {
+	auto image = QImage(12, 12, QImage::Format_ARGB32_Premultiplied);
+	image.fill(Qt::transparent);
+	auto shape = QPainterPath();
+	shape.addRoundedRect(QRectF(2, 2, 8, 8), 3, 3);
+	{
+		auto p = QPainter(&image);
+		Ui::Material::PaintFill(p, shape, QColor(10, 20, 30, 128));
+		Check(!p.testRenderHint(QPainter::Antialiasing),
+			"shape fill restores antialiasing state");
+	}
+	Check(image.pixelColor(6, 6).alpha() == 128,
+		"path interior has the requested alpha");
+	Check(image.pixelColor(0, 0).alpha() == 0,
+		"path leaves outside pixels untouched");
+	const auto solid = style::internal::OwnedColor(QColor(40, 50, 60));
+	const auto material = QColor(10, 20, 30, 128);
+	Ui::Material::SetFills({ { Surface::Navigation, material } }, {});
+	for (const auto active : { false, true }) {
+		Ui::Material::SetActive(active);
+		image.fill(Qt::transparent);
+		{
+			auto p = QPainter(&image);
+			Ui::Material::PaintSurface(p, image.rect(),
+				Surface::Navigation, solid.color());
+		}
+		const auto expected = (active ? material : solid.color()->c).rgba();
+		Check(image.pixelColor(6, 6).rgba() == expected,
+			"surface chooses material or the exact solid color");
+		image.fill(Qt::transparent);
+		{
+			auto p = QPainter(&image);
+			Ui::Material::PaintSurface(p, shape,
+				Surface::Navigation, solid.color());
+		}
+		Check(image.pixelColor(6, 6).rgba() == expected,
+			"path surface chooses material or solid");
+	}
+	Ui::Material::SetActive(false);
+}
+
+void TestWidgetMaterialBindings() {
+	auto widget = QWidget();
+	Ui::Material::SetOpaquePaint(&widget, true);
+	Check(widget.testAttribute(Qt::WA_OpaquePaintEvent), "solid widget opaque");
+	Ui::Material::SetActive(true);
+	Check(!widget.testAttribute(Qt::WA_OpaquePaintEvent), "material clears opaque");
+	Ui::Material::SetOpaquePaint(&widget, false);
+	Ui::Material::SetActive(false);
+	Check(!widget.testAttribute(Qt::WA_OpaquePaintEvent),
+		"fallback preserves animation's non-opaque intent");
+	Ui::Material::SetOpaquePaint(&widget, true);
+	const auto children = widget.children().size();
+	Ui::Material::SetOpaquePaint(&widget, true);
+	Ui::Material::RepaintOnFillsChanged(&widget);
+	Ui::Material::RepaintOnFillsChanged(&widget);
+	Check(widget.children().size() == children,
+		"repeated binding reuses the widget's state");
+	Check(widget.testAttribute(Qt::WA_OpaquePaintEvent),
+		"animation end restores solid opacity");
+	auto temporary = new QWidget();
+	Ui::Material::SetOpaquePaint(temporary, true);
+	Ui::Material::RepaintOnFillsChanged(temporary);
+	delete temporary;
+	Ui::Material::SetActive(true);
+	Ui::Material::SetFills({ { Surface::Navigation, QColor(1, 2, 3, 128) } }, {});
+	Ui::Material::SetActive(false);
+}
+
 } // namespace
 
-int main() {
+int main(int argc, char *argv[]) {
+	const auto application = QApplication(argc, argv);
 	TestDecide();
 	TestLiveAllows();
 	TestMaterialMirror();
 	TestNames();
-	TestPrototypeFill();
 	TestMaterialFills();
 	TestReadableOver();
 	TestMaterialFillMirror();
+	TestPaintFillReplaces();
+	TestShapeAndSurfaceFill();
+	TestWidgetMaterialBindings();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;

@@ -12,7 +12,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Window::Material {
 
 inline constexpr auto kMinimumBackdropBuild = 22621;
-inline constexpr auto kPrototypeFillAlpha = 0.6;
 
 enum class Backdrop {
 	None,
@@ -44,6 +43,5 @@ struct Decision {
 [[nodiscard]] Decision Decide(const Environment &environment);
 [[nodiscard]] bool LiveAllows(const Environment &environment);
 [[nodiscard]] const char *RefusalName(Refusal refusal);
-[[nodiscard]] QColor PrototypeFill(QColor opaque);
 
 } // namespace Window::Material

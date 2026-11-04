@@ -9,8 +9,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "rpl/producer.h"
 #include "base/flat_map.h"
+#include "base/basic_types.h"
+#include "ui/style/style_core.h"
 
 #include <QtGui/QColor>
+
+class QPainter;
+class QPainterPath;
+class QRect;
+class QWidget;
 
 namespace Ui::Material {
 
@@ -32,5 +39,19 @@ void SetFills(
 [[nodiscard]] QColor Fill(Surface surface);
 [[nodiscard]] QColor Border(Surface surface);
 [[nodiscard]] rpl::producer<> FillsChanged();
+void PaintFill(QPainter &p, const QRect &rect, const QColor &fill);
+void PaintFill(QPainter &p, const QPainterPath &shape, const QColor &fill);
+void PaintSurface(
+	QPainter &p,
+	const QRect &rect,
+	Surface surface,
+	const style::color &solid);
+void PaintSurface(
+	QPainter &p,
+	const QPainterPath &shape,
+	Surface surface,
+	const style::color &solid);
+void SetOpaquePaint(not_null<QWidget*> widget, bool opaqueInSolidMode);
+void RepaintOnFillsChanged(not_null<QWidget*> widget);
 
 } // namespace Ui::Material

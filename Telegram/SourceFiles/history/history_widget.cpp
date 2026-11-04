@@ -66,6 +66,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/silent_toggle.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "inline_bots/inline_bot_result.h"
 #include "base/event_filter.h"
 #include "base/options.h"
@@ -365,6 +366,7 @@ HistoryWidget::HistoryWidget(
 		return _list && _list->itemTop(view) >= 0;
 	}))
 , _topShadow(this) {
+	Ui::Material::RepaintOnFillsChanged(this);
 	setAcceptDrops(true);
 	setVisualTabOrder(true);
 
@@ -11272,7 +11274,8 @@ void HistoryWidget::drawField(Painter &p, const QRect &rect) {
 	}
 	p.setInactive(
 		controller()->isGifPausedAtLeastFor(Window::GifPauseReason::Any));
-	p.fillRect(myrtlrect(0, backy, width(), backh), st::historyReplyBg);
+	Ui::Material::PaintSurface(p, myrtlrect(0, backy, width(), backh),
+		Ui::Material::Surface::Composer, st::historyReplyBg);
 
 	const auto media = (!_previewDrawPreview && drawMsgText)
 		? drawMsgText->media()

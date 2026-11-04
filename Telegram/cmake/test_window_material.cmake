@@ -37,6 +37,7 @@ PRIVATE
 target_link_libraries(test_window_material
 PRIVATE
     desktop-app::external_qt
+    desktop-app::external_qt_static_plugins
     desktop-app::lib_base
     desktop-app::lib_rpl
     desktop-app::lib_ui

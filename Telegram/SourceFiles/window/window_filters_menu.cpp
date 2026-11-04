@@ -6,6 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_filters_menu.h"
+#include "ui/ui_material.h"
 
 #include "menu/menu_mark_as_read.h"
 #include "mainwindow.h"
@@ -123,7 +124,8 @@ void FiltersMenu::setup() {
 	_menu.setIsMenuButton(true);
 	_menu.setAccessibleName(tr::lng_main_menu(tr::now));
 
-	_outer.setAttribute(Qt::WA_OpaquePaintEvent);
+	Ui::Material::SetOpaquePaint(&_outer, true);
+	Ui::Material::RepaintOnFillsChanged(&_outer);
 	_outer.show();
 
 	// Keep the sidebar's Tab chain in visual order: the main menu button
@@ -135,9 +137,14 @@ void FiltersMenu::setup() {
 	_outer.paintRequest(
 	) | rpl::on_next([=](QRect clip) {
 		auto p = QPainter(&_outer);
-		p.setPen(Qt::NoPen);
-		p.setBrush(st::windowFiltersButton.textBg);
-		p.drawRect(clip);
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintSurface(p, clip,
+				Ui::Material::Surface::Navigation, st::windowFiltersButton.textBg);
+		} else {
+			p.setPen(Qt::NoPen);
+			p.setBrush(st::windowFiltersButton.textBg);
+			p.drawRect(clip);
+		}
 	}, _outer.lifetime());
 
 	_parent->heightValue(
