@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_material_policy.h"
 #include "window/window_material_fills.h"
+#include "window/window_soft_panels_layout.h"
 #include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "ui/color_contrast.h"
@@ -41,6 +42,73 @@ void Check(bool condition, const char *name) {
 		++FailedChecks;
 		std::cout << "FAILED: " << name << std::endl;
 	}
+}
+
+void TestSoftPanelsLayout() {
+	using namespace Window::SoftPanels;
+	const auto two = Layout({
+		.main = QRect(0, 0, 928, 694),
+		.dialogsWidth = 300,
+		.gap = 4,
+	});
+	Check(two.dialogs == QRect(0, 0, 300, 694), "dialogs at the left");
+	Check(two.conversation == QRect(304, 0, 624, 694),
+		"conversation follows one gap");
+	Check(two.third.isEmpty(), "two columns omit third panel");
+	const auto three = Layout({
+		.main = QRect(0, 0, 1200, 694),
+		.dialogsWidth = 300,
+		.thirdWidth = 280,
+		.gap = 4,
+	});
+	Check(three.third == QRect(920, 0, 280, 694), "third at right edge");
+	Check(three.conversation == QRect(304, 0, 612, 694),
+		"conversation fits between both gaps");
+	const auto one = Layout({
+		.main = QRect(0, 0, 500, 694),
+		.dialogsWidth = 500,
+		.oneColumn = true,
+		.gap = 4,
+	});
+	Check(one.dialogs == QRect(0, 0, 500, 694), "one column fills available space");
+	Check(one.conversation == one.dialogs, "one column shares panel space");
+	Check(one.third.isEmpty(), "one column has no third panel");
+	const auto separate = Layout({
+		.main = QRect(10, 20, 600, 400),
+		.thirdWidth = 200,
+		.gap = 4,
+	});
+	Check(separate.dialogs.isEmpty(), "separate window has no navigation panel");
+	Check(separate.conversation == QRect(10, 20, 396, 400),
+		"absent navigation adds no leading gap");
+	Check(separate.third == QRect(410, 20, 200, 400),
+		"layout preserves coordinate origin");
+}
+
+void TestPanelShape() {
+	using namespace Window::SoftPanels;
+	const auto right = PanelShape(QRectF(0, 0, 100, 100), 14, Corners::Right);
+	Check(right.contains(QPointF(1, 1)), "navigation keeps square top-left");
+	Check(right.contains(QPointF(1, 99)), "navigation keeps square bottom-left");
+	Check(!right.contains(QPointF(99, 1)), "navigation rounds top-right");
+	Check(!right.contains(QPointF(99, 99)), "navigation rounds bottom-right");
+	auto outline = QImage(100, 100, QImage::Format_ARGB32_Premultiplied);
+	outline.fill(Qt::transparent);
+	{
+		auto painter = QPainter(&outline);
+		painter.setPen(QPen(Qt::red, 1));
+		painter.setBrush(Qt::NoBrush);
+		painter.drawPath(right);
+	}
+	Check(outline.pixelColor(14, 50).alpha() == 0,
+		"navigation outline has no internal seam");
+	const auto all = PanelShape(QRectF(10, 20, 100, 100), 14, Corners::All);
+	Check(!all.contains(QPointF(11, 21)), "conversation rounds top-left");
+	Check(all.contains(QPointF(60, 70)), "conversation keeps center");
+	const auto narrow = PanelShape(QRectF(0, 0, 4, 8), 14, Corners::All);
+	Check(narrow.contains(QPointF(2, 4)), "small panels retain their center");
+	Check(narrow.boundingRect() == QRectF(0, 0, 4, 8),
+		"oversized radius stays within panel bounds");
 }
 
 [[nodiscard]] Environment Supported() {
@@ -490,6 +558,8 @@ rpl::producer<> on_main_update_requests() {
 int main(int argc, char *argv[]) {
 	const auto application = QApplication(argc, argv);
 	TestDecide();
+	TestSoftPanelsLayout();
+	TestPanelShape();
 	TestLiveAllows();
 	TestMaterialMirror();
 	TestNames();

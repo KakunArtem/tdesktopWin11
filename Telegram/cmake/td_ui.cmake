@@ -88,6 +88,7 @@ set(style_files
     overview/overview.style
     wallet/wallet.style
     window/window.style
+    window/window_soft_panels.style
     window/window_main_menu.style
     editor/editor.style
     statistics/statistics.style

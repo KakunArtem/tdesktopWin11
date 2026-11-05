@@ -43,6 +43,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_saved_windows.h"
 #include "window/window_separate_id.h"
 #include "window/window_slide_animation.h"
+#include "window/window_soft_panels.h"
 #include "window/window_text_drop.h"
 #include "window/window_history_hider.h"
 #include "window/window_controller.h"
@@ -101,6 +102,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_dialogs.h"
 #include "styles/style_chat.h"
 #include "styles/style_window.h"
+#include "styles/style_window_soft_panels.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QMimeData>
@@ -287,6 +289,9 @@ MainWidget::MainWidget(
 	: nullptr)
 , _playerPlaylist(this, _controller)
 , _changelogs(Core::Changelogs::Create(&controller->session())) {
+	Ui::Material::SoftPanelsValue() | rpl::skip(1) | rpl::on_next([=] {
+		updateControlsGeometry();
+	}, lifetime());
 	rpl::merge(
 		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
 		Ui::Material::FillsChanged() | rpl::filter([] {
@@ -2128,7 +2133,7 @@ void MainWidget::showNewSection(
 		}, _thirdSection->lifetime());
 		if (!_thirdShadow) {
 			_thirdShadow.create(this);
-			_thirdShadow->show();
+			_thirdShadow->setVisible(!Ui::Material::SoftPanels());
 			orderWidgets();
 		}
 		updateControlsGeometry();
@@ -2462,6 +2467,13 @@ void MainWidget::orderWidgets() {
 	if (_thirdColumnResizeArea) {
 		_thirdColumnResizeArea->raise();
 	}
+	for (const auto frame : {
+		_navigationFrame.get(), _conversationFrame.get(), _thirdFrame.get(),
+	}) {
+		if (frame) {
+			frame->raise();
+		}
+	}
 	if (_connecting) {
 		_connecting->raise();
 	}
@@ -2474,6 +2486,11 @@ void MainWidget::orderWidgets() {
 }
 
 QPixmap MainWidget::grabForShowAnimation(const Window::SectionSlideParams &params) {
+	const auto grab = [&](QRect rect) {
+		return Ui::Material::SoftPanels()
+			? Window::SoftPanels::GrabContent(this, rect)
+			: Ui::Material::Grab(this, rect);
+	};
 	QPixmap result;
 	floatPlayerHideAll();
 	if (_player) {
@@ -2490,7 +2507,7 @@ QPixmap MainWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 
 	auto sectionTop = getMainSectionTop();
 	if (isOneColumn()) {
-		result = Ui::Material::Grab(this, QRect(
+		result = grab(QRect(
 			0,
 			sectionTop,
 			width(),
@@ -2502,16 +2519,16 @@ QPixmap MainWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 		if (_thirdShadow) {
 			_thirdShadow->hide();
 		}
-		result = Ui::Material::Grab(this, QRect(
-			_dialogsWidth,
+		result = grab(QRect(
+			Ui::Material::SoftPanels() ? _history->x() : _dialogsWidth,
 			sectionTop,
-			width() - _dialogsWidth,
+			Ui::Material::SoftPanels() ? _history->width() : width() - _dialogsWidth,
 			height() - sectionTop));
 		if (_sideShadow) {
-			_sideShadow->show();
+			_sideShadow->setVisible(!Ui::Material::SoftPanels());
 		}
 		if (_thirdShadow) {
-			_thirdShadow->show();
+			_thirdShadow->setVisible(!Ui::Material::SoftPanels());
 		}
 	}
 	if (_hider && hiderVisible) {
@@ -2614,6 +2631,45 @@ void MainWidget::paintEvent(QPaintEvent *e) {
 			}
 		}
 		_showAnimation->paintContents(p);
+		if (Ui::Material::SoftPanels()) {
+			using namespace Window::SoftPanels;
+			auto outside = QPainterPath();
+			outside.addRect(rect());
+			const auto exclude = [&](QRect panel, int radius, Corners corners) {
+				outside = outside.subtracted(PanelShape(panel, radius, corners));
+			};
+			if (isOneColumn()) {
+				const auto navigation = _dialogs && !isMainSectionShown();
+				exclude(
+					rect(),
+					navigation ? st::softPanelsNavigationRadius : st::softPanelsRadius,
+					navigation ? Corners::Right : Corners::All);
+			} else {
+				if (_dialogs) {
+					exclude(
+						QRect(_dialogs->x(), 0, _dialogs->width(), height()),
+						st::softPanelsNavigationRadius,
+						Corners::Right);
+				}
+				exclude(
+					QRect(_history->x(), 0, _history->width(), height()),
+					st::softPanelsRadius,
+					Corners::All);
+				if (_thirdSection) {
+					exclude(
+						QRect(_thirdSection->x(), 0, _thirdSection->width(), height()),
+						st::softPanelsRadius,
+						Corners::All);
+				}
+			}
+			p.setOpacity(1.);
+			p.setRenderHint(QPainter::Antialiasing);
+			Ui::Material::PaintSurface(
+				p,
+				outside,
+				Ui::Material::Surface::Window,
+				st::windowBg);
+		}
 	}
 }
 
@@ -2626,6 +2682,13 @@ int MainWidget::getThirdSectionTop() const {
 }
 
 void MainWidget::hideAll() {
+	for (const auto frame : {
+		_navigationFrame.get(), _conversationFrame.get(), _thirdFrame.get(),
+	}) {
+		if (frame) {
+			frame->hide();
+		}
+	}
 	if (_dialogs) {
 		_dialogs->hide();
 	}
@@ -2680,7 +2743,7 @@ void MainWidget::showAll() {
 		}
 	} else {
 		if (_sideShadow) {
-			_sideShadow->show();
+			_sideShadow->setVisible(!Ui::Material::SoftPanels());
 		}
 		if (_hider) {
 			_hider->show();
@@ -2698,7 +2761,7 @@ void MainWidget::showAll() {
 			_thirdSection->show();
 		}
 		if (_thirdShadow) {
-			_thirdShadow->show();
+			_thirdShadow->setVisible(!Ui::Material::SoftPanels());
 		}
 	}
 	if (_player) {
@@ -2779,6 +2842,13 @@ void MainWidget::updateControlsGeometry() {
 		destroyThirdSection();
 		_thirdShadow.destroy();
 	}
+	if (Ui::Material::SoftPanels()) {
+		updateSoftPanelsGeometry();
+		return;
+	}
+	_navigationFrame = nullptr;
+	_conversationFrame = nullptr;
+	_thirdFrame = nullptr;
 	const auto mainSectionTop = getMainSectionTop();
 	auto dialogsWidth = _dialogs
 		? int(base::SafeRound(_a_dialogsWidth.value(_dialogsWidth)))
@@ -2895,6 +2965,92 @@ void MainWidget::updateControlsGeometry() {
 	floatPlayerUpdatePositions();
 }
 
+void MainWidget::updateSoftPanelsGeometry() {
+	using namespace Window::SoftPanels;
+	const auto one = isOneColumn();
+	const auto thirdWidth = _thirdSection ? _thirdColumnWidth : 0;
+	auto dialogsWidth = one ? width() : _dialogs
+		? int(base::SafeRound(_a_dialogsWidth.value(_dialogsWidth)))
+		: 0;
+	if (!one && _dialogs) {
+		accumulate_min(dialogsWidth, std::max(0, width() - thirdWidth
+			- st::softPanelsGap * (thirdWidth ? 2 : 1)
+			- st::columnMinimalWidthMain));
+	}
+	const auto panels = Layout({
+		.main = rect(),
+		.dialogsWidth = dialogsWidth,
+		.thirdWidth = thirdWidth,
+		.oneColumn = one,
+		.gap = st::softPanelsGap,
+	});
+	const auto conversation = panels.conversation;
+	const auto section = conversation.adjusted(0, getMainSectionTop(), 0, 0);
+	if (_dialogs) {
+		if (one) {
+			_dialogs->setGeometryWithTopMoved(section, _contentScrollAddToY);
+		} else {
+			_dialogs->setGeometry(panels.dialogs);
+		}
+	}
+	_history->setGeometryWithTopMoved(section, _contentScrollAddToY);
+	if (_mainSection) {
+		_mainSection->setGeometryWithTopMoved(section, _contentScrollAddToY);
+	}
+	if (_thirdSection) {
+		_thirdSection->setGeometry(
+			panels.third.adjusted(0, getThirdSectionTop(), 0, 0));
+	}
+	if (_callTopBar) {
+		_callTopBar->resizeToWidth(conversation.width());
+		_callTopBar->moveToLeft(conversation.x(), conversation.y());
+	}
+	if (_exportTopBar) {
+		_exportTopBar->resizeToWidth(conversation.width());
+		_exportTopBar->moveToLeft(
+			conversation.x(),
+			conversation.y() + _callTopBarHeight);
+	}
+	if (_player) {
+		_player->resizeToWidth(conversation.width());
+		_player->moveToLeft(
+			conversation.x(),
+			conversation.y() + _callTopBarHeight + _exportTopBarHeight);
+		_player->entity()->updateDropdownsGeometry();
+	}
+	if (_hider) {
+		_hider->setGeometry(conversation);
+	}
+	if (_sideShadow) {
+		_sideShadow->hide();
+	}
+	if (_thirdShadow) {
+		_thirdShadow->hide();
+	}
+	const auto frame = [&](
+			auto &owner,
+			QRect geometry,
+			Corners corners,
+			bool visible) {
+		if (!owner && visible) {
+			owner = base::make_unique_q<PanelFrame>(this, corners);
+		}
+		if (owner) {
+			owner->setPanelGeometry(geometry);
+			owner->setVisible(visible);
+		}
+	};
+	const auto navigation = _dialogs && (!one || !isMainSectionShown());
+	frame(_navigationFrame, panels.dialogs, Corners::Right, navigation);
+	frame(_conversationFrame, conversation, Corners::All, !one || !navigation);
+	frame(_thirdFrame, panels.third, Corners::All, !panels.third.isEmpty());
+	refreshResizeAreas();
+	orderWidgets();
+	updateMediaPlaylistPosition(_playerPlaylist->x());
+	_contentScrollAddToY = 0;
+	floatPlayerUpdatePositions();
+}
+
 void MainWidget::destroyThirdSection() {
 	if (const auto strong = _thirdSection.data()) {
 		if (Ui::InFocusChain(strong)) {
@@ -2908,9 +3064,9 @@ void MainWidget::refreshResizeAreas() {
 	if (!isOneColumn() && _dialogs) {
 		ensureFirstColumnResizeAreaCreated();
 		_firstColumnResizeArea->setGeometryToLeft(
-			_history->x(),
+			_history->x() - (Ui::Material::SoftPanels() ? st::softPanelsGap : 0),
 			0,
-			st::historyResizeWidth,
+			Ui::Material::SoftPanels() ? st::softPanelsGap : st::historyResizeWidth,
 			height());
 	} else if (_firstColumnResizeArea) {
 		_firstColumnResizeArea.destroy();
@@ -2919,9 +3075,9 @@ void MainWidget::refreshResizeAreas() {
 	if (isThreeColumn() && _thirdSection) {
 		ensureThirdColumnResizeAreaCreated();
 		_thirdColumnResizeArea->setGeometryToLeft(
-			_thirdSection->x(),
+			_thirdSection->x() - (Ui::Material::SoftPanels() ? st::softPanelsGap : 0),
 			0,
-			st::historyResizeWidth,
+			Ui::Material::SoftPanels() ? st::softPanelsGap : st::historyResizeWidth,
 			height());
 	} else if (_thirdColumnResizeArea) {
 		_thirdColumnResizeArea.destroy();
@@ -2980,6 +3136,9 @@ void MainWidget::ensureThirdColumnResizeAreaCreated() {
 	}
 	auto moveLeftCallback = [=](int globalLeft) {
 		auto newWidth = mapToGlobal(QPoint(width(), 0)).x() - globalLeft;
+		if (Ui::Material::SoftPanels()) {
+			newWidth -= st::softPanelsGap;
+		}
 		Core::App().settings().setThirdColumnWidth(newWidth);
 	};
 	auto moveFinishedCallback = [=] {
@@ -3182,7 +3341,7 @@ bool MainWidget::eventFilter(QObject *o, QEvent *e) {
 void MainWidget::handleAdaptiveLayoutUpdate() {
 	showAll();
 	if (_sideShadow) {
-		_sideShadow->setVisible(!isOneColumn());
+		_sideShadow->setVisible(!isOneColumn() && !Ui::Material::SoftPanels());
 	}
 	if (_player) {
 		_player->updateAdaptiveLayout();
@@ -3237,7 +3396,8 @@ void MainWidget::updateWindowAdaptiveLayout() {
 		//	chatWidth -= _history->tabbedSelectorSectionWidth();
 		//}
 		auto minimalNormalWidth = st::columnMinimalWidthLeft
-			+ st::columnMinimalWidthMain;
+			+ st::columnMinimalWidthMain
+			+ (Ui::Material::SoftPanels() ? st::softPanelsGap : 0);
 		if (chatWidth >= minimalNormalWidth) {
 			// Switch layout back to normal in a wide enough window.
 			layout.windowLayout = Window::Adaptive::WindowLayout::Normal;

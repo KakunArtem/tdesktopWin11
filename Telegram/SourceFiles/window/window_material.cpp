@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/color_contrast.h"
 #include "ui/style/style_core_palette.h"
 #include "window/window_material_fills.h"
+#include "window/window_soft_panels.h"
 #include "rpl/variable.h"
 #include "styles/palette.h"
 #include "base/flat_set.h"
@@ -265,6 +266,7 @@ void SetSettingEnabled(bool enabled) {
 
 bool Capable() {
 	if (!StartupCapability.has_value()) {
+		SoftPanels::Initialize();
 #ifdef Q_OS_WIN
 		StartupCapability = Platform::Material::Decide().backdrop
 			== Backdrop::Acrylic;

@@ -6,6 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_session_controller.h"
+#include "ui/ui_material.h"
 
 #include "apiwrap.h"
 #include "api/api_cloud_password.h"
@@ -128,6 +129,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_privacy_security.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_window.h"
+#include "styles/style_window_soft_panels.h"
 #include "styles/style_dialogs.h"
 #include "styles/style_layers.h" // st::boxLabel
 
@@ -2636,18 +2638,26 @@ int SessionController::dialogsSmallColumnWidth() const {
 int SessionController::minimalThreeColumnWidth() const {
 	return (_hasDialogs ? st::columnMinimalWidthLeft : 0)
 		+ st::columnMinimalWidthMain
-		+ st::columnMinimalWidthThird;
+		+ st::columnMinimalWidthThird
+		+ (Ui::Material::SoftPanels()
+			? st::softPanelsGap * (_hasDialogs ? 2 : 1)
+			: 0);
 }
 
 auto SessionController::computeColumnLayout() const -> ColumnLayout {
 	auto layout = Adaptive::WindowLayout::OneColumn;
 
 	auto bodyWidth = widget()->bodyWidget()->width() - filtersWidth();
+	const auto gap = Ui::Material::SoftPanels() ? st::softPanelsGap : 0;
+	if (Ui::Material::SoftPanels()) {
+		bodyWidth = std::max(0, bodyWidth
+			- st::softPanelsFrame.left() - st::softPanelsFrame.right());
+	}
 	auto dialogsWidth = 0, chatWidth = 0, thirdWidth = 0;
 
 	auto useOneColumnLayout = [&] {
 		auto minimalNormal = st::columnMinimalWidthLeft
-			+ st::columnMinimalWidthMain;
+			+ st::columnMinimalWidthMain + gap;
 		if (_hasDialogs && bodyWidth < minimalNormal) {
 			return true;
 		}
@@ -2670,21 +2680,23 @@ auto SessionController::computeColumnLayout() const -> ColumnLayout {
 		dialogsWidth = chatWidth = bodyWidth;
 	} else if (useNormalLayout()) {
 		layout = Adaptive::WindowLayout::Normal;
+		const auto available = bodyWidth - (_hasDialogs ? gap : 0);
 		dialogsWidth = countDialogsWidthFromRatio(bodyWidth);
-		accumulate_min(dialogsWidth, bodyWidth - st::columnMinimalWidthMain);
-		chatWidth = bodyWidth - dialogsWidth;
+		accumulate_min(dialogsWidth, available - st::columnMinimalWidthMain);
+		chatWidth = available - dialogsWidth;
 	} else {
 		layout = Adaptive::WindowLayout::ThreeColumn;
+		const auto available = bodyWidth - gap * (_hasDialogs ? 2 : 1);
 		dialogsWidth = countDialogsWidthFromRatio(bodyWidth);
 		thirdWidth = countThirdColumnWidthFromRatio(bodyWidth);
 		auto shrink = shrinkDialogsAndThirdColumns(
 			dialogsWidth,
 			thirdWidth,
-			bodyWidth);
+			available);
 		dialogsWidth = shrink.dialogsWidth;
 		thirdWidth = shrink.thirdWidth;
 
-		chatWidth = bodyWidth - dialogsWidth - thirdWidth;
+		chatWidth = available - dialogsWidth - thirdWidth;
 	}
 	return { bodyWidth, dialogsWidth, chatWidth, thirdWidth, layout };
 }
@@ -2763,8 +2775,9 @@ void SessionController::resizeForThirdSection() {
 	settings.setTabbedSelectorSectionEnabled(false);
 	settings.setThirdSectionInfoEnabled(false);
 
-	auto wanted = countThirdColumnWidthFromRatio(layout.bodyWidth);
-	auto minimal = st::columnMinimalWidthThird;
+	const auto gap = Ui::Material::SoftPanels() ? st::softPanelsGap : 0;
+	auto wanted = countThirdColumnWidthFromRatio(layout.bodyWidth) + gap;
+	auto minimal = st::columnMinimalWidthThird + gap;
 	auto extendBy = wanted;
 	auto extendedBy = [&] {
 		// Best - extend by third column without moving the window.
@@ -2782,8 +2795,8 @@ void SessionController::resizeForThirdSection() {
 		return widget()->tryToExtendWidthBy(minimal);
 	}();
 	if (extendedBy) {
-		if (extendBy != settings.thirdColumnWidth()) {
-			settings.setThirdColumnWidth(extendBy);
+		if (extendBy - gap != settings.thirdColumnWidth()) {
+			settings.setThirdColumnWidth(extendBy - gap);
 		}
 		const auto nochat = !mainSectionShown();
 		auto newBodyWidth = layout.bodyWidth + extendedBy;
@@ -2812,6 +2825,7 @@ void SessionController::closeThirdSection() {
 		auto savedValue = settings.thirdSectionExtendedBy();
 		auto extendedBy = (savedValue == -1)
 			? layout.thirdWidth
+				+ (Ui::Material::SoftPanels() ? st::softPanelsGap : 0)
 			: savedValue;
 		auto newBodyWidth = noResize
 			? layout.bodyWidth

@@ -47,6 +47,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "styles/style_widgets.h"
 #include "styles/style_window.h"
+#include "styles/style_window_soft_panels.h"
 #include "styles/style_menu_icons.h"
 
 #include <QtGui/QtEvents>
@@ -147,8 +148,12 @@ void FiltersMenu::setup() {
 		}
 	}, _outer.lifetime());
 
-	_parent->heightValue(
-	) | rpl::on_next([=](int height) {
+	rpl::combine(
+		_parent->heightValue(),
+		Ui::Material::SoftPanelsValue()
+	) | rpl::on_next([=](int height, bool softPanels) {
+		height = std::max(0, height
+			- (softPanels ? st::softPanelsFrame.bottom() : 0));
 		const auto width = st::windowFiltersWidth;
 		_outer.setGeometry({ 0, 0, width, height });
 		_menu.resizeToWidth(width);

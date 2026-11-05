@@ -35,7 +35,7 @@ execution keeps its row; note the correction in the plan.
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 5 / 5 | Implemented: 63 unit and 66 native fixture checks pass; visible desktop acceptance tracked separately | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
 | C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 4 / 4 | Implemented: search animation loading-order bug fixed and verified; visible-desktop acceptance pending | [search animation fix](checks/transparent-grabs.md#resolved-blocker-before-c7-static-search-animation), `checks/grab-audit.md` |
 | C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 3 / 3 | Complete: both published branches match unchanged pins; checkout sync and anonymous toolkit clone checks pass | [fork verification](toolkit-fork.md#c6-verification) |
-| C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 0 / 4 | Not started; search animation blocker resolved | [search animation fix](checks/transparent-grabs.md#resolved-blocker-before-c7-static-search-animation), `checks/shell-layout.md` |
+| C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 4 / 4 | Implemented: 117 unit and 708 native checks pass; native matrix recorded, desktop acceptance pending | [shell checks](checks/shell-layout.md) |
 | C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
 | C17 | Shared controls | [plan](plans/2026-10-30-shared-controls.md) | [reference](component-references/c17-shared-controls/README.md) | 0 / 4 | Not started | `checks/shared-controls.md` |
 | C18 | Foundations | [plan](plans/2026-10-31-foundations.md) | [reference](component-references/c18-foundations/README.md) | 0 / 3 | Not started | `checks/foundations.md` |
@@ -399,6 +399,13 @@ window's left edge and rounds only its right corners. The conversation and
 third panels round all corners. `PanelFrame` is a mouse-transparent overlay
 that paints the area outside the rounded shape with the Window role and the
 thin border on the shape, so panel children need no clipping.
+
+Section transitions use `Window::SoftPanels::GrabContent(widget, rect)` to
+omit stationary panel frames from their snapshots, including captures that
+flush pending geometry. The snapshot covers the conversation viewport and
+excludes the gaps. Normal captures retain the frame decoration. During
+whole-workspace transitions, strokes move with the captured workspace; a
+Window-role matte restores gaps and outside corners after compositing.
 
 Sizes live in `window/window_soft_panels.style`: `softPanelsFrame` (margins,
 from the exploration: 0, 0, 6, 6), `softPanelsGap` (4), `softPanelsRadius`

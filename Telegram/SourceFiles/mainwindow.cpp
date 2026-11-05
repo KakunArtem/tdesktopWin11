@@ -50,6 +50,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_setup_email.h"
 #include "window/window_media_preview.h"
 #include "styles/style_window.h"
+#include "styles/style_window_soft_panels.h"
 
 #include <QtGui/QWindow>
 
@@ -107,6 +108,9 @@ MainWindow::MainWindow(not_null<Window::Controller*> controller)
 	}, lifetime());
 
 	Ui::Material::SetOpaquePaint(this, true);
+	Ui::Material::SoftPanelsValue() | rpl::skip(1) | rpl::on_next([=] {
+		updateControlsGeometry();
+	}, lifetime());
 }
 
 void MainWindow::initHook() {
@@ -766,11 +770,15 @@ void MainWindow::updateControlsGeometry() {
 		}
 	}
 	if (_main) {
-		_main->setGeometry({
+		auto geometry = QRect(
 			body.x() + mainLeft,
 			body.y(),
 			mainWidth,
-			body.height() });
+			body.height());
+		if (Ui::Material::SoftPanels()) {
+			geometry = geometry.marginsRemoved(st::softPanelsFrame);
+		}
+		_main->setGeometry(geometry);
 	}
 	if (_intro) _intro->setGeometry(body);
 	if (_layer) _layer->setGeometry(body);

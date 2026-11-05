@@ -73,6 +73,9 @@ class SlideWrap;
 } // namespace Ui
 
 namespace Window {
+namespace SoftPanels {
+class PanelFrame;
+} // namespace SoftPanels
 class SessionController;
 template <typename Inner>
 class TopBarWrapWidget;
@@ -246,6 +249,7 @@ private:
 	void handleAudioUpdate(const Media::Player::TrackState &state);
 	void updateMediaPlaylistPosition(int x);
 	void updateControlsGeometry();
+	void updateSoftPanelsGeometry();
 	void updateMainSectionShown();
 	void updateDialogsWidthAnimated();
 	void updateThirdColumnToCurrentChat(
@@ -357,6 +361,9 @@ private:
 
 	const base::unique_qptr<Ui::PlainShadow> _sideShadow;
 	object_ptr<Ui::PlainShadow> _thirdShadow = { nullptr };
+	base::unique_qptr<Window::SoftPanels::PanelFrame> _navigationFrame;
+	base::unique_qptr<Window::SoftPanels::PanelFrame> _conversationFrame;
+	base::unique_qptr<Window::SoftPanels::PanelFrame> _thirdFrame;
 	object_ptr<Ui::ResizeArea> _firstColumnResizeArea = { nullptr };
 	object_ptr<Ui::ResizeArea> _thirdColumnResizeArea = { nullptr };
 

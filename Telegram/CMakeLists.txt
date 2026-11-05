@@ -2421,6 +2421,10 @@ PRIVATE
     window/window_material_fills.h
     window/window_material.cpp
     window/window_material.h
+    window/window_soft_panels.cpp
+    window/window_soft_panels.h
+    window/window_soft_panels_layout.cpp
+    window/window_soft_panels_layout.h
     window/window_media_preview.cpp
     window/window_media_preview.h
     window/window_no_paid_token.cpp

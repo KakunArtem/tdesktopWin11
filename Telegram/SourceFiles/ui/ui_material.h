@@ -32,6 +32,9 @@ enum class Surface {
 };
 
 [[nodiscard]] bool Active();
+[[nodiscard]] bool SoftPanels();
+void SetSoftPanels(bool enabled);
+[[nodiscard]] rpl::producer<bool> SoftPanelsValue();
 [[nodiscard]] uint64 Revision();
 [[nodiscard]] rpl::producer<bool> ActiveValue();
 void SetActive(bool active);

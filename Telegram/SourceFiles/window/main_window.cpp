@@ -427,7 +427,7 @@ MainWindow::MainWindow(not_null<Controller*> controller)
 	}));
 }))
 , _body(body()) {
-	if (Window::Material::Capable()) {
+	if (Window::Material::Capable() || Ui::Material::SoftPanels()) {
 		_body->paintRequest() | rpl::on_next([=](QRect clip) {
 			auto p = QPainter(_body);
 			Ui::Material::PaintSurface(

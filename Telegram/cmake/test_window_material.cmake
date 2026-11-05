@@ -23,6 +23,8 @@ nice_target_sources(test_window_material ${src_loc}
 PRIVATE
     window/window_material_policy.cpp
     window/window_material_policy.h
+    window/window_soft_panels_layout.cpp
+    window/window_soft_panels_layout.h
     window/window_material_fills.cpp
     window/window_material_fills.h
     ui/color_contrast.cpp

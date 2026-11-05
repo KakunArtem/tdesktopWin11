@@ -22,6 +22,7 @@ namespace Ui::Material {
 namespace {
 
 auto ActiveState = rpl::variable<bool>(false);
+auto SoftPanelsState = rpl::variable<bool>(false);
 auto Fills = base::flat_map<Surface, QColor>();
 auto Borders = base::flat_map<Surface, QColor>();
 auto FillChanges = rpl::event_stream<>();
@@ -52,6 +53,22 @@ struct WidgetBinding {
 
 bool Active() {
 	return ActiveState.current();
+}
+
+bool SoftPanels() {
+	return SoftPanelsState.current();
+}
+
+void SetSoftPanels(bool enabled) {
+#ifdef Q_OS_WIN
+	SoftPanelsState = enabled;
+#else // Q_OS_WIN
+	SoftPanelsState = false;
+#endif // Q_OS_WIN
+}
+
+rpl::producer<bool> SoftPanelsValue() {
+	return SoftPanelsState.value();
 }
 
 uint64 Revision() {
