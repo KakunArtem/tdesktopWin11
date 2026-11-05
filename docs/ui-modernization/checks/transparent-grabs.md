@@ -5,35 +5,45 @@ scale / 96 DPI. See the [plan](../plans/2026-10-29-transparent-grabs.md),
 [visual reference](../component-references/c5-transparent-grabs/README.md)
 and [complete capture inventory](grab-audit.md).
 
-## Open blocker before C7: static search animation
+## Resolved blocker before C7: static search animation
 
-Reported by the user on 2026-11-05 after C5: switching to search shows a
-static picture instead of the expected animation. Resolve this report before
-starting C7. Status: reported, not yet reproduced; no fix or root cause is
-confirmed. The working interpretation is the search magnifying-glass
-illustration; confirm that it is this illustration rather than the panel
-transition when reproducing.
+Reported by the user and fixed on 2026-11-05. The affected element was the
+large magnifying-glass illustration in the empty search panel. C7 is no
+longer blocked by this report; it has not been started.
 
-Source inspection: `SearchEmpty::animate` in `dialogs/ui/chat_search_empty.cpp`
-requests `anim::repeat::once`. `Suggestions::setupEmpty` starts it when the
-empty-state wrapper toggles on and the chats list is loaded. The icon factory
-is `Settings::CreateLottieIcon` in `settings/settings_common.cpp`. This path
-does not disable animation specifically for Debug. Stopping after one visible
-play is expected; never moving on entry is the reported failure to investigate.
+The playback trigger in `Suggestions::setupEmpty` observed only the empty
+wrapper toggling on. If the main chats list was still loading, its readiness
+check rejected that trigger. Finishing loading produced no new wrapper toggle,
+so the icon remained on its first frame. The same Debug executable animated
+correctly when loading had already finished or search was reopened.
 
-Reproduce with the actual search owner, record motion/power-saving settings,
-and distinguish first entry from reopening search. Check both material and
-solid modes. Trace the empty-state playback trigger, Lottie frame progression,
-and restoration of live children after the suggestions reveal cache finishes.
-C5 regression is a hypothesis, not an established cause. The C5 native checks
-above cover panel frames and callback cleanup, not this Lottie illustration's
-playback.
+The fix observes both wrapper toggles and main-list loading completion,
+reevaluates the combined current state and starts playback on its false-to-true
+transition. Duplicate ready notifications do not restart playback; archive
+folder notifications do not trigger it. `SearchEmpty::animate` still requests
+one play, and motion-disabled behavior is retained. No Lottie asset, duration,
+loop policy, rendering engine or snapshot code changed.
 
-Close the blocker only after a regression test reproduces the missing motion
-and passes with the fix, or after reproduction establishes that the reported
-behavior is the intended one-shot playback. Preserve motion preferences and
-the existing one-shot behavior; do not change it into a continuous loop to
-hide the problem.
+The RED fixture used the actual `Dialogs::Widget` search owner in an isolated
+empty profile and a synthetic local Test session, with no primary-account
+switch or user-profile copy. At 350, 850 and 1400 ms after loading completed,
+the illustration produced zero changing image pairs, while a direct Lottie
+reference and reopened search each produced a changing pair. The ready-at-entry
+baseline passed. These checks measure the icon's own paint owner after the
+panel reveal, rather than interpreting a panel slide as illustration playback.
+
+The GREEN fixture passed 115 checks across five modes: delayed and already-ready
+loading in material and solid mode, plus animations disabled through power
+saving. It covers first entry, reopening, completed one-shot playback and a
+duplicate loading notification. The material regression suite also passed
+97 checks. Changed-line Qt lint returned zero findings. The disposable overlay
+was restored to its original no-op before the normal Debug rebuild.
+
+Evidence, PNG sequences and the reproducible scenario/launcher are under
+`%LOCALAPPDATA%\tdesktop-ui-checks\search-empty-animation\`, in `loading-red`,
+`ready-baseline`, the five `*-green` directories and the archived execution
+folder. Full signed-in visible-desktop acceptance remains separate from these
+native widget checks.
 
 ## Implemented
 
