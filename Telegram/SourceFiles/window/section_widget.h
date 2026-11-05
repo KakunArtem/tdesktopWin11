@@ -99,6 +99,7 @@ struct SectionSlideParams {
 	bool withTabs = false;
 	bool withFade = false;
 	bool fromBottom = false;
+	std::optional<uint64> materialRevision;
 
 	explicit operator bool() const {
 		return !oldContentCache.isNull();
@@ -140,6 +141,7 @@ public:
 	// This can be used to grab with or without top bar shadow.
 	// This will be protected when animation preparation will be done inside.
 	virtual QPixmap grabForShowAnimation(const SectionSlideParams &params);
+	virtual void paintAnimationBackground(QPainter &p);
 
 	// Attempt to show the required section inside the existing one.
 	// For example if this section already shows exactly the required

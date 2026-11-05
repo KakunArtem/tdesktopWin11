@@ -36,6 +36,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "ui/toast/toast.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "window/window_connecting_widget.h"
 #include "window/window_top_bar_wrap.h"
 #include "window/notifications_manager.h"
@@ -286,6 +287,17 @@ MainWidget::MainWidget(
 	: nullptr)
 , _playerPlaylist(this, _controller)
 , _changelogs(Core::Changelogs::Create(&controller->session())) {
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		if (_showAnimation) {
+			showFinished();
+			update();
+		}
+	}, lifetime());
 	if (_dialogs) {
 		setupConnectingWidget();
 	}
@@ -1928,6 +1940,7 @@ Window::SectionSlideParams MainWidget::prepareThirdSectionAnimation(Window::Sect
 	Expects(_thirdSection != nullptr);
 
 	Window::SectionSlideParams result;
+	result.materialRevision = Ui::Material::Revision();
 	result.withTopBarShadow = section->hasTopBarShadow();
 	if (!_thirdSection->hasTopBarShadow()) {
 		result.withTopBarShadow = false;
@@ -1935,6 +1948,9 @@ Window::SectionSlideParams MainWidget::prepareThirdSectionAnimation(Window::Sect
 	floatPlayerHideAll();
 	result.oldContentCache = _thirdSection->grabForShowAnimation(result);
 	floatPlayerShowVisible();
+	if (*result.materialRevision != Ui::Material::Revision()) {
+		result.oldContentCache = QPixmap();
+	}
 	return result;
 }
 
@@ -1942,6 +1958,7 @@ Window::SectionSlideParams MainWidget::prepareShowAnimation(
 		bool willHaveTopBarShadow,
 		bool fromBottom) {
 	Window::SectionSlideParams result;
+	result.materialRevision = Ui::Material::Revision();
 	result.withTopBarShadow = willHaveTopBarShadow;
 	if (_mainSection) {
 		if (!_mainSection->hasTopBarShadow()) {
@@ -1971,7 +1988,7 @@ Window::SectionSlideParams MainWidget::prepareShowAnimation(
 	} else if (!isOneColumn() || !_history->isHidden()) {
 		result.oldContentCache = _history->grabForShowAnimation(result);
 	} else {
-		result.oldContentCache = Ui::GrabWidget(this, QRect(
+		result.oldContentCache = Ui::Material::Grab(this, QRect(
 			0,
 			sectionTop,
 			_dialogsWidth,
@@ -1989,6 +2006,9 @@ Window::SectionSlideParams MainWidget::prepareShowAnimation(
 	}
 	floatPlayerShowVisible();
 
+	if (*result.materialRevision != Ui::Material::Revision()) {
+		result.oldContentCache = QPixmap();
+	}
 	return result;
 }
 
@@ -2470,7 +2490,7 @@ QPixmap MainWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 
 	auto sectionTop = getMainSectionTop();
 	if (isOneColumn()) {
-		result = Ui::GrabWidget(this, QRect(
+		result = Ui::Material::Grab(this, QRect(
 			0,
 			sectionTop,
 			width(),
@@ -2482,7 +2502,7 @@ QPixmap MainWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 		if (_thirdShadow) {
 			_thirdShadow->hide();
 		}
-		result = Ui::GrabWidget(this, QRect(
+		result = Ui::Material::Grab(this, QRect(
 			_dialogsWidth,
 			sectionTop,
 			width() - _dialogsWidth,
@@ -2525,13 +2545,18 @@ void MainWidget::checkActivation() {
 }
 
 void MainWidget::showAnimated(QPixmap oldContentCache, bool back) {
+	const auto revision = Ui::Material::Revision();
 	_showAnimation = nullptr;
 
 	showAll();
 	floatPlayerHideAll();
-	auto newContentCache = Ui::GrabWidget(this);
+	auto newContentCache = Ui::Material::Grab(this);
 	hideAll();
 	floatPlayerShowVisible();
+	if (revision != Ui::Material::Revision()) {
+		showFinished();
+		return;
+	}
 
 	_showAnimation = std::make_unique<Window::SlideAnimation>();
 	_showAnimation->setDirection(back
@@ -2558,6 +2583,36 @@ void MainWidget::paintEvent(QPaintEvent *e) {
 	}
 	if (_showAnimation) {
 		auto p = QPainter(this);
+		if (Ui::Material::Active()) {
+			const auto navigation = _dialogs
+				&& isOneColumn()
+				&& !_history->peer()
+				&& !_mainSection;
+			Ui::Material::PaintAnimationBackground(p, rect(),
+				navigation
+					? Ui::Material::Surface::Navigation
+					: Ui::Material::Surface::Conversation,
+				navigation ? st::dialogsBg : st::windowBg);
+			if (_dialogs && !isOneColumn()) {
+				Ui::Material::PaintAnimationBackground(p,
+					_dialogs->geometry(),
+					Ui::Material::Surface::Navigation, st::dialogsBg);
+			}
+			const auto paintSection = [&](auto section) {
+				p.save();
+				p.translate(section->pos());
+				section->paintAnimationBackground(p);
+				p.restore();
+			};
+			if (_mainSection) {
+				paintSection(_mainSection.get());
+			} else if (_history->peer()) {
+				paintSection(_history.get());
+			}
+			if (_thirdSection) {
+				paintSection(_thirdSection.get());
+			}
+		}
 		_showAnimation->paintContents(p);
 	}
 }

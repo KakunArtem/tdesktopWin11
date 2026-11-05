@@ -133,6 +133,7 @@ public:
 
 	QPixmap grabForShowAnimation(
 		const Window::SectionSlideParams &params) override;
+	void paintAnimationBackground(QPainter &p) override;
 
 	bool showInternal(
 		not_null<Window::SectionMemento*> memento,

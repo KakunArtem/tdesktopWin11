@@ -29,6 +29,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/format_values.h"
 #include "ui/text/text_utilities.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "base/timer_rpl.h"
 #include "apiwrap.h"
 #include "window/window_adaptive.h"
@@ -405,7 +406,7 @@ Dialogs::RowDescriptor PinnedWidget::activeChat() const {
 QPixmap PinnedWidget::grabForShowAnimation(const Window::SectionSlideParams &params) {
 	_topBar->updateControlsVisibility();
 	if (params.withTopBarShadow) _topBarShadow->hide();
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (params.withTopBarShadow) _topBarShadow->show();
 	_translateBar->hide();
 	return result;

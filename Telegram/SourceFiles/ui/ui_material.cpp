@@ -9,12 +9,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "base/assertion.h"
 #include "ui/qt_object_factory.h"
+#include "ui/ui_utility.h"
 #include "rpl/variable.h"
 #include "rpl/event_stream.h"
 
 #include <QtCore/QPointer>
 #include <QtGui/QPainter>
 #include <QtGui/QPainterPath>
+#include <QtGui/QPixmap>
 
 namespace Ui::Material {
 namespace {
@@ -23,6 +25,8 @@ auto ActiveState = rpl::variable<bool>(false);
 auto Fills = base::flat_map<Surface, QColor>();
 auto Borders = base::flat_map<Surface, QColor>();
 auto FillChanges = rpl::event_stream<>();
+auto GrabDepth = 0;
+auto CurrentRevision = uint64(0);
 
 constexpr auto kBindingProperty = "_td_material_binding";
 
@@ -50,12 +54,19 @@ bool Active() {
 	return ActiveState.current();
 }
 
+uint64 Revision() {
+	return CurrentRevision;
+}
+
 rpl::producer<bool> ActiveValue() {
 	return ActiveState.value();
 }
 
 void SetActive(bool active) {
-	ActiveState = active;
+	if (ActiveState.current() != active) {
+		++CurrentRevision;
+		ActiveState = active;
+	}
 }
 
 void SetFills(
@@ -63,6 +74,9 @@ void SetFills(
 		base::flat_map<Surface, QColor> borders) {
 	Fills = std::move(fills);
 	Borders = std::move(borders);
+	if (Active()) {
+		++CurrentRevision;
+	}
 	FillChanges.fire({});
 }
 
@@ -78,6 +92,59 @@ QColor Border(Surface surface) {
 
 rpl::producer<> FillsChanged() {
 	return FillChanges.events();
+}
+
+GrabScope::GrabScope() {
+	++GrabDepth;
+}
+
+GrabScope::~GrabScope() {
+	Expects(GrabDepth > 0);
+	--GrabDepth;
+}
+
+bool Grabbing() {
+	return GrabDepth > 0;
+}
+
+QPixmap Grab(not_null<QWidget*> widget, QRect rect) {
+	if (!Active()) {
+		return Ui::GrabWidget(widget, rect);
+	}
+	const auto scope = GrabScope();
+	const auto opaque = widget->testAttribute(Qt::WA_OpaquePaintEvent);
+	const auto weak = QPointer<QWidget>(widget.get());
+	const auto restore = gsl::finally([=] {
+		if (opaque && weak) {
+			const auto binding = static_cast<WidgetBinding*>(
+				weak->property(kBindingProperty).value<void*>());
+			weak->setAttribute(Qt::WA_OpaquePaintEvent,
+				(binding && binding->opaqueBound)
+					? binding->opaqueInSolidMode && !Active()
+					: true);
+		}
+	});
+	if (opaque) {
+		widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
+	}
+	return Ui::GrabWidget(widget, rect, QColor(0, 0, 0, 0));
+}
+
+QPixmap GrabOpaque(
+		not_null<QWidget*> widget,
+		QRect rect,
+		const style::color &solid) {
+	return Active()
+		? Grab(widget, rect)
+		: Ui::GrabOpaque(widget, rect, solid->c);
+}
+
+void PaintAnimationBackground(
+		QPainter &p,
+		const QRect &rect,
+		Surface surface,
+		const style::color &solid) {
+	PaintSurface(p, rect, surface, solid);
 }
 
 void PaintFill(QPainter &p, const QRect &rect, const QColor &fill) {
@@ -101,7 +168,7 @@ void PaintSurface(
 		Surface surface,
 		const style::color &solid) {
 	if (Active()) {
-		PaintFill(p, rect, Fill(surface));
+		PaintFill(p, rect, Grabbing() ? QColor(0, 0, 0, 0) : Fill(surface));
 	} else {
 		p.fillRect(rect, solid);
 	}
@@ -113,7 +180,7 @@ void PaintSurface(
 		Surface surface,
 		const style::color &solid) {
 	if (Active()) {
-		PaintFill(p, shape, Fill(surface));
+		PaintFill(p, shape, Grabbing() ? QColor(0, 0, 0, 0) : Fill(surface));
 	} else {
 		p.fillPath(shape, solid);
 	}

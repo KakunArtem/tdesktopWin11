@@ -309,6 +309,7 @@ public:
 	bool contentOverlapped(const QRect &globalRect);
 
 	QPixmap grabForShowAnimation(const Window::SectionSlideParams &params);
+	void paintAnimationBackground(QPainter &p);
 
 	void forwardSelected();
 	void confirmDeleteSelected();
@@ -660,6 +661,7 @@ private:
 	void sendInlineResult(InlineBots::ResultSelected result);
 
 	void drawField(Painter &p, const QRect &rect);
+	[[nodiscard]] QRect fieldBackgroundRect() const;
 	void paintEditHeader(
 		Painter &p,
 		const QRect &rect,
@@ -1000,6 +1002,7 @@ private:
 	QString _confirmSource;
 
 	std::unique_ptr<Window::SlideAnimation> _showAnimation;
+	QRect _showAnimationComposerRect;
 
 	HistoryView::ElementHighlighter _highlighter;
 

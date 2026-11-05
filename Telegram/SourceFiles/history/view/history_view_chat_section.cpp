@@ -59,6 +59,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/rect.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "base/timer_rpl.h"
 #include "api/api_bot.h"
 #include "api/api_chat_participants.h"
@@ -3862,7 +3863,7 @@ QPixmap ChatWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 	if (params.fromBottom && _subsectionTabs) {
 		_subsectionTabs->hide();
 	}
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (hideTopBarShadow) {
 		_topBarShadow->show();
 	}
@@ -3871,6 +3872,11 @@ QPixmap ChatWidget::grabForShowAnimation(const Window::SectionSlideParams &param
 		_subsectionTabs->hide();
 	}
 	return result;
+}
+
+void ChatWidget::paintAnimationBackground(QPainter &p) {
+	SectionWidget::paintAnimationBackground(p);
+	_composeControls->paintAnimationBackground(p);
 }
 
 void ChatWidget::checkActivation() {

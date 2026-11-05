@@ -40,6 +40,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "window/window_session_controller.h"
 
 #include "styles/style_boxes.h"
@@ -755,11 +756,16 @@ QPixmap WelcomeMessagesWidget::grabForShowAnimation(
 		_topBarShadow->hide();
 	}
 	_composeControls->showForGrab();
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (params.withTopBarShadow) {
 		_topBarShadow->show();
 	}
 	return result;
+}
+
+void WelcomeMessagesWidget::paintAnimationBackground(QPainter &p) {
+	SectionWidget::paintAnimationBackground(p);
+	_composeControls->paintAnimationBackground(p);
 }
 
 void WelcomeMessagesWidget::checkActivation() {

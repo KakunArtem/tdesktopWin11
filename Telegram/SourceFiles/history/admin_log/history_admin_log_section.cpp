@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/userpic_button.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "apiwrap.h"
 #include "window/themes/window_theme.h"
 #include "window/window_session_controller.h"
@@ -471,7 +472,7 @@ QPixmap Widget::grabForShowAnimation(
 	if (params.withTopBarShadow) {
 		_fixedBarShadow->hide();
 	}
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (params.withTopBarShadow) {
 		_fixedBarShadow->show();
 	}

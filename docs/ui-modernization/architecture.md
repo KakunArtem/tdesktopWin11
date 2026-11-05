@@ -33,7 +33,7 @@ execution keeps its row; note the correction in the plan.
 | C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 3 / 4 | In progress: service and native-frame fallback tested; manual Windows toggles pending | `checks/material-state.md` |
 | C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 3 / 3 | Implemented: 49 unit, 142 service and 79 regression checks passed; native visual acceptance tracked separately | `checks/material-fills.md` |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 5 / 5 | Implemented: 63 unit and 66 native fixture checks pass; visible desktop acceptance tracked separately | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
-| C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 0 / 4 | Not started | `checks/grab-audit.md` |
+| C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 4 / 4 | Implemented: native animation frames and fallback verified; visible-desktop acceptance pending | `checks/grab-audit.md` |
 | C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 1 / 3 | In progress: `lib_ui` forked and pointed at; `lib_base` not forked yet | `toolkit-fork.md` |
 | C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 0 / 4 | Not started | `checks/shell-layout.md` |
 | C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
@@ -351,11 +351,22 @@ explicitly.
 ### Grabs (C5)
 
 While material is active, animation caches hold content only:
-`Ui::Material::GrabScope` makes `PaintSurface` skip role fills during a grab,
+`Ui::Material::GrabScope` makes `PaintSurface` clear role regions during a grab,
 `Ui::Material::Grab` and `GrabOpaque` wrap `Ui::GrabWidget` / `Ui::GrabOpaque`
 with a transparent background, and each animation owner paints its role once
 with `PaintAnimationBackground` before drawing the caches. With material off
 these functions call the `lib_ui` grabs unchanged.
+
+Snapshot preparation carries `Ui::Material::Revision()`, covering active-state
+changes and fill publications while material is active. `SectionSlideParams`
+stamps the departing snapshot; receivers reject a changed revision before
+starting, and current animations finish when their appearance changes.
+Inactive palette publications retain upstream animation behavior.
+
+Role regions clear previously painted wallpaper as well as omitting material
+color. Section owners restore Conversation and the current Composer geometry
+before drawing content caches; the classic history retains its pre-hide field
+rectangle, and newer sections reuse their composer shape and restriction state.
 
 ### Shell geometry (C7)
 

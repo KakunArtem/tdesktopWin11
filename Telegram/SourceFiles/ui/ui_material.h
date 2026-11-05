@@ -12,11 +12,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/basic_types.h"
 #include "ui/style/style_core.h"
 
+#include <QtCore/QRect>
 #include <QtGui/QColor>
 
 class QPainter;
 class QPainterPath;
-class QRect;
+class QPixmap;
 class QWidget;
 
 namespace Ui::Material {
@@ -31,6 +32,7 @@ enum class Surface {
 };
 
 [[nodiscard]] bool Active();
+[[nodiscard]] uint64 Revision();
 [[nodiscard]] rpl::producer<bool> ActiveValue();
 void SetActive(bool active);
 void SetFills(
@@ -39,6 +41,27 @@ void SetFills(
 [[nodiscard]] QColor Fill(Surface surface);
 [[nodiscard]] QColor Border(Surface surface);
 [[nodiscard]] rpl::producer<> FillsChanged();
+
+class GrabScope final {
+public:
+	GrabScope();
+	~GrabScope();
+	GrabScope(const GrabScope &) = delete;
+	GrabScope &operator=(const GrabScope &) = delete;
+
+};
+
+[[nodiscard]] bool Grabbing();
+[[nodiscard]] QPixmap Grab(not_null<QWidget*> widget, QRect rect = QRect());
+[[nodiscard]] QPixmap GrabOpaque(
+	not_null<QWidget*> widget,
+	QRect rect,
+	const style::color &solid);
+void PaintAnimationBackground(
+	QPainter &p,
+	const QRect &rect,
+	Surface surface,
+	const style::color &solid);
 void PaintFill(QPainter &p, const QRect &rect, const QColor &fill);
 void PaintFill(QPainter &p, const QPainterPath &shape, const QColor &fill);
 void PaintSurface(

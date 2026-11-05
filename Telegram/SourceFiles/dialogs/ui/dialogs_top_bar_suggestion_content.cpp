@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_custom_emoji.h"
 #include "ui/ui_rpl_filter.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "ui/unread_badge_paint.h"
 #include "ui/vertical_list.h"
 #include "ui/vertical_list.h"
@@ -113,11 +114,17 @@ int PaintSuggestionBubbleBackground(
 		int cornerRadius) {
 	const auto &margins = st::dialogsTopBarSuggestionMargins;
 	const auto pill = outer - margins;
-	PaintTopFade(
-		p,
-		outer.width(),
-		margins.top() + pill.height() / 2,
-		st::dialogsBg->c);
+	if (Ui::Material::Active()) {
+		Ui::Material::PaintSurface(p,
+			QRect(0, 0, outer.width(), margins.top() + pill.height() / 2),
+			Ui::Material::Surface::Navigation, st::dialogsBg);
+	} else {
+		PaintTopFade(
+			p,
+			outer.width(),
+			margins.top() + pill.height() / 2,
+			st::dialogsBg->c);
+	}
 	if (pill.isEmpty()) {
 		return 0;
 	}
@@ -135,9 +142,22 @@ UnconfirmedAuthWrap::UnconfirmedAuthWrap(
 	object_ptr<Ui::VerticalLayout> &&child)
 : Ui::SlideWrap<Ui::VerticalLayout>(parent, std::move(child))
 , _shadow(st::dialogsTopBarSuggestionShadow) {
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		releaseCollapseSnapshot();
+		update();
+	}, lifetime());
 	paintRequest() | rpl::on_next([=] {
 		if (!_collapseSnapshot.isNull()) {
 			auto p = QPainter(this);
+			if (Ui::Material::Active()) {
+				Ui::Material::PaintAnimationBackground(p, rect(),
+					Ui::Material::Surface::Navigation, st::dialogsBg);
+			}
 			p.drawPixmap(0, 0, _collapseSnapshot);
 		}
 	}, lifetime());
@@ -163,7 +183,13 @@ void UnconfirmedAuthWrap::setCollapseProgress(
 }
 
 void UnconfirmedAuthWrap::prepareCollapseSnapshot() {
-	_collapseSnapshot = Ui::GrabWidget(this);
+	const auto revision = Ui::Material::Revision();
+	auto snapshot = Ui::Material::Grab(this);
+	if (revision != Ui::Material::Revision()) {
+		releaseCollapseSnapshot();
+		return;
+	}
+	_collapseSnapshot = std::move(snapshot);
 	if (const auto w = wrapped()) {
 		w->hide();
 	}
@@ -198,7 +224,7 @@ int UnconfirmedAuthWrap::resizeGetHeight(int newWidth) {
 		w->show();
 		w->resizeToWidth(newWidth);
 	}
-	return w ? w->height() : 0;
+	return w ? int(base::SafeRound(w->height() * (1. - _collapseProgress))) : 0;
 }
 
 not_null<UnconfirmedAuthWrap*> CreateUnconfirmedAuthContent(
@@ -294,6 +320,15 @@ TopBarSuggestionContent::TopBarSuggestionContent(
 , _contentTextSt(st::dialogsTopBarSuggestionAboutStyle)
 , _shadow(st::dialogsTopBarSuggestionShadow)
 , _emojiPaused(std::move(emojiPaused)) {
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		releaseCollapseSnapshot();
+		update();
+	}, lifetime());
 	_leftPadding = st::dialogsTopBarLeftPadding;
 	setRightIcon(RightIcon::Close);
 	Ui::AbstractButton::setClickedCallback([=] {
@@ -599,6 +634,10 @@ void TopBarSuggestionContent::setContent(
 void TopBarSuggestionContent::paintEvent(QPaintEvent *) {
 	auto p = QPainter(this);
 	if (!_collapseSnapshot.isNull()) {
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintAnimationBackground(p, rect(),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
+		}
 		p.drawPixmap(0, 0, _collapseSnapshot);
 		return;
 	}
@@ -606,7 +645,13 @@ void TopBarSuggestionContent::paintEvent(QPaintEvent *) {
 }
 
 void TopBarSuggestionContent::prepareCollapseSnapshot() {
-	_collapseSnapshot = Ui::GrabWidget(this);
+	const auto revision = Ui::Material::Revision();
+	auto snapshot = Ui::Material::Grab(this);
+	if (revision != Ui::Material::Revision()) {
+		releaseCollapseSnapshot();
+		return;
+	}
+	_collapseSnapshot = std::move(snapshot);
 	for (const auto child : children()) {
 		if (const auto widget = qobject_cast<QWidget*>(child)) {
 			widget->hide();

@@ -433,6 +433,18 @@ Widget::Widget(
 , _peerSearch(&controller->session(), Api::PeerSearch::Type::WithSponsored)
 , _singleMessageSearch(&controller->session()) {
 	Ui::Material::RepaintOnFillsChanged(this);
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		if (Ui::Material::Grabbing()) {
+			InvokeQueued(this, [=] { finishMaterialAnimations(); });
+		} else {
+			finishMaterialAnimations();
+		}
+	}, lifetime());
 	const auto makeChildListShown = [](PeerId peerId, float64 shown) {
 		return InnerWidget::ChildListShown{ peerId, shown };
 	};
@@ -1437,7 +1449,13 @@ void Widget::updateCommunityAddChatButton() {
 		const auto fadeHeight = st::communityAddChatButtonMargin.top()
 			+ st::communityAddChatButton.height
 			+ st::communityAddChatButtonMargin.bottom();
-		PaintBottomFade(p, entity->width(), fadeHeight, st::dialogsBg);
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintSurface(p,
+				QRect(0, 0, entity->width(), fadeHeight),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
+		} else {
+			PaintBottomFade(p, entity->width(), fadeHeight, st::dialogsBg);
+		}
 	});
 
 	_communityAddChat.reset(wrap.release());
@@ -2137,7 +2155,9 @@ void Widget::updateSuggestions(anim::type animated) {
 			taken->setVisible(true);
 			_suggestions = base::take(taken);
 
-			_suggestions->hide(animated, [=, raw = _suggestions.get()] {
+			const auto raw = _suggestions.get();
+			_hidingSuggestions.push_back(std::move(_suggestions));
+			raw->hide(animated, [=] {
 				stopWidthAnimation();
 				_hidingSuggestions.erase(
 					ranges::remove(
@@ -2147,7 +2167,6 @@ void Widget::updateSuggestions(anim::type animated) {
 					end(_hidingSuggestions));
 				updateControlsVisibility();
 			});
-			_hidingSuggestions.push_back(std::move(_suggestions));
 		} else {
 			_suggestions = nullptr;
 			_hidingSuggestions.clear();
@@ -2300,6 +2319,7 @@ void Widget::changeOpenedSubsection(
 		FnMut<void()> change,
 		bool fromRight,
 		anim::type animated) {
+	const auto revision = Ui::Material::Revision();
 	if (isHidden()) {
 		animated = anim::type::instant;
 	}
@@ -2330,6 +2350,9 @@ void Widget::changeOpenedSubsection(
 		auto newContentCache = grabForFolderSlideAnimation();
 		if (_connecting) {
 			_connecting->setForceHidden(false);
+		}
+		if (revision != Ui::Material::Revision()) {
+			return;
 		}
 		startSlideAnimation(
 			std::move(oldContentCache),
@@ -2579,6 +2602,7 @@ void Widget::showSearchInTopBar(anim::type animated) {
 }
 
 void Widget::switchToChatsFilter(FilterId id) {
+	const auto revision = Ui::Material::Revision();
 	const auto was = _inner->filterId();
 	const auto animated = (was != id)
 		&& !isHidden()
@@ -2604,9 +2628,13 @@ void Widget::switchToChatsFilter(FilterId id) {
 	if (_inner->filterId() == was) {
 		return;
 	}
+	auto nowCache = grabForChatsFilterSlide();
+	if (revision != Ui::Material::Revision()) {
+		return;
+	}
 	startChatsFilterSlide(
 		std::move(wasCache),
-		grabForChatsFilterSlide(),
+		std::move(nowCache),
 		slideLeft,
 		duration);
 }
@@ -2616,10 +2644,10 @@ QPixmap Widget::grabForChatsFilterSlide() {
 	if (!hidden) {
 		_scrollToTop->hide();
 	}
-	auto result = Ui::GrabOpaque(
+	auto result = Ui::Material::GrabOpaque(
 		_scroll.data(),
 		_scroll->rect(),
-		st::dialogsBg->c);
+		st::dialogsBg);
 	if (!hidden) {
 		_scrollToTop->show();
 	}
@@ -2641,7 +2669,7 @@ void Widget::startChatsFilterSlide(
 		= canvas->lifetime().make_state<Ui::SlideAnimation>();
 	animation->setSnapshots(std::move(wasCache), std::move(nowCache));
 	canvas->paintOn([=](QPainter &p) {
-		Ui::Material::PaintSurface(
+		Ui::Material::PaintAnimationBackground(
 			p, canvas->rect(), Ui::Material::Surface::Navigation, st::dialogsBg);
 		animation->paintFrame(p, 0, 0, canvas->width());
 	});
@@ -2665,7 +2693,7 @@ QPixmap Widget::grabForFolderSlideAnimation() {
 	}
 
 	const auto rect = QRect(0, 0, width(), rect::bottom(_scroll));
-	auto result = Ui::GrabWidget(this, rect);
+	auto result = Ui::Material::Grab(this, rect);
 
 	if (!hidden) {
 		_scrollToTop->show();
@@ -2836,6 +2864,10 @@ void Widget::scrollToDefault(bool verytop) {
 	image.setDevicePixelRatio(style::DevicePixelRatio());
 	image.fill(Qt::transparent);
 	{
+		auto scope = std::optional<Ui::Material::GrabScope>();
+		if (Ui::Material::Active()) {
+			scope.emplace();
+		}
 		QPainter p(&image);
 		Ui::RenderWidget(
 			p,
@@ -2865,7 +2897,12 @@ void Widget::startWidthAnimation() {
 	if (!_widthAnimationCache.isNull()) {
 		return;
 	}
-	_widthAnimationCache = grabNonNarrowScrollFrame();
+	const auto revision = Ui::Material::Revision();
+	auto cache = grabNonNarrowScrollFrame();
+	if (revision != Ui::Material::Revision()) {
+		return;
+	}
+	_widthAnimationCache = std::move(cache);
 	_scroll->hide();
 	if (_frozenAccountBar) {
 		_frozenAccountBar->hide();
@@ -2972,12 +3009,21 @@ rpl::producer<float64> Widget::shownProgressValue() const {
 void Widget::showAnimated(
 		Window::SlideDirection direction,
 		const Window::SectionSlideParams &params) {
+	const auto revision = Ui::Material::Revision();
 	_showAnimation = nullptr;
 	_chatsFilterSlideCanvas = nullptr;
 
 	auto oldContentCache = params.oldContentCache;
 	showFast();
-	auto newContentCache = Ui::GrabWidget(this);
+	if (params.materialRevision && *params.materialRevision != revision) {
+		slideFinished();
+		return;
+	}
+	auto newContentCache = Ui::Material::Grab(this);
+	if (revision != Ui::Material::Revision()) {
+		slideFinished();
+		return;
+	}
 
 	if (_updateTelegram) {
 		_updateTelegram->hide();
@@ -3059,6 +3105,20 @@ void Widget::slideFinished() {
 		&& !_searchHasFocus) {
 		controller()->widget()->setInnerFocus();
 	}
+}
+
+void Widget::finishMaterialAnimations() {
+	if (_showAnimation) {
+		slideFinished();
+	}
+	_chatsFilterSlideCanvas = nullptr;
+	if (_hideChildListCanvas) {
+		destroyChildListCanvas();
+	}
+	if (!_widthAnimationCache.isNull()) {
+		stopWidthAnimation();
+	}
+	update();
 }
 
 void Widget::escape() {
@@ -4040,11 +4100,12 @@ void Widget::openChildList(
 		not_null<Data::Forum*> forum,
 		const Window::SectionShow &params) {
 	auto slide = Window::SectionSlideParams();
+	slide.materialRevision = Ui::Material::Revision();
 	const auto animated = !_childList
 		&& (params.animated == anim::type::normal);
 	if (animated) {
 		destroyChildListCanvas();
-		slide.oldContentCache = Ui::GrabWidget(
+		slide.oldContentCache = Ui::Material::Grab(
 			this,
 			QRect(_narrowWidth, 0, width() - _narrowWidth, height()));
 	}
@@ -4104,11 +4165,12 @@ void Widget::closeChildList(anim::type animated) {
 		return;
 	}
 	const auto geometry = _childList->geometry();
+	const auto revision = Ui::Material::Revision();
 	const auto shown = _childListShown.current();
 	auto oldContentCache = QPixmap();
 	auto animation = (Window::SlideAnimation*)nullptr;
 	if (animated == anim::type::normal) {
-		oldContentCache = Ui::GrabWidget(_childList.get());
+		oldContentCache = Ui::Material::Grab(_childList.get());
 		_hideChildListCanvas = std::make_unique<Ui::RpWidget>(this);
 		_hideChildListCanvas->setAttribute(Qt::WA_TransparentForMouseEvents);
 		_hideChildListCanvas->setGeometry(geometry);
@@ -4118,6 +4180,11 @@ void Widget::closeChildList(anim::type animated) {
 		_hideChildListCanvas->paintRequest(
 		) | rpl::on_next([=] {
 			QPainter p(_hideChildListCanvas.get());
+			if (Ui::Material::Active()) {
+				Ui::Material::PaintAnimationBackground(p,
+					_hideChildListCanvas->rect(),
+					Ui::Material::Surface::Navigation, st::dialogsBg);
+			}
 			animation->paintContents(p);
 		}, _hideChildListCanvas->lifetime());
 	}
@@ -4132,7 +4199,14 @@ void Widget::closeChildList(anim::type animated) {
 	}
 	if (animated == anim::type::normal) {
 		_hideChildListCanvas->hide();
-		auto newContentCache = Ui::GrabWidget(this, geometry);
+		auto newContentCache = Ui::Material::Grab(this, geometry);
+		if (revision != Ui::Material::Revision()) {
+			destroyChildListCanvas();
+			_childListShadow = nullptr;
+			updateStoriesVisibility();
+			updateForceDisplayWide();
+			return;
+		}
 		_hideChildListCanvas->show();
 
 		_childListShown = shown;
@@ -4965,6 +5039,10 @@ void Widget::paintEvent(QPaintEvent *e) {
 		p.setClipRect(r);
 	}
 	if (_showAnimation) {
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintAnimationBackground(p, r,
+				Ui::Material::Surface::Navigation, st::dialogsBg);
+		}
 		_showAnimation->paintContents(p);
 		return;
 	}
@@ -5003,6 +5081,12 @@ void Widget::paintEvent(QPaintEvent *e) {
 			} else {
 				p.fillRect(between, bg);
 			}
+		}
+		if (Ui::Material::Active()) {
+			Ui::Material::PaintAnimationBackground(p,
+				QRect(0, top, width(),
+					_widthAnimationCache.height() / style::DevicePixelRatio()),
+				Ui::Material::Surface::Navigation, st::dialogsBg);
 		}
 		p.drawPixmapLeft(0, top, width(), _widthAnimationCache);
 		belowTop = top

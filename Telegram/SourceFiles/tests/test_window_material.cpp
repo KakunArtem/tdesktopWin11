@@ -8,20 +8,24 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_material_policy.h"
 #include "window/window_material_fills.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "ui/color_contrast.h"
 #include "ui/style/style_core_color.h"
 
 #include "rpl/lifetime.h"
+#include "rpl/never.h"
 
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 #include <QtGui/QPainterPath>
+#include <QtGui/QPixmap>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QWidget>
 
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace {
@@ -332,7 +336,156 @@ void TestWidgetMaterialBindings() {
 	Ui::Material::SetActive(false);
 }
 
+class CaptureWidget final : public QWidget {
+public:
+	explicit CaptureWidget(const style::color &solid) : _solid(solid) {
+		resize(8, 8);
+		setAttribute(Qt::WA_NoSystemBackground);
+	}
+
+	Fn<void()> beforePaint;
+	bool observedScope = false;
+
+protected:
+	void paintEvent(QPaintEvent *) override {
+		auto p = QPainter(this);
+		observedScope = Ui::Material::Grabbing();
+		if (beforePaint) {
+			beforePaint();
+		}
+		p.fillRect(rect(), QColor(90, 80, 70));
+		Ui::Material::PaintSurface(p, rect(), Surface::Navigation, _solid);
+		p.fillRect(QRect(2, 2, 2, 2), Qt::red);
+	}
+
+private:
+	const style::color &_solid;
+
+};
+
+void TestGrabScopeNests() {
+	using Ui::Material::GrabScope;
+	using Ui::Material::Grabbing;
+	static_assert(!std::is_copy_constructible_v<GrabScope>);
+	static_assert(!std::is_move_constructible_v<GrabScope>);
+	Check(!Grabbing(), "not grabbing initially");
+	{
+		auto outer = GrabScope();
+		Check(Grabbing(), "grabbing inside a scope");
+		{
+			auto inner = GrabScope();
+			Check(Grabbing(), "grabbing inside nested scopes");
+		}
+		Check(Grabbing(), "outer scope still grabbing");
+	}
+	Check(!Grabbing(), "not grabbing after scopes end");
+}
+
+void TestScopedSurfacePainting() {
+	const auto solid = style::internal::OwnedColor(QColor(40, 50, 60));
+	const auto sentinel = QColor(200, 10, 30);
+	auto image = QImage(8, 8, QImage::Format_ARGB32_Premultiplied);
+	image.fill(sentinel);
+	Ui::Material::SetActive(true);
+	Ui::Material::SetFills({ { Surface::Navigation, QColor(0, 0, 255, 128) } }, {});
+	{
+		auto scope = Ui::Material::GrabScope();
+		auto p = QPainter(&image);
+		Ui::Material::PaintSurface(p, image.rect(),
+			Surface::Navigation, solid.color());
+		Check(image.pixelColor(6, 6).alpha() == 0,
+			"rect role fill is absent during a content grab");
+		p.fillRect(image.rect(), sentinel);
+		auto shape = QPainterPath();
+		shape.addRect(image.rect());
+		Ui::Material::PaintSurface(p, shape,
+			Surface::Navigation, solid.color());
+		Check(image.pixelColor(6, 6).alpha() == 0,
+			"path role fill is absent during a content grab");
+		p.fillRect(image.rect(), sentinel);
+		Ui::Material::PaintAnimationBackground(p, image.rect(),
+			Surface::Navigation, solid.color());
+		Check(image.pixelColor(6, 6).alpha() == 0,
+			"nested animation background is absent during a grab");
+		Ui::Material::SetActive(false);
+		Ui::Material::PaintSurface(p, image.rect(),
+			Surface::Navigation, solid.color());
+		Check(image.pixelColor(6, 6).rgba() == solid.color()->c.rgba(),
+			"fallback paints solid even before a grab scope ends");
+	}
+}
+
+void TestContentGrabs() {
+	const auto solid = style::internal::OwnedColor(QColor(40, 50, 60));
+	auto widget = CaptureWidget(solid.color());
+	Ui::Material::SetActive(true);
+	Ui::Material::SetFills({ { Surface::Navigation, QColor(0, 0, 255, 128) } }, {});
+	for (const auto opaque : { false, true }) {
+		widget.setAttribute(Qt::WA_OpaquePaintEvent, opaque);
+		const auto cache = Ui::Material::Grab(&widget).toImage();
+		Check(widget.observedScope, "widget paints within the grab scope");
+		Check(cache.pixelColor(6, 6).alpha() == 0,
+			"content cache has no material background");
+		Check(cache.pixelColor(2, 2) == QColor(Qt::red),
+			"content cache retains foreground pixels");
+		Check(widget.testAttribute(Qt::WA_OpaquePaintEvent) == opaque,
+			"capture preserves the target's opaque attribute");
+		Check(!Ui::Material::Grabbing(), "capture ends its scope");
+		const auto cropped = Ui::Material::GrabOpaque(
+			&widget, QRect(1, 1, 4, 4), solid.color()).toImage();
+		Check(cropped.size() == QSize(4, 4), "content grab respects its crop");
+		Check(cropped.pixelColor(0, 0).alpha() == 0,
+			"material GrabOpaque also captures content only");
+		Check(cropped.pixelColor(1, 1) == QColor(Qt::red),
+			"cropped content retains the correct foreground position");
+	}
+	widget.beforePaint = [] { Ui::Material::SetActive(false); };
+	const auto changed = Ui::Material::Grab(&widget).toImage();
+	Check(changed.pixelColor(6, 6).rgba() == solid.color()->c.rgba(),
+		"fallback during capture produces the solid surface");
+	Check(!Ui::Material::Grabbing(), "state changes do not leak a grab scope");
+	widget.beforePaint = nullptr;
+	Check(Ui::Material::Grab(&widget).toImage()
+			== Ui::GrabWidget(&widget).toImage(),
+		"inactive capture matches the upstream capture");
+	Check(Ui::Material::GrabOpaque(&widget, QRect(), solid.color()).toImage()
+			== Ui::GrabOpaque(&widget, QRect(), solid.color()->c).toImage(),
+		"inactive opaque capture matches the upstream capture");
+}
+
+void TestAnimationBackgroundDensity() {
+	const auto solid = style::internal::OwnedColor(QColor(40, 50, 60));
+	auto widget = CaptureWidget(solid.color());
+	Ui::Material::SetActive(true);
+	Ui::Material::SetFills({ { Surface::Navigation, QColor(0, 0, 255, 128) } }, {});
+	const auto cache = Ui::Material::Grab(&widget);
+	for (const auto progress : { 0., 0.25, 0.5, 0.75, 1. }) {
+		auto image = QImage(8, 8, QImage::Format_ARGB32_Premultiplied);
+		image.fill(Qt::transparent);
+		{
+			auto p = QPainter(&image);
+			Ui::Material::PaintAnimationBackground(p, image.rect(),
+				Surface::Navigation, solid.color());
+			p.setOpacity(1. - progress);
+			p.drawPixmap(0, 0, cache);
+			p.setOpacity(progress);
+			p.drawPixmap(0, 0, cache);
+		}
+		Check(image.pixelColor(6, 6) == QColor(0, 0, 255, 128),
+			"cross-fade content keeps a constant material background");
+	}
+	Ui::Material::SetActive(false);
+}
+
 } // namespace
+
+namespace crl {
+
+rpl::producer<> on_main_update_requests() {
+	return rpl::never<>();
+}
+
+} // namespace crl
 
 int main(int argc, char *argv[]) {
 	const auto application = QApplication(argc, argv);
@@ -346,6 +499,10 @@ int main(int argc, char *argv[]) {
 	TestPaintFillReplaces();
 	TestShapeAndSurfaceFill();
 	TestWidgetMaterialBindings();
+	TestGrabScopeNests();
+	TestScopedSurfacePainting();
+	TestContentGrabs();
+	TestAnimationBackgroundDensity();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;

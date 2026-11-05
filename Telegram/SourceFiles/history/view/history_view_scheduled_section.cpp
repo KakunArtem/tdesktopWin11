@@ -29,6 +29,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/dynamic_thumbnails.h"
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "api/api_editing.h"
 #include "api/api_sending.h"
 #include "apiwrap.h"
@@ -1064,9 +1065,14 @@ QPixmap ScheduledWidget::grabForShowAnimation(const Window::SectionSlideParams &
 	_topBar->updateControlsVisibility();
 	if (params.withTopBarShadow) _topBarShadow->hide();
 	_composeControls->showForGrab();
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (params.withTopBarShadow) _topBarShadow->show();
 	return result;
+}
+
+void ScheduledWidget::paintAnimationBackground(QPainter &p) {
+	SectionWidget::paintAnimationBackground(p);
+	_composeControls->paintAnimationBackground(p);
 }
 
 void ScheduledWidget::checkActivation() {

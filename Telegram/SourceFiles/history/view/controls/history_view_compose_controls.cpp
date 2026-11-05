@@ -5727,6 +5727,27 @@ void ComposeControls::updateAttachBotsMenu() {
 	}, _attachBotsMenu->lifetime());
 }
 
+void ComposeControls::paintAnimationBackground(QPainter &p) {
+	using Type = HistoryView::Controls::WriteRestrictionType;
+	const auto &restriction = _writeRestriction.current();
+	if (!_regularWindow
+		|| !Ui::Material::Active()
+		|| _hidden.current()
+		|| restriction.type == Type::Hidden) {
+		return;
+	}
+	const auto restricted = !restriction.empty() && _writeRestricted;
+	const auto widget = restricted ? _writeRestricted.get() : _wrap.get();
+	p.save();
+	p.translate(widget->pos());
+	paintBackground(p, widget->rect(), widget->rect());
+	if (!restricted && !_header->isHidden()) {
+		Ui::Material::PaintSurface(p, _header->geometry(),
+			Ui::Material::Surface::Composer, st::historyComposeAreaBg);
+	}
+	p.restore();
+}
+
 void ComposeControls::paintBackground(QPainter &p, QRect full, QRect clip) {
 	if (_regularWindow && Ui::Material::Active()) {
 		if (_backgroundRect) {

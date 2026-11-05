@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mainwidget.h"
 #include "mainwindow.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/painter.h"
 #include "boxes/premium_preview_box.h"
@@ -262,13 +263,24 @@ SectionWidget::SectionWidget(
 	not_null<Window::SessionController*> controller,
 	rpl::producer<PeerData*> peerForBackground)
 : AbstractSectionWidget(parent, controller, std::move(peerForBackground)) {
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		if (_showAnimation) {
+			showFinished();
+			update();
+		}
+	}, lifetime());
 }
 
 SectionWidget::SectionWidget(
 	QWidget *parent,
 	not_null<Window::SessionController*> controller,
 	not_null<PeerData*> peerForBackground)
-: AbstractSectionWidget(
+: SectionWidget(
 	parent,
 	controller,
 	rpl::single(peerForBackground.get())) {
@@ -299,9 +311,18 @@ void SectionWidget::showAnimated(
 	if (_showAnimation) {
 		return;
 	}
+	const auto revision = Ui::Material::Revision();
+	if (params.materialRevision && *params.materialRevision != revision) {
+		showFast();
+		return;
+	}
 
 	showChildren();
 	auto myContentCache = grabForShowAnimation(params);
+	if (revision != Ui::Material::Revision()) {
+		showFast();
+		return;
+	}
 	hideChildren();
 	showAnimatedHook(params);
 
@@ -333,7 +354,7 @@ void SectionWidget::showFast() {
 
 QPixmap SectionWidget::grabForShowAnimation(
 		const SectionSlideParams &params) {
-	return Ui::GrabWidget(this);
+	return Ui::Material::Grab(this);
 }
 
 void SectionWidget::PaintBackground(
@@ -516,9 +537,17 @@ void SectionWidget::PaintBackground(
 	}
 }
 
+void SectionWidget::paintAnimationBackground(QPainter &p) {
+	Ui::Material::PaintAnimationBackground(p, rect(),
+		Ui::Material::Surface::Conversation, st::windowBg);
+}
+
 void SectionWidget::paintEvent(QPaintEvent *e) {
 	if (_showAnimation) {
 		auto p = QPainter(this);
+		if (Ui::Material::Active()) {
+			paintAnimationBackground(p);
+		}
 		_showAnimation->paintContents(p);
 	}
 }

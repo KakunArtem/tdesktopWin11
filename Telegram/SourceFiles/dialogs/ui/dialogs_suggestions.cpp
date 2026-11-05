@@ -74,6 +74,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/unread_badge_paint.h"
 #include "ui/unread_counter_format.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "window/window_separate_id.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
@@ -1738,6 +1739,18 @@ Suggestions::Suggestions(
 	_recentApps.get(),
 	false))
 , _searchQueryTimer([=] { applySearchQuery(); }) {
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		if (Ui::Material::Grabbing()) {
+			InvokeQueued(this, [=] { finishAppearanceAnimation(); });
+		} else {
+			finishAppearanceAnimation();
+		}
+	}, lifetime());
 	setupTabs();
 	setupChats();
 	setupChannels();
@@ -3055,6 +3068,7 @@ void Suggestions::ensureContent(Key key) {
 }
 
 void Suggestions::startSlideAnimation(Key was, Key now, bool swipe) {
+	const auto revision = Ui::Material::Revision();
 	ensureContent(now);
 	const auto find = [&](Key key) -> not_null<QWidget*> {
 		if (const auto search = shownSearchList(key)) {
@@ -3070,8 +3084,16 @@ void Suggestions::startSlideAnimation(Key was, Key now, bool swipe) {
 	};
 	const auto wasWidget = find(was);
 	const auto nowWidget = find(now);
-	auto wasCache = Ui::GrabWidget(wasWidget);
-	auto nowCache = Ui::GrabWidget(nowWidget);
+	auto wasCache = Ui::Material::Grab(wasWidget);
+	auto nowCache = Ui::Material::Grab(nowWidget);
+	if (revision != Ui::Material::Revision()) {
+		if (_shownAnimation.animating()) {
+			finishAppearanceAnimation();
+		} else {
+			finishShow();
+		}
+		return;
+	}
 	if (wasCache.isNull() || nowCache.isNull()) {
 		_slideAnimation = nullptr;
 		if (!_shownAnimation.animating()) {
@@ -3097,26 +3119,37 @@ void Suggestions::startSlideAnimation(Key was, Key now, bool swipe) {
 }
 
 void Suggestions::startShownAnimation(bool shown, Fn<void()> finish) {
+	const auto revision = Ui::Material::Revision();
+	_showFinished = std::move(finish);
 	const auto from = shown ? 0. : 1.;
 	const auto to = shown ? 1. : 0.;
+	const auto weak = QPointer(this);
 	_shownAnimation.start([=] {
 		update();
-		if (!_shownAnimation.animating() && finish) {
+		if (!_shownAnimation.animating() && _showFinished) {
+			const auto finish = base::take(_showFinished);
 			finish();
-			if (shown) {
+			if (weak && shown) {
 				finishShow();
 			}
 		}
 	}, from, to, st::slideDuration, anim::easeOutQuint);
+	if (!weak || !_shownAnimation.animating()) {
+		return;
+	}
 	if (_cache.isNull()) {
 		const auto now = width();
 		if (now < st::columnMinimalWidthLeft) {
 			resize(st::columnMinimalWidthLeft, height());
 		}
-		_cache = Ui::GrabWidget(this);
+		_cache = Ui::Material::Grab(this);
 		if (now < st::columnMinimalWidthLeft) {
 			resize(now, height());
 		}
+	}
+	if (revision != Ui::Material::Revision()) {
+		finishAppearanceAnimation();
+		return;
 	}
 	_tabsScroll->hide();
 	_chatsScroll->hide();
@@ -3130,6 +3163,21 @@ void Suggestions::startShownAnimation(bool shown, Fn<void()> finish) {
 		search->scroll->hide();
 	}
 	_slideAnimation = nullptr;
+}
+
+void Suggestions::finishAppearanceAnimation() {
+	if (_cache.isNull() && !_slideAnimation && !_shownAnimation.animating()) {
+		return;
+	}
+	const auto finish = base::take(_showFinished);
+	finishShow();
+	if (_hidden) {
+		RpWidget::hide();
+	}
+	update();
+	if (finish) {
+		finish();
+	}
 }
 
 void Suggestions::finishShow() {
@@ -3201,7 +3249,12 @@ void Suggestions::paintEvent(QPaintEvent *e) {
 	color.setAlphaF(color.alphaF() * opacity);
 
 	auto p = QPainter(this);
-	p.fillRect(e->rect(), color);
+	if (Ui::Material::Active()) {
+		Ui::Material::PaintAnimationBackground(p, e->rect(),
+			Ui::Material::Surface::Navigation, st::dialogsBg);
+	} else {
+		p.fillRect(e->rect(), color);
+	}
 	if (!_cache.isNull()) {
 		const auto slide = st::topPeers.height + st::searchedBarHeight;
 		p.setOpacity(opacity);

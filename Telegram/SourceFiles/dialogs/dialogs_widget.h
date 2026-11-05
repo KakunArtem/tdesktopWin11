@@ -192,6 +192,7 @@ private:
 	void searchMore();
 
 	void slideFinished();
+	void finishMaterialAnimations();
 	void searchReceived(
 		SearchRequestType type,
 		const MTPmessages_Messages &result,

@@ -367,6 +367,17 @@ HistoryWidget::HistoryWidget(
 	}))
 , _topShadow(this) {
 	Ui::Material::RepaintOnFillsChanged(this);
+	rpl::merge(
+		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
+		Ui::Material::FillsChanged() | rpl::filter([] {
+			return Ui::Material::Active();
+		})
+	) | rpl::on_next([=] {
+		if (_showAnimation) {
+			showFinished();
+			update();
+		}
+	}, lifetime());
 	setAcceptDrops(true);
 	setVisualTabOrder(true);
 
@@ -6269,8 +6280,18 @@ void HistoryWidget::showAnimated(
 	_preserveScrollTop = false;
 	_stickerToast = nullptr;
 
-	auto newContentCache = Ui::GrabWidget(this);
+	const auto revision = Ui::Material::Revision();
+	if (params.materialRevision && *params.materialRevision != revision) {
+		showFinished();
+		return;
+	}
+	auto newContentCache = Ui::Material::Grab(this);
+	if (revision != Ui::Material::Revision()) {
+		showFinished();
+		return;
+	}
 
+	const auto composerRect = fieldBackgroundRect();
 	hideChildWidgets();
 	if (params.withTopBarShadow && !fromBottom) {
 		_topShadow->show();
@@ -6281,6 +6302,7 @@ void HistoryWidget::showAnimated(
 		_topBar->setAnimatingMode(true);
 	}
 
+	_showAnimationComposerRect = composerRect;
 	_showAnimation = std::make_unique<Window::SlideAnimation>();
 	_showAnimation->setDirection(direction);
 	_showAnimation->setRepaintCallback([=] { update(); });
@@ -8194,7 +8216,7 @@ QPixmap HistoryWidget::grabForShowAnimation(
 	}
 	_inGrab = true;
 	updateControlsGeometry();
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	_inGrab = false;
 	updateControlsGeometry();
 	if (params.withTopBarShadow) {
@@ -11259,22 +11281,13 @@ void HistoryWidget::updateField() {
 void HistoryWidget::drawField(Painter &p, const QRect &rect) {
 	_repaintFieldScheduled = false;
 
-	auto backy = _field->y() - st::historySendPadding;
-	auto backh = fieldHeight() + 2 * st::historySendPadding;
+	const auto background = fieldBackgroundRect();
+	const auto backy = background.y();
 	auto hasForward = readyToForward();
 	auto drawMsgText = (_editMsgId || _replyTo) ? _replyEditMsg : _kbReplyTo;
-	if (_editMsgId
-		|| _replyTo
-		|| hasForward
-		|| _kbReplyTo
-		|| _previewDrawPreview
-		|| _suggestOptions) {
-		backy -= st::historyReplyHeight;
-		backh += st::historyReplyHeight;
-	}
 	p.setInactive(
 		controller()->isGifPausedAtLeastFor(Window::GifPauseReason::Any));
-	Ui::Material::PaintSurface(p, myrtlrect(0, backy, width(), backh),
+	Ui::Material::PaintSurface(p, background,
 		Ui::Material::Surface::Composer, st::historyReplyBg);
 
 	const auto media = (!_previewDrawPreview && drawMsgText)
@@ -11532,9 +11545,36 @@ void HistoryWidget::paintEditHeader(
 	}
 }
 
+QRect HistoryWidget::fieldBackgroundRect() const {
+	if (!_list || isSearching()
+		|| !(fieldOrDisabledShown() || isRecording() || replyTo()
+			|| readyToForward() || _kbShown || _suggestOptions)) {
+		return {};
+	}
+	auto top = _field->y() - st::historySendPadding;
+	auto height = fieldHeight() + 2 * st::historySendPadding;
+	if (_editMsgId || _replyTo || readyToForward() || _kbReplyTo
+		|| _previewDrawPreview || _suggestOptions) {
+		top -= st::historyReplyHeight;
+		height += st::historyReplyHeight;
+	}
+	return myrtlrect(0, top, width(), height);
+}
+
+void HistoryWidget::paintAnimationBackground(QPainter &p) {
+	Ui::Material::PaintAnimationBackground(p, rect(),
+		Ui::Material::Surface::Conversation, st::windowBg);
+	Ui::Material::PaintAnimationBackground(p,
+		_showAnimation ? _showAnimationComposerRect : fieldBackgroundRect(),
+		Ui::Material::Surface::Composer, st::historyReplyBg);
+}
+
 bool HistoryWidget::paintShowAnimationFrame() {
 	if (_showAnimation) {
 		auto p = QPainter(this);
+		if (Ui::Material::Active()) {
+			paintAnimationBackground(p);
+		}
 		_showAnimation->paintContents(p);
 		return true;
 	}

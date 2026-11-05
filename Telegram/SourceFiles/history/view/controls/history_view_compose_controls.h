@@ -277,6 +277,7 @@ public:
 	[[nodiscard]] bool preventsClose(Fn<void()> &&continueCallback) const;
 
 	void showForGrab();
+	void paintAnimationBackground(QPainter &p);
 	void showStarted();
 	void showFinished();
 	void raisePanels();
