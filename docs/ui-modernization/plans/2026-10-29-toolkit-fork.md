@@ -1,6 +1,6 @@
 # Toolkit Fork Implementation Plan (C6)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Give `lib_ui` and `lib_base` changes a home: forks under the user's GitHub account, a fork branch pinned to the commits tdesktop uses today, submodule URLs pointing at the forks, and a written rule for taking upstream updates.
 
@@ -12,7 +12,7 @@
 
 **Visual reference:** [C6 toolkit fork](../component-references/c6-toolkit-fork/README.md): the branch layout, the `.gitmodules` change, the upstream update and the outputs that prove each step.
 
-**Status (2026-10-31):** `lib_ui` is done: `soft-panels` pushed, `.gitmodules` pointed at the fork, [procedure](../toolkit-fork.md) written. `lib_base` keeps upstream until the user forks it.
+**Status (2026-11-05):** Complete. Both public forks publish `soft-panels` at the unchanged pins; `lib_base` publication was explicitly approved. Existing checkout URLs are synchronized and fresh anonymous recursive toolkit initialization passes. See [verification and scope](../toolkit-fork.md#c6-verification). Upstream-update instructions below are the original plan; the executable procedure in [toolkit-fork.md](../toolkit-fork.md#taking-upstream-updates) inspects incoming pins before acceptance and rebases on the intended new active branch.
 
 **Depends on:** nothing. Must finish before [title bar](2026-10-29-title-bar.md) and [transient surfaces](2026-10-29-transient-surfaces.md).
 
@@ -38,16 +38,16 @@
 
 **Files:** none in tdesktop.
 
-- [ ] **Step 1: Record the pinned commits**
+- [x] **Step 1: Record the pinned commits**
 
 Run: `git submodule status Telegram/lib_ui Telegram/lib_base`
 Expected: two lines with the pinned SHAs. Write them down for Step 3.
 
-- [ ] **Step 2: Ask the user to fork**
+- [x] **Step 2: Ask the user to fork**
 
 Ask the user to fork `https://github.com/desktop-app/lib_ui` and `https://github.com/desktop-app/lib_base` under their account, or to approve doing it with `gh repo fork desktop-app/lib_ui --clone=false` and the same for `lib_base`.
 
-- [ ] **Step 3: Create `soft-panels` at the pinned commits**
+- [x] **Step 3: Create `soft-panels` at the pinned commits**
 
 In a clone of each fork, whose `origin` is the fork:
 
@@ -56,9 +56,9 @@ git branch soft-panels <pinned sha>
 git push origin soft-panels
 ```
 
-Done for `lib_ui` on 2026-10-31 at `79c846fd`. `lib_base` waits for its fork (pinned `95a543e4`). Pushing needs the user's approval.
+Done for `lib_ui` on 2026-10-31 at `79c846fd` and `lib_base` on 2026-11-05 at `95a543e4`. The user explicitly approved `lib_base` branch publication.
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `git ls-remote git@github.com:KakunArtem/lib_ui.git refs/heads/soft-panels`
 Expected: the pinned `lib_ui` SHA. Same for `lib_base`.
@@ -71,29 +71,29 @@ Expected: the pinned `lib_ui` SHA. Same for `lib_base`.
 - Modify: `.gitmodules`
 - Create: `docs/ui-modernization/toolkit-fork.md`
 
-- [ ] **Step 1: Change the URLs and branches**
+- [x] **Step 1: Change the URLs and branches**
 
 For `Telegram/lib_ui` and `Telegram/lib_base` in `.gitmodules`, set `url` to `https://github.com/KakunArtem/lib_ui.git` / `lib_base.git` and add `branch = soft-panels`. HTTPS keeps anonymous clones working.
 
-- [ ] **Step 2: Check the pointers are reachable from the fork**
+- [x] **Step 2: Check the pointers are reachable from the fork**
 
 Run in each submodule: `git branch -r --contains $(git rev-parse HEAD)`
 Expected: `origin/soft-panels` is listed, since `origin` is the fork after Step 3's sync.
 
-- [ ] **Step 3: Sync**
+- [x] **Step 3: Sync**
 
 Run: `git submodule sync Telegram/lib_ui Telegram/lib_base` then `git -C Telegram/lib_ui remote get-url origin`
 Expected: the fork URL.
 
-- [ ] **Step 4: Fresh clone check**
+- [x] **Step 4: Fresh clone check**
 
 In a scratch directory outside the checkout: `git clone --recursive <origin url> clone-check` after pushing this commit to a branch (user approval), or with `--branch` on the pushed branch. Expected: `Telegram/lib_ui` checks out at the pinned SHA with no errors. Delete the scratch clone.
 
-- [ ] **Step 5: Write the fork procedure**
+- [x] **Step 5: Write the fork procedure**
 
 `docs/ui-modernization/toolkit-fork.md` records: the fork URLs, the branch rule, how to land a change (commit in the fork on `soft-panels`, push, then a tdesktop commit "Updated lib_ui for <change>." that moves the pointer), and Task 3's update procedure. Link it from `docs/ui-modernization/README.md` under "Working documents".
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .gitmodules docs/ui-modernization/toolkit-fork.md docs/ui-modernization/README.md
@@ -106,14 +106,14 @@ git commit -m "Pointed lib_ui and lib_base at the redesign forks."
 
 Written into `docs/ui-modernization/toolkit-fork.md` in Task 2 Step 5; executed whenever upstream tdesktop is merged into this fork.
 
-- [ ] **Step 1: Document the procedure**
+- [x] **Step 1: Document the procedure**
 
 1. After merging upstream tdesktop, read the new pinned SHA from the merge (`git diff HEAD^1 HEAD -- Telegram/lib_ui`).
 2. In the submodule: `git fetch https://github.com/desktop-app/lib_ui.git master`, then `git rebase --onto <new upstream sha> <old upstream sha> soft-panels`. Resolve conflicts by reading both sides' history.
 3. Push `soft-panels` as a new branch name `soft-panels-<date>` (no force-push), and point `.gitmodules`'s `branch` at it.
 4. Move the tdesktop pointer to the rebased tip in its own commit and build Debug.
 
-- [ ] **Step 2: Commit** (if not already part of Task 2's commit)
+- [x] **Step 2: Commit** (if not already part of Task 2's commit)
 
 ```bash
 git add docs/ui-modernization/toolkit-fork.md
