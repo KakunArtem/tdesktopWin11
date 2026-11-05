@@ -5,6 +5,36 @@ scale / 96 DPI. See the [plan](../plans/2026-10-29-transparent-grabs.md),
 [visual reference](../component-references/c5-transparent-grabs/README.md)
 and [complete capture inventory](grab-audit.md).
 
+## Open blocker before C7: static search animation
+
+Reported by the user on 2026-11-05 after C5: switching to search shows a
+static picture instead of the expected animation. Resolve this report before
+starting C7. Status: reported, not yet reproduced; no fix or root cause is
+confirmed. The working interpretation is the search magnifying-glass
+illustration; confirm that it is this illustration rather than the panel
+transition when reproducing.
+
+Source inspection: `SearchEmpty::animate` in `dialogs/ui/chat_search_empty.cpp`
+requests `anim::repeat::once`. `Suggestions::setupEmpty` starts it when the
+empty-state wrapper toggles on and the chats list is loaded. The icon factory
+is `Settings::CreateLottieIcon` in `settings/settings_common.cpp`. This path
+does not disable animation specifically for Debug. Stopping after one visible
+play is expected; never moving on entry is the reported failure to investigate.
+
+Reproduce with the actual search owner, record motion/power-saving settings,
+and distinguish first entry from reopening search. Check both material and
+solid modes. Trace the empty-state playback trigger, Lottie frame progression,
+and restoration of live children after the suggestions reveal cache finishes.
+C5 regression is a hypothesis, not an established cause. The C5 native checks
+above cover panel frames and callback cleanup, not this Lottie illustration's
+playback.
+
+Close the blocker only after a regression test reproduces the missing motion
+and passes with the fix, or after reproduction establishes that the reported
+behavior is the intended one-shot playback. Preserve motion preferences and
+the existing one-shot behavior; do not change it into a continuous loop to
+hide the problem.
+
 ## Implemented
 
 Main-window section, chats-list, filter, forum-child, suggestion and banner
