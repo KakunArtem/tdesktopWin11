@@ -1223,7 +1223,7 @@ void ScheduledWidget::paintEvent(QPaintEvent *e) {
 	//_historyDownShown.step(ms);
 
 	const auto clip = e->rect();
-	SectionWidget::PaintBackground(controller(), _theme.get(), this, clip);
+	SectionWidget::PaintChatBackground(controller(), _theme.get(), this, clip);
 }
 
 void ScheduledWidget::onScroll() {

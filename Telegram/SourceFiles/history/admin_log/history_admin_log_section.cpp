@@ -640,7 +640,11 @@ void Widget::paintEvent(QPaintEvent *e) {
 	//_historyDownShown.step(ms);
 
 	const auto clip = e->rect();
-	SectionWidget::PaintBackground(controller(), _inner->theme(), this, clip);
+	SectionWidget::PaintChatBackground(
+		controller(),
+		_inner->theme(),
+		this,
+		clip);
 }
 
 void Widget::onScroll() {

@@ -258,6 +258,14 @@ public:
 		return false;
 	}
 
+	static void PaintChatBackground(
+		not_null<SessionController*> controller,
+		not_null<Ui::ChatTheme*> theme,
+		not_null<QWidget*> widget,
+		QRect clip);
+	[[nodiscard]] static bool PaintMaterialChatBackground(
+		not_null<QWidget*> widget,
+		QRect clip);
 	static void PaintBackground(
 		not_null<SessionController*> controller,
 		not_null<Ui::ChatTheme*> theme,

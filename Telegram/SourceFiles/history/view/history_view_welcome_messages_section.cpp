@@ -878,7 +878,7 @@ void WelcomeMessagesWidget::paintEvent(QPaintEvent *e) {
 		return;
 	}
 	const auto clip = e->rect();
-	SectionWidget::PaintBackground(controller(), _theme.get(), this, clip);
+	SectionWidget::PaintChatBackground(controller(), _theme.get(), this, clip);
 }
 
 void WelcomeMessagesWidget::onScroll() {

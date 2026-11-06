@@ -33,11 +33,30 @@ struct BackdropRange {
 	QColor brightest;
 };
 
+struct ChatColorInputs {
+	QColor barFill;
+	QColor barBorder;
+	QColor text;
+	QColor unreadText;
+	QColor accent;
+	bool dark = false;
+};
+
+struct ChatColors {
+	QColor serviceBg;
+	QColor serviceBgSelected;
+	QColor serviceFg;
+	QColor unreadBg;
+	QColor unreadBorder;
+	QColor unreadFg;
+};
+
 [[nodiscard]] float64 Floor(Surface surface, bool dark);
 [[nodiscard]] BackdropRange AcrylicRange(bool dark);
 [[nodiscard]] QColor Composite(const QColor &over, const QColor &under);
 [[nodiscard]] QColor ComputeFill(Surface surface, const FillInputs &inputs);
 [[nodiscard]] QColor BorderColor(const QColor &text);
+[[nodiscard]] ChatColors ComputeChatColors(const ChatColorInputs &inputs);
 [[nodiscard]] QColor ReadableOver(
 	const QColor &text,
 	const QColor &surface,

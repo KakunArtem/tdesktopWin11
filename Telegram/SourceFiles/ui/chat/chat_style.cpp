@@ -668,6 +668,27 @@ void ChatStyle::applyAdjustedServiceBg(QColor serviceBg) {
 	msgServiceBg().set(uchar(r), uchar(g), uchar(b), uchar(a));
 }
 
+void ChatStyle::applyServiceColors(const ServiceColors &colors) {
+	const auto set = [](const style::color &entry, const QColor &color) {
+		entry.set(
+			uchar(color.red()),
+			uchar(color.green()),
+			uchar(color.blue()),
+			uchar(color.alpha()));
+	};
+	set(msgServiceBg(), colors.bg);
+	set(msgServiceBgSelected(), colors.bgSelected);
+	set(msgServiceFg(), colors.fg);
+	set(historyUnreadBarBg(), colors.unreadBg);
+	set(historyUnreadBarBorder(), colors.unreadBorder);
+	set(historyUnreadBarFg(), colors.unreadFg);
+	resetPaletteCaches();
+}
+
+void ChatStyle::reapplyPalette(const style::palette *palette) {
+	assignPalette(palette ? palette : style::main_palette::get().get());
+}
+
 std::span<Text::SpecialColor> ChatStyle::highlightColors() const {
 	if (_highlightColors.empty()) {
 		_highlightColors = SyntaxHighlightColors(this);
@@ -701,7 +722,10 @@ void ChatStyle::clearColorIndexCaches() {
 
 void ChatStyle::assignPalette(not_null<const style::palette*> palette) {
 	*static_cast<style::palette*>(this) = *palette;
+	resetPaletteCaches();
+}
 
+void ChatStyle::resetPaletteCaches() {
 	// Only our own icons. style::internal::ResetIcons() would instead reset
 	// every icon in the process - including the app's, which this palette has
 	// nothing to do with - while iterating a registry that the GUI thread may

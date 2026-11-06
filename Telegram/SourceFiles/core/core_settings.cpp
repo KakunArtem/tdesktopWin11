@@ -1766,12 +1766,17 @@ void Settings::resetOnLastLogout() {
 	_ttlVoiceClickTooltipHidden = false;
 	const auto srDisabled = readPref<bool>(kScreenReaderModeDisabledKey);
 	const auto windowMaterial = readPref<bool>("window_material");
+	const auto windowMaterialChat = readPref<bool>(
+		"window_material_chat_background");
 	_prefs.clear();
 	if (srDisabled) {
 		writePref<bool>(kScreenReaderModeDisabledKey, true);
 	}
 	if (windowMaterial) {
 		writePref<bool>("window_material", true);
+	}
+	if (windowMaterialChat) {
+		writePref<bool>("window_material_chat_background", true);
 	}
 	_ivZoom = 0;
 	_recordVideoMessages = false;

@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "mainwindow.h"
 #include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "window/window_material.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/painter.h"
 #include "boxes/premium_preview_box.h"
@@ -274,6 +275,11 @@ SectionWidget::SectionWidget(
 			update();
 		}
 	}, lifetime());
+	Ui::Material::RepaintOnFillsChanged(this);
+	Window::Material::ChatBackgroundActiveValue(
+	) | rpl::skip(1) | rpl::on_next([=] {
+		update();
+	}, lifetime());
 }
 
 SectionWidget::SectionWidget(
@@ -355,6 +361,31 @@ void SectionWidget::showFast() {
 QPixmap SectionWidget::grabForShowAnimation(
 		const SectionSlideParams &params) {
 	return Ui::Material::Grab(this);
+}
+
+void SectionWidget::PaintChatBackground(
+		not_null<Window::SessionController*> controller,
+		not_null<Ui::ChatTheme*> theme,
+		not_null<QWidget*> widget,
+		QRect clip) {
+	if (!PaintMaterialChatBackground(widget, clip)) {
+		PaintBackground(controller, theme, widget, clip);
+	}
+}
+
+bool SectionWidget::PaintMaterialChatBackground(
+		not_null<QWidget*> widget,
+		QRect clip) {
+	if (!Window::Material::ChatBackgroundActive()) {
+		return false;
+	}
+	auto p = QPainter(widget);
+	Ui::Material::PaintSurface(
+		p,
+		clip,
+		Ui::Material::Surface::Conversation,
+		st::windowBg);
+	return true;
 }
 
 void SectionWidget::PaintBackground(

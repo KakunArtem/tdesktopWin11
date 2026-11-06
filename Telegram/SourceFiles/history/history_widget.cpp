@@ -67,6 +67,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/screen_reader_mode.h"
 #include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "window/window_material.h"
 #include "inline_bots/inline_bot_result.h"
 #include "base/event_filter.h"
 #include "base/options.h"
@@ -367,6 +368,10 @@ HistoryWidget::HistoryWidget(
 	}))
 , _topShadow(this) {
 	Ui::Material::RepaintOnFillsChanged(this);
+	Window::Material::ChatBackgroundActiveValue(
+	) | rpl::skip(1) | rpl::on_next([=] {
+		update();
+	}, lifetime());
 	rpl::merge(
 		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
 		Ui::Material::FillsChanged() | rpl::filter([] {
@@ -11590,7 +11595,7 @@ void HistoryWidget::paintEvent(QPaintEvent *e) {
 		updateListSize();
 	}
 
-	Window::SectionWidget::PaintBackground(
+	Window::SectionWidget::PaintChatBackground(
 		controller(),
 		controller()->currentChatTheme(),
 		this,

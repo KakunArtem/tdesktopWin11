@@ -54,6 +54,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/themes/window_theme_editor_box.h"
 #include "window/themes/window_themes_cloud_list.h"
 #include "window/window_adaptive.h"
+#include "window/window_material.h"
 #include "window/window_session_controller.h"
 #include "window/window_controller.h"
 #include "info/info_memento.h"
@@ -850,6 +851,19 @@ void BuildChatBackgroundSection(SectionBuilder &builder) {
 				? SearchEntryCheckIcon::Checked
 				: SearchEntryCheckIcon::Unchecked,
 		};
+	});
+
+	builder.add(nullptr, [] {
+		return Window::Material::Capable()
+			? SearchEntry{
+				.id = u"chat/window-material-background"_q,
+				.title = tr::lng_settings_bg_window_material(tr::now),
+				.keywords = { u"transparency"_q, u"acrylic"_q, u"background"_q },
+				.checkIcon = Window::Material::ChatBackgroundEnabled()
+					? SearchEntryCheckIcon::Checked
+					: SearchEntryCheckIcon::Unchecked,
+			}
+			: SearchEntry();
 	});
 }
 
@@ -1845,6 +1859,26 @@ void SetupChatBackground(
 			adaptive->entity(),
 			{ .radius = st::boxRadius },
 		} });
+	}
+
+	if (Window::Material::Capable()) {
+		const auto material = inner->add(
+			object_ptr<Ui::Checkbox>(
+				inner,
+				tr::lng_settings_bg_window_material(tr::now),
+				Window::Material::ChatBackgroundEnabled(),
+				st::settingsCheckbox),
+			st::settingsSendTypePadding);
+		material->checkedChanges(
+		) | rpl::on_next([=](bool checked) {
+			Window::Material::SetChatBackgroundEnabled(checked);
+		}, material->lifetime());
+		if (highlights) {
+			highlights->push_back({ u"chat/window-material-background"_q, {
+				material,
+				{ .radius = st::boxRadius },
+			} });
+		}
 	}
 }
 

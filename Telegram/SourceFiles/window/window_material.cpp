@@ -31,6 +31,7 @@ namespace {
 
 auto StartupCapability = std::optional<bool>();
 auto ActiveState = rpl::variable<bool>(false);
+auto ChatBackgroundState = rpl::variable<bool>(false);
 auto StateLifetime = rpl::lifetime();
 auto Adjustments = base::flat_map<const style::color*, Adjustment>();
 auto PaletteSnapshot = QByteArray();
@@ -271,9 +272,36 @@ void SetSettingEnabled(bool enabled) {
 	Core::App().saveSettingsDelayed();
 }
 
+bool ChatBackgroundEnabled() {
+	return Core::App().settings().readPref<bool>(
+		"window_material_chat_background",
+		false);
+}
+
+void SetChatBackgroundEnabled(bool enabled) {
+	Core::App().settings().writePref<bool>(
+		"window_material_chat_background",
+		enabled);
+	Core::App().saveSettingsDelayed();
+	ChatBackgroundState = enabled;
+}
+
+bool ChatBackgroundActive() {
+	return Active() && ChatBackgroundState.current();
+}
+
+rpl::producer<bool> ChatBackgroundActiveValue() {
+	return rpl::combine(
+		ActiveValue(),
+		ChatBackgroundState.value(),
+		[](bool active, bool enabled) { return active && enabled; }
+	) | rpl::distinct_until_changed();
+}
+
 bool Capable() {
 	if (!StartupCapability.has_value()) {
 		SoftPanels::Initialize();
+		ChatBackgroundState = ChatBackgroundEnabled();
 #ifdef Q_OS_WIN
 		StartupCapability = Platform::Material::Decide().backdrop
 			== Backdrop::Acrylic;

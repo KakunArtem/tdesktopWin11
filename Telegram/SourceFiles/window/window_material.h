@@ -17,6 +17,11 @@ namespace Window::Material {
 [[nodiscard]] bool SettingEnabled();
 void SetSettingEnabled(bool enabled);
 
+[[nodiscard]] bool ChatBackgroundEnabled();
+void SetChatBackgroundEnabled(bool enabled);
+[[nodiscard]] bool ChatBackgroundActive();
+[[nodiscard]] rpl::producer<bool> ChatBackgroundActiveValue();
+
 [[nodiscard]] bool Capable();
 [[nodiscard]] bool Active();
 [[nodiscard]] rpl::producer<bool> ActiveValue();

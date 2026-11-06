@@ -561,7 +561,7 @@ void PinnedWidget::paintEvent(QPaintEvent *e) {
 	const auto aboveHeight = _topBar->height();
 	const auto bg = e->rect().intersected(
 		QRect(0, aboveHeight, width(), height() - aboveHeight));
-	SectionWidget::PaintBackground(controller(), _theme.get(), this, bg);
+	SectionWidget::PaintChatBackground(controller(), _theme.get(), this, bg);
 }
 
 void PinnedWidget::onScroll() {

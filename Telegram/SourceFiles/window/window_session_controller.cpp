@@ -6,7 +6,12 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_session_controller.h"
+
+#include "ui/chat/chat_theme_readability.h"
+#include "ui/style/style_core_palette.h"
 #include "ui/ui_material.h"
+#include "window/window_material.h"
+#include "window/window_material_fills.h"
 
 #include "apiwrap.h"
 #include "api/api_cloud_password.h"
@@ -1603,6 +1608,16 @@ SessionController::SessionController(
 
 	_chatStyleTheme = _defaultChatTheme;
 	_chatStyle->apply(_defaultChatTheme.get());
+
+	rpl::merge(
+		_chatStyle->paletteChanged(),
+		Ui::Material::FillsChanged(),
+		Window::Material::ChatBackgroundActiveValue(
+		) | rpl::skip(1) | rpl::to_empty
+	) | rpl::on_next([=] {
+		applyMaterialChatColors();
+	}, _lifetime);
+	applyMaterialChatColors();
 
 	pushDefaultChatBackground();
 	Theme::Background()->updates(
@@ -3666,6 +3681,39 @@ void SessionController::setChatStyleTheme(
 	}
 	_chatStyleTheme = theme;
 	_chatStyle->apply(theme.get());
+}
+
+void SessionController::applyMaterialChatColors() {
+	if (_applyingMaterialChatColors) {
+		return;
+	}
+	_applyingMaterialChatColors = true;
+	const auto guard = gsl::finally([&] {
+		_applyingMaterialChatColors = false;
+	});
+	if (Window::Material::ChatBackgroundActive()) {
+		const auto colors = Window::Material::ComputeChatColors({
+			.barFill = Ui::Material::Fill(Ui::Material::Surface::Bar),
+			.barBorder = Ui::Material::Border(Ui::Material::Surface::Bar),
+			.text = st::windowFg->c,
+			.unreadText = st::historyUnreadBarFg->c,
+			.accent = st::windowBgActive->c,
+			.dark = Ui::IsDarkPalette(*style::main_palette::get()),
+		});
+		_chatStyle->applyServiceColors({
+			.bg = colors.serviceBg,
+			.bgSelected = colors.serviceBgSelected,
+			.fg = colors.serviceFg,
+			.unreadBg = colors.unreadBg,
+			.unreadBorder = colors.unreadBorder,
+			.unreadFg = colors.unreadFg,
+		});
+		_materialChatColorsApplied = true;
+	} else if (_materialChatColorsApplied) {
+		_materialChatColorsApplied = false;
+		const auto theme = _chatStyleTheme.lock();
+		_chatStyle->reapplyPalette(theme ? theme->palette() : nullptr);
+	}
 }
 
 void SessionController::clearCachedChatThemes() {

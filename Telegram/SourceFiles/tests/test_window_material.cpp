@@ -280,6 +280,48 @@ void TestMaterialFills() {
 		== QColor(127, 127, 127), "straight alpha composite rounds channels");
 }
 
+void TestChatColors() {
+	auto dark = QColor(0x17, 0x21, 0x2b);
+	dark.setAlphaF(0.90);
+	const auto weak = QColor(0x70, 0x84, 0x99);
+	const auto colors = ComputeChatColors({
+		.barFill = dark,
+		.barBorder = QColor(255, 255, 255, 26),
+		.text = weak,
+		.unreadText = weak,
+		.accent = QColor(0x5e, 0xb5, 0xf7),
+		.dark = true,
+	});
+	Check(colors.serviceBg == dark && colors.unreadBg == dark,
+		"service and unread backgrounds use the bar fill");
+	Check(colors.serviceBgSelected != dark
+		&& colors.serviceBgSelected.alpha() == dark.alpha(),
+		"selected service background shifts toward the accent");
+	Check(colors.serviceBgSelected.blue() > dark.blue(),
+		"selected service background moves in the accent's direction");
+	const auto range = AcrylicRange(true);
+	for (const auto &fill : { colors.serviceBg, colors.serviceBgSelected }) {
+		for (const auto &under : { range.darkest, range.brightest }) {
+			const auto background = Composite(fill, under);
+			Check(Ui::CountContrast(colors.serviceFg, background) >= 4.5,
+				"service text reads on plain and selected fills");
+			Check(Ui::CountContrast(colors.unreadFg, background) >= 4.5,
+				"unread bar text reads on the bar fill");
+		}
+	}
+	const auto strong = QColor(0xf5, 0xf5, 0xf5);
+	const auto unchanged = ComputeChatColors({
+		.barFill = dark,
+		.barBorder = QColor(255, 255, 255, 26),
+		.text = strong,
+		.unreadText = strong,
+		.accent = QColor(0x5e, 0xb5, 0xf7),
+		.dark = true,
+	});
+	Check(unchanged.serviceFg == strong,
+		"already readable service text is unchanged");
+}
+
 void TestReadableOver() {
 	const auto surface = QColor(255, 255, 255);
 	const auto grey = QColor(0x99, 0x99, 0x99);
@@ -576,6 +618,7 @@ int main(int argc, char *argv[]) {
 	TestMaterialMirror();
 	TestNames();
 	TestMaterialFills();
+	TestChatColors();
 	TestReadableOver();
 	TestMaterialFillMirror();
 	TestPaintFillReplaces();

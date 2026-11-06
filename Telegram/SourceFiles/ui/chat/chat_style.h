@@ -362,6 +362,17 @@ public:
 	void applyCustomPalette(const style::palette *palette);
 	void applyAdjustedServiceBg(QColor serviceBg);
 
+	struct ServiceColors {
+		QColor bg;
+		QColor bgSelected;
+		QColor fg;
+		QColor unreadBg;
+		QColor unreadBorder;
+		QColor unreadFg;
+	};
+	void applyServiceColors(const ServiceColors &colors);
+	void reapplyPalette(const style::palette *palette);
+
 	[[nodiscard]] bool dark() const {
 		return _dark;
 	}
@@ -592,6 +603,7 @@ private:
 	};
 
 	void assignPalette(not_null<const style::palette*> palette);
+	void resetPaletteCaches();
 	void clearColorIndexCaches();
 	void updateDarkValue();
 

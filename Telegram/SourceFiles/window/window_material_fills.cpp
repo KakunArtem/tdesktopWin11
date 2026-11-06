@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/assertion.h"
 
 #include <cmath>
+#include <vector>
 
 namespace Window::Material {
 namespace {
@@ -83,6 +84,36 @@ QColor BorderColor(const QColor &text) {
 	auto result = text;
 	result.setAlphaF(0.10);
 	return result;
+}
+
+ChatColors ComputeChatColors(const ChatColorInputs &inputs) {
+	const auto blend = [](int from, int to) {
+		return int(std::lround(from + (to - from) * 0.15));
+	};
+	const auto &bar = inputs.barFill;
+	const auto selected = QColor(
+		blend(bar.red(), inputs.accent.red()),
+		blend(bar.green(), inputs.accent.green()),
+		blend(bar.blue(), inputs.accent.blue()),
+		bar.alpha());
+	const auto range = AcrylicRange(inputs.dark);
+	const auto backgrounds = std::vector<QColor>{
+		Composite(bar, range.darkest),
+		Composite(bar, range.brightest),
+		Composite(selected, range.darkest),
+		Composite(selected, range.brightest),
+	};
+	return {
+		.serviceBg = bar,
+		.serviceBgSelected = selected,
+		.serviceFg = Ui::EnsureTextContrast(inputs.text, backgrounds, 4.5),
+		.unreadBg = bar,
+		.unreadBorder = inputs.barBorder,
+		.unreadFg = Ui::EnsureTextContrast(
+			inputs.unreadText,
+			backgrounds,
+			4.5),
+	};
 }
 
 QColor ReadableOver(

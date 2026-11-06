@@ -787,6 +787,7 @@ private:
 	void setupPremiumToast();
 
 	void pushDefaultChatBackground();
+	void applyMaterialChatColors();
 	void cacheChatTheme(
 		CachedThemeKey key,
 		const Data::CloudTheme &data,
@@ -885,6 +886,8 @@ private:
 	rpl::event_stream<> _giftSymbolLoaded;
 	const std::unique_ptr<Ui::ChatStyle> _chatStyle;
 	std::weak_ptr<Ui::ChatTheme> _chatStyleTheme;
+	bool _materialChatColorsApplied = false;
+	bool _applyingMaterialChatColors = false;
 	std::deque<std::shared_ptr<Ui::ChatTheme>> _lastUsedCustomChatThemes;
 	rpl::variable<PeerThemeOverride> _peerThemeOverride;
 
