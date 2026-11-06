@@ -53,14 +53,45 @@ occur: the QRhi Direct3D backing store composites with the backdrop.
 
 ## Decision
 
-Pending. The automated rows support going ahead with Acrylic: every DWM call
-succeeds through the QRhi Direct3D path, the window is not layered, only the
-painted region becomes translucent and text rendering is unchanged. The plan's
-go criteria also require maximized and full-screen states to draw correctly,
-and those, with the other "Not run" rows, need a manual pass with no
-full-screen application on the desktop.
+Go with Acrylic (`DWMSBT_TRANSIENTWINDOW`). User decision, 2026-11-06.
 
-Already visible for later plans: the native strip is more muted than the
-mockup, so C3's floors should be re-measured on native screenshots, and the
-Mica comparison from Task 6 Step 4 is worth running if the manual pass also
-finds Acrylic too muted.
+The automated rows support it: every DWM call succeeds through the QRhi
+Direct3D path, the window is not layered, only the painted region becomes
+translucent and text rendering is unchanged. The plan's go criteria also ask
+for maximized and full-screen states to draw correctly. The user accepted the
+decision without that manual pass, so the rows marked "Not run" or
+"Inconclusive" above are waived, not passed. If one of those states
+misbehaves later, this record is where to reopen the decision.
+
+## Native measurement
+
+Date: 2026-11-06. Raw backdrops on a topmost probe window, with focus held and
+verified, over solid and rendered-wallpaper windows. Values are RGB, or one
+number when the channels are equal. These numbers settled the "more muted than
+the mockup" finding above.
+
+| Backdrop | Over black | Over white | Over red | Over blue | Unfocused, any backdrop |
+| --- | --- | --- | --- | --- | --- |
+| Acrylic, dark | 54 | 146 | 255, 7, 7 | 40, 40, 255 | 84 |
+| Acrylic, light | 135 | 227 | 255, 123, 123 | 132, 132, 255 | 211 |
+| Mica, dark | 28, 32, 40 | 28, 32, 40 | 28, 32, 40 | 28, 32, 40 | 32 |
+| Mica, light | 240, 243, 249 | 240, 243, 249 | 240, 243, 249 | 240, 243, 249 | 243 |
+
+- Focused Acrylic is vivid. It blurs and strongly saturates, as the mockup
+  does. The muted look came from C3, whose fills assumed raw black and white
+  behind the window and so hid most of it.
+- Windows drops Acrylic to a flat color while the window is unfocused. Nothing
+  in the documented backdrop API changes this.
+- Mica ignores windows behind it, because it samples only the wallpaper. Its
+  values above show that, and they do not compare the two over a real
+  wallpaper, since changing the wallpaper is a system setting. Mica cannot show
+  the desktop through Telegram the way the mockup does, so it was not pursued.
+- `SetWindowCompositionAttribute` accent blur and accent Acrylic rendered flat
+  black in the probe. They were not pursued; that probe is not proof they can
+  never work.
+
+Acrylic over the preview wallpapers, as mean color: Blue folds 57, 96, 148
+dark and 143, 177, 221 light; Warm shapes 136, 92, 87 and 214, 174, 170; Bright
+sky 126, 141, 155 and 208, 222, 236; Night 54, 63, 89 and 135, 144, 170. C3 now
+uses the measured range; see
+[material fills](../checks/material-fills.md#native-acrylic-re-measure).

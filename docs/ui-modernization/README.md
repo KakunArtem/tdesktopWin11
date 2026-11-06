@@ -25,6 +25,8 @@ Windows 11 as the design target.
 - Use the [readable Soft Panels mockup](explorations/README.md) as the
   appearance target, rather than choosing between Acrylic and Mica first.
   Acrylic is the working guideline for now (2026-10-28).
+- Phase 1 result (2026-11-06): go with Acrylic. The manual rows of the
+  [prototype results](decisions/2026-10-native-backdrop.md) are waived.
 - Focus on Windows for now: the Soft Panels layout and material are judged and
   built for Windows, and macOS and Linux keep the upstream look (2026-10-30).
 - Platform and setup (2026-10-31): material needs Windows 11 22H2 (build

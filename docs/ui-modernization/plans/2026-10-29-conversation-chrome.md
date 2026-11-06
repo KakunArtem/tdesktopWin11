@@ -106,6 +106,11 @@ git commit -m "Turned conversation bars into Soft Panels pills."
 
 ### Task 3: "Window material" chat background
 
+Correction, 2026-11-06: built ahead of order at the user's request. Step 2's
+innermost overload is shared with message previews in boxes, so a separate
+`SectionWidget::PaintChatBackground` is used instead. See
+[the checks](../checks/conversation-chrome.md#changes-from-the-plans).
+
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_material.h`, `window_material.cpp`
 - Modify: `Telegram/SourceFiles/window/section_widget.cpp`

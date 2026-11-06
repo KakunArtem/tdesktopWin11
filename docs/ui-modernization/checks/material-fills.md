@@ -36,6 +36,39 @@ implemented. Native OS and visual acceptance remains tracked separately in
 [C2](material-state.md) and [C16](verification-tooling.md). C4 and later
 components have not been started.
 
+## Native Acrylic re-measure
+
+Date: 2026-11-06. The window looked far less translucent than the mockup. The
+[native measurement](../decisions/2026-10-native-backdrop.md#native-measurement)
+showed why: fills assumed raw black and white behind the window, but Acrylic
+only spans 54 to 146 in dark and 135 to 227 in light over those backdrops.
+
+`AcrylicRange()` now supplies the contrast backdrops: 54 to 169 in dark, because
+two-channel colors such as cyan peak near 169, and 132 to 255 in light. Saturated
+rows in that measurement partly lagged, so 169 is inferred from the rows that
+settled, and is not a full sweep of every color.
+
+| Role | Floor before (light / dark) | Floor now (light / dark) |
+| --- | --- | --- |
+| Window | 0.72 / 0.74 | 0.45 / 0.50 |
+| Navigation | 0.78 / 0.82 | 0.52 / 0.60 |
+| Conversation | 0.79 / 0.81 | 0.52 / 0.60 |
+
+Bar, Composer and Popup keep their floors. Mockup text computes to 0.52 light
+and 0.63 dark on Navigation. Over the darkest and brightest measured areas of the
+four wallpapers it stays between 4.85:1 and 12.97:1. In the real day and night
+themes the Window fill published 0.50 and 0.60 alpha.
+
+A real isolated window confirms the composition. Its title reads 195 over black,
+241 over white, 255, 189, 189 over red and 194, 194, 255 over blue while
+focused, and a flat 233 unfocused, matching a 0.50 white fill over the measured
+Acrylic. That window showed the sign-in screen with an empty profile, so the
+chats list and panels at these fills have not been seen by this check. The
+standalone suite passes after 9 failures against the old floors.
+
+These numbers come from one machine, Windows build 26300. A later Windows build
+that changes Acrylic's tint would need a new measurement.
+
 ## Visible scope at the C3 checkpoint
 
 C3 publishes its six fills and borders, but no production painter consumes

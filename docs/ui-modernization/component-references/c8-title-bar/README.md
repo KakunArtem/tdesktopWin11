@@ -46,8 +46,15 @@ here.
   `MainWindow::refreshTitleWidget` creates it only when the native frame is
   on and `Platform::NativeTitleRequiresShadow()`, and destroys it for the
   custom title. Material is refused with the native frame (C2), so Task 2
-  Step 2 has nothing to hide when material is on. It only needs to confirm
-  this.
+  Step 2 leaves this app-owned shadow alone. The pinned Windows toolkit
+  also has a separate `TitleWidget::_shadow`, with
+  `defaultWindowTitle.shadow` enabled. C8 disables that shadow through a
+  parallel app title style while Soft Panels or material is active.
+- **Caption icons have their own opaque backgrounds.** The resting
+  `defaultWindowTitle` icons include full-button background layers using
+  `titleButtonBg` and `titleButtonCloseBg`, with active variants. The
+  material title uses glyph-only resting icons; hover and pressed icons
+  retain their original fills. Other windows keep the toolkit defaults.
 
 ## Notes
 

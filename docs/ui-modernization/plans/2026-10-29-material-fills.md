@@ -275,6 +275,12 @@ git add Telegram/SourceFiles/window/window_material.h Telegram/SourceFiles/windo
 git commit -m "Applied window material fills and text adjustments to the palette."
 ```
 
+## Native correction
+
+On 2026-11-06 the floors and the black and white contrast backdrops in this plan
+were replaced by values measured on native Acrylic. See
+[the re-measure](../checks/material-fills.md#native-acrylic-re-measure).
+
 ## Done when
 
 - `test_window_material.exe` reports `failures: 0`.

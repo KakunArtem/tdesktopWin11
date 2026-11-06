@@ -20,6 +20,10 @@ mockup palette and for Telegram's default day and night themes.
 
 ## Computed values
 
+These are the original browser-model values. The shipping floors were replaced
+on 2026-11-06; see the
+[native re-measure](../../checks/material-fills.md#native-acrylic-re-measure).
+
 Alpha per role. **Bold** values were raised above the role floor.
 
 | Role | Floor (light / dark) | Mockup light | Mockup dark | Telegram day | Telegram night |

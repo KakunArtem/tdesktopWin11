@@ -28,22 +28,22 @@ execution keeps its row; note the correction in the plan.
 
 | ID | Component | Plan | Visual reference | Tasks done | Status | Record |
 | --- | --- | --- | --- | --- | --- | --- |
-| C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 6 / 7 | In progress: Tasks 0–5 committed; Task 6 automated rows recorded, manual rows and Task 2's Settings check pending | `decisions/2026-10-native-backdrop.md` |
+| C1 | Native backdrop | [plan](plans/2026-10-28-native-backdrop-prototype.md) | [reference](component-references/c1-native-backdrop/README.md) | 7 / 7 | Done: user chose Acrylic on 2026-11-06 and waived the manual rows and Task 2's Settings check; native backdrop response measured | `decisions/2026-10-native-backdrop.md` |
 | C16 | Verification tooling | [plan](plans/2026-10-29-verification-tooling.md) | [reference](component-references/c16-verification-tooling/README.md) | 2 / 4 | In progress: all tools implemented; native fixture suite passed, Telegram and 150% monitor acceptance pending | `tools/`, `checks/README.md` |
 | C2 | Material state | [plan](plans/2026-10-29-material-state.md) | [reference](component-references/c2-material-state/README.md) | 3 / 4 | In progress: service and native-frame fallback tested; manual Windows toggles pending | `checks/material-state.md` |
-| C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 3 / 3 | Implemented: 49 unit, 142 service and 79 regression checks passed; native visual acceptance tracked separately | `checks/material-fills.md` |
+| C3 | Material fills | [plan](plans/2026-10-29-material-fills.md) | [reference](component-references/c3-material-fills/README.md) | 3 / 3 | Implemented: 49 unit, 142 service and 79 regression checks passed; floors re-measured on native Acrylic 2026-11-06 (uncommitted); native visual acceptance tracked separately | `checks/material-fills.md` |
 | C4 | Surface roles | [plan](plans/2026-10-29-surface-roles.md) | [reference](component-references/c4-surface-roles/README.md) | 5 / 5 | Implemented: 63 unit and 66 native fixture checks pass; visible desktop acceptance tracked separately | `checks/surface-roles.md`, `checks/opaque-paint-audit.md` |
 | C5 | Transparent grabs | [plan](plans/2026-10-29-transparent-grabs.md) | [reference](component-references/c5-transparent-grabs/README.md) | 4 / 4 | Implemented: search animation loading-order bug fixed and verified; visible-desktop acceptance pending | [search animation fix](checks/transparent-grabs.md#resolved-blocker-before-c7-static-search-animation), `checks/grab-audit.md` |
 | C6 | Toolkit fork | [plan](plans/2026-10-29-toolkit-fork.md) | [reference](component-references/c6-toolkit-fork/README.md) | 3 / 3 | Complete: both published branches match unchanged pins; checkout sync and anonymous toolkit clone checks pass | [fork verification](toolkit-fork.md#c6-verification) |
 | C7 | Shell layout | [plan](plans/2026-10-29-shell-layout.md) | [reference](component-references/c7-shell-layout/README.md) | 4 / 4 | Implemented: 117 unit and 708 native checks pass; native matrix recorded, desktop acceptance pending | [shell checks](checks/shell-layout.md) |
-| C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | Not started | `checks/title-bar.md` |
+| C8 | Title bar | [plan](plans/2026-10-29-title-bar.md) | [reference](component-references/c8-title-bar/README.md) | 0 / 3 | In progress: local implementation verified with 1014 native and 133 regression checks; native caption hidden under the translucent title; snap flyout, system menu, minimize and Win+Up seen on the desktop; fork publication and the remaining desktop acceptance pending | [title checks](checks/title-bar.md) |
 | C17 | Shared controls | [plan](plans/2026-10-30-shared-controls.md) | [reference](component-references/c17-shared-controls/README.md) | 0 / 4 | Not started | `checks/shared-controls.md` |
 | C18 | Foundations | [plan](plans/2026-10-31-foundations.md) | [reference](component-references/c18-foundations/README.md) | 0 / 3 | Not started | `checks/foundations.md` |
 | C9 | Navigation rail | [plan](plans/2026-10-29-navigation-rail.md) | [reference](component-references/c9-navigation-rail/README.md) | 0 / 4 | Not started | `checks/navigation-rail.md` |
 | C10 | Chat list and search | [plan](plans/2026-10-29-chat-list.md) | [reference](component-references/c10-chat-list/README.md) | 0 / 4 | Not started | `checks/chat-list.md` |
-| C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 0 / 4 | Not started | `checks/conversation-chrome.md` |
+| C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 0 / 4 | In progress: Task 3 chat background built ahead of order, uncommitted; automated checks pass and the user confirmed the look in a signed-in chat; other states pending | [conversation checks](checks/conversation-chrome.md) |
 | C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 0 / 4 | Not started | `checks/composer.md` |
-| C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | Not started | `checks/messages.md` |
+| C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | In progress: Task 1 service and unread colors built for the chat background, uncommitted; bubble radius and message survey not started | [conversation checks](checks/conversation-chrome.md), `checks/messages.md` |
 | C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
 | C19 | Separate windows | [plan](plans/2026-10-31-separate-windows.md) | [reference](component-references/c19-separate-windows/README.md) | 0 / 4 | Not started | `checks/separate-windows.md` |
 | C15 | Info, settings and specialized screens | [plan](plans/2026-10-29-info-settings.md) | [reference](component-references/c15-info-settings/README.md) | 0 / 4 | Not started | `checks/final.md` |
@@ -57,7 +57,6 @@ user decisions with the date, then remove the row here.
 
 | Decision | Plans assume | Needed before | Raised in |
 | --- | --- | --- | --- |
-| Phase 1 result: go with Acrylic, Mica or no-go | Go with Acrylic | C2 | C1 decision record; see [What a Phase 1 no-go changes](#what-a-phase-1-no-go-changes) |
 | Composer drop shadow from the mockup (the other mockup values were adopted on 2026-10-31) | No shadow | Any time; a style value | C12 Global Constraints |
 | Window transparency on by default; chat background default | Off; the user's wallpaper | C15 Task 3 | Roadmap decision 3 |
 | Soft Panels layout on by default | Off | C15 Task 3 | C15 |
@@ -286,12 +285,15 @@ A fill is the role's total coverage over the backdrop, never a layer on top
 of another role, which is why `PaintSurface` paints with
 `CompositionMode_Source`. `ComputeFill` returns the role color with the
 lowest alpha, not below the role's floor, at which both text colors reach
-their target over the fill composited on black and on white. The target is
-4.5:1, or the text's contrast on the opaque surface when that is lower, so
-material is never less readable than solid mode. Floors (light / dark) are the
-exploration's effective coverage: Window 0.72 / 0.74, Navigation 0.78 / 0.82,
-Conversation 0.79 / 0.81; Bar 0.90, Composer 0.96 and Popup 0.97 are
-proposals from its pill, composer and popup fills.
+their target over the fill composited on both ends of `AcrylicRange()`: what
+native Acrylic actually shows through, 54 to 169 in dark and 132 to 255 in
+light. The target is 4.5:1, or the text's contrast on the opaque surface when
+that is lower, so material is never less readable than solid mode. Floors
+(light / dark) are Window 0.45 / 0.50 and Navigation and Conversation
+0.52 / 0.60, chosen on native measurements because Acrylic's own tint sits under
+the fill, unlike the exploration's raw browser blur. Bar 0.90, Composer 0.96 and
+Popup 0.97 are proposals from its pill, composer and popup fills. The backdrop's
+dark mode follows the palette, not night mode, so the two always agree.
 
 Telegram's default secondary text (`windowSubTextFg`) is below 4.5:1 even on
 its opaque background, so with unchanged text colors every fill would be
@@ -437,7 +439,7 @@ are style values, so they follow the interface scale.
 ### Adjusted palette entries
 
 While material is active, C3 raises each entry until it reaches its target
-over the lowest floor among its roles, composited on black and on white, and
+over the lowest floor among its roles, composited on both ends of the Acrylic range, and
 restores it exactly when material turns off. A plan that adds an entry adds
 its row here and to C3's table in `window/window_material.cpp`.
 
