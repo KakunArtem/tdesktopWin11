@@ -1,7 +1,7 @@
 # C8 title bar checks
 
 Date: 2026-11-06. Local implementation and native raster checks pass.
-Fork publication and visible-desktop acceptance remain pending. Plan:
+The toolkit fork is published; visible-desktop acceptance remains pending. Plan:
 [title bar](../plans/2026-10-29-title-bar.md).
 
 ## Implemented behavior
@@ -130,9 +130,9 @@ These were not observed:
 
 ## Publication
 
-The toolkit hook, the shadow fix and the native caption change are committed
-locally on `lib_ui`'s `soft-panels` branch, and the app's gitlink points at
-them. Publishing needs explicit approval under the
-[toolkit rules](../toolkit-fork.md#branch-and-publication-rules). Until the fork
-commits are pushed and their remote reachability is verified, the app commits
-must not be pushed, because a fresh clone could not fetch that gitlink.
+Published on 2026-11-06 with the user's approval, under the
+[toolkit rules](../toolkit-fork.md#branch-and-publication-rules). The toolkit
+hook, the shadow fix and the native caption change went to `lib_ui`'s
+`soft-panels` branch first, without force. The remote tip was verified to match
+the app's gitlink before the app commits were pushed to `dev`. A fresh recursive
+clone and build have not been repeated.

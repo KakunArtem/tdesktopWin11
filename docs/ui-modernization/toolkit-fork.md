@@ -12,8 +12,9 @@ at the unchanged source pins. Component: C6 in the
 | `Telegram/lib_ui` | `https://github.com/KakunArtem/lib_ui.git` | `soft-panels` | `79c846fdf0327ff99d3efdc1cc4e11ef50bedc6d` |
 | `Telegram/lib_base` | `https://github.com/KakunArtem/lib_base.git` | `soft-panels` | `95a543e426e35938dd632139d0bb828b268c3b4c` |
 
-C6 changes fetch locations and branch setup, not source versions. Both
-superproject gitlinks remain at the listed pins. The sibling clones
+C6 changed fetch locations and branch setup, not source versions, so the table
+records the C6 base. Since C8 the `lib_ui` gitlink is ahead of it, at a commit
+published on `soft-panels`; `lib_base` remains at its pin. The sibling clones
 `../lib_ui` and `../lib_base` are available for fork development; the build
 uses the pinned checkouts under `Telegram/`. Their existing `master`
 branches are preserved. A fork can have no redesign commits yet; this is
