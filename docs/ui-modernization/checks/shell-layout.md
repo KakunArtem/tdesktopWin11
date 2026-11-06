@@ -67,7 +67,7 @@ actual palette, material state and startup scale. Checks cover:
   the Window role in gaps and outside rounded corners in both material and
   solid modes.
 
-Evidence is under `%LOCALAPPDATA%\tdesktop-ui-checks\shell-layout\`.
+Evidence is under `%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\shell-layout\`.
 Final matrix folders are `review-<material|solid>-<day|night>-<100|150>-final`, each
 containing `test_log.txt` and `columns-<1|2|3>-switch-<0|1>.png`. There are
 72 final matrix PNGs, including 24 steady-state captures with the switch on

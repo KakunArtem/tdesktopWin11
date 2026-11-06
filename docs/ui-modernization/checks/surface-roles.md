@@ -56,10 +56,21 @@ both newer-composer fills and the root opaque promise; the corresponding
 GREEN runs passed.
 
 Local logs and images are under
-`%LOCALAPPDATA%\tdesktop-ui-checks\surface-roles\`, in `review-body-green`,
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\surface-roles\`, in `review-body-green`,
 `review-navigation-green` and `review-chrome-green`. `navigation-red` and
 `navigation-green` retain the solid image comparison. `review-cache-green` retains populated-row evidence. Build/unit logs belong
 to this plan's ignored execution workspace until archived after review.
+
+## Child list tint
+
+Date: 2026-11-06. A review found that material dropped upstream's tint on the
+chats list while a forum child list is open, because the transparent row
+background skipped it. `PaintTintedSurface` now shifts the Navigation fill toward
+`dialogsBgOver` by the child list's progress and keeps the fill's alpha, so the
+panel stays translucent. Unit checks failed against a stub first. The disposable
+overlay reads `#85ffffff` with no child list and `#85f2f2f2` with one open, in
+the day theme, and grabs stay transparent. No automated check opens a real forum
+child list, because this machine has no test account.
 
 ## Acceptance still requiring a visible desktop
 

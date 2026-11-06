@@ -7,17 +7,17 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_material.h"
 
+#include "base/flat_set.h"
 #include "core/application.h"
 #include "core/core_settings.h"
-#include "ui/ui_material.h"
-#include "ui/chat/chat_theme_readability.h"
-#include "ui/color_contrast.h"
-#include "ui/style/style_core_palette.h"
-#include "window/window_material_fills.h"
-#include "window/window_soft_panels.h"
 #include "rpl/variable.h"
 #include "styles/palette.h"
-#include "base/flat_set.h"
+#include "ui/chat/chat_theme_readability.h"
+#include "ui/style/style_core_palette.h"
+#include "ui/color_contrast.h"
+#include "ui/ui_material.h"
+#include "window/window_material_fills.h"
+#include "window/window_soft_panels.h"
 
 #include <cmath>
 #include <optional>
@@ -108,8 +108,11 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 	if (entry->c == color) {
 		return false;
 	}
-	entry.set(uchar(color.red()), uchar(color.green()),
-		uchar(color.blue()), uchar(color.alpha()));
+	entry.set(
+		uchar(color.red()),
+		uchar(color.green()),
+		uchar(color.blue()),
+		uchar(color.alpha()));
 	return true;
 }
 
@@ -156,7 +159,9 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 				backgrounds.push_back(Composite(fill, range.brightest));
 			}
 			const auto adjusted = Ui::EnsureTextContrast(
-				original, backgrounds, rule.target);
+				original,
+				backgrounds,
+				rule.target);
 			colors[rule.entry] = adjusted;
 			if (ranges::any_of(backgrounds, [&](const QColor &background) {
 				return ContrastOver(adjusted, background) < rule.target;

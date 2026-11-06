@@ -36,7 +36,8 @@ measured Acrylic range. Turning the option off restores Telegram's colors.
 
 ## Automated evidence
 
-`test_window_material` passes 133 checks, with 10 failures against a stub first.
+`test_window_material` passes 136 checks. The chat color checks had 10 failures
+against a stub first.
 
 The disposable `-testagent` overlay adds this stage to the
 [title bar matrix](title-bar.md#automated-evidence), on a real widget and a real

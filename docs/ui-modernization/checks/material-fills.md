@@ -25,7 +25,7 @@ unauthorized fixture with the production session gate; no user account data.
 | Other platforms | Build/runtime checks | Not performed | Windows-first checkout; inactive paths source-reviewed |
 
 Full evidence is outside the repository at
-`%LOCALAPPDATA%\tdesktop-ui-checks\material-fills\`:
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\material-fills\`:
 `review-red`, `review-green`, `review-full-suite` and `review-extended`.
 The disposable overlay is preserved there as `verification-overlay.cpp`;
 the repository's scenario is the original no-op. No private chat captures

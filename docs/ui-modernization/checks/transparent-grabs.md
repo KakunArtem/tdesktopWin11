@@ -40,7 +40,7 @@ duplicate loading notification. The material regression suite also passed
 was restored to its original no-op before the normal Debug rebuild.
 
 Evidence, PNG sequences and the reproducible scenario/launcher are under
-`%LOCALAPPDATA%\tdesktop-ui-checks\search-empty-animation\`, in `loading-red`,
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\search-empty-animation\`, in `loading-red`,
 `ready-baseline`, the five `*-green` directories and the archived execution
 folder. Full signed-in visible-desktop acceptance remains separate from these
 native widget checks.
@@ -105,7 +105,7 @@ transparent cache samples were zero and solid fallback samples were 255.
 These are Qt raster measurements, not DWM-composited screen measurements.
 
 Local logs and PNGs are under
-`%LOCALAPPDATA%\tdesktop-ui-checks\transparent-grabs\`, including
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\transparent-grabs\`, including
 `section-red`, `solid-parity-red`, `section-final`, `dialogs-red` and
 `dialogs-green`, `dialogs-fix-final`, `sections-fix-final` and `review-fix-final`. Build logs and the disposable overlay are retained in the
 archived execution evidence after final review.

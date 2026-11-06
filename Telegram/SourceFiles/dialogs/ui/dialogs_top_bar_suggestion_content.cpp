@@ -21,9 +21,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/round_rect.h"
 #include "ui/text/format_values.h"
 #include "ui/text/text_custom_emoji.h"
+#include "ui/ui_material.h"
 #include "ui/ui_rpl_filter.h"
 #include "ui/ui_utility.h"
-#include "ui/ui_material.h"
 #include "ui/unread_badge_paint.h"
 #include "ui/vertical_list.h"
 #include "ui/vertical_list.h"
@@ -115,9 +115,11 @@ int PaintSuggestionBubbleBackground(
 	const auto &margins = st::dialogsTopBarSuggestionMargins;
 	const auto pill = outer - margins;
 	if (Ui::Material::Active()) {
-		Ui::Material::PaintSurface(p,
+		Ui::Material::PaintSurface(
+			p,
 			QRect(0, 0, outer.width(), margins.top() + pill.height() / 2),
-			Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::Surface::Navigation,
+			st::dialogsBg);
 	} else {
 		PaintTopFade(
 			p,
@@ -155,8 +157,11 @@ UnconfirmedAuthWrap::UnconfirmedAuthWrap(
 		if (!_collapseSnapshot.isNull()) {
 			auto p = QPainter(this);
 			if (Ui::Material::Active()) {
-				Ui::Material::PaintAnimationBackground(p, rect(),
-					Ui::Material::Surface::Navigation, st::dialogsBg);
+				Ui::Material::PaintAnimationBackground(
+					p,
+					rect(),
+					Ui::Material::Surface::Navigation,
+					st::dialogsBg);
 			}
 			p.drawPixmap(0, 0, _collapseSnapshot);
 		}
@@ -635,8 +640,11 @@ void TopBarSuggestionContent::paintEvent(QPaintEvent *) {
 	auto p = QPainter(this);
 	if (!_collapseSnapshot.isNull()) {
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintAnimationBackground(p, rect(),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::PaintAnimationBackground(
+				p,
+				rect(),
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg);
 		}
 		p.drawPixmap(0, 0, _collapseSnapshot);
 		return;

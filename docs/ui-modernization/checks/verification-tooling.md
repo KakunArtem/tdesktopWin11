@@ -6,7 +6,7 @@ Fixture monitor: 2560 x 1440, display DPI 96 (100%). Windows PowerShell 5.1.
 
 | Row | How | Result | Evidence |
 | --- | --- | --- | --- |
-| Wallpapers | Export four 320 x 180 test images and default 2560 x 1440 images; inspect against reference | Pass | Distinct hashes and exact dimensions; default images in `%LOCALAPPDATA%\tdesktop-ui-checks\wallpapers\` |
+| Wallpapers | Export four 320 x 180 test images and default 2560 x 1440 images; inspect against reference | Pass | Distinct hashes and exact dimensions; default images in `%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\wallpapers\` |
 | Backdrop window | Non-activating native fixture; real Telegram ten-second wallpaper worker | Pass for API behavior | Correct monitor bounds and z-order; foreground handle unchanged; worker returns PID and exits on time |
 | Contrast | Native 13 px antialiased labels | Pass | `#3a4b5f` / `#e9eef5`: 7.66:1 PASS; `#999999` / white: 2.85:1 FAIL as expected |
 | Contrast CLI | Native fixture captured over black and white | Pass | Both report 7.66:1; valid samples exit 0 and outside samples report INVALID and exit 1 |
@@ -23,9 +23,9 @@ Fixture monitor: 2560 x 1440, display DPI 96 (100%). Windows PowerShell 5.1.
 | Actual interface scale mismatch | Telegram captures at 100% and 125% | Pending | Generated dimension mismatch is covered; no user interface-scale setting was changed |
 
 The full native fixture run is at
-`%LOCALAPPDATA%\tdesktop-ui-checks\self-tests\992b5967c90a4975b6c336129c672c58\`.
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\self-tests\992b5967c90a4975b6c336129c672c58\`.
 Its backdrop fixtures are at
-`%LOCALAPPDATA%\tdesktop-ui-checks\backdrop\20261104-144252-621\`.
+`%LOCALAPPDATA%\Packages\OpenAI.Codex_2p2nqsd0c76g0\LocalCache\Local\tdesktop-ui-checks\backdrop\20261104-144252-621\`.
 These checks verify tooling behavior, not Telegram's Acrylic rendering or a
 display configuration that was not exercised. C16 Tasks 3 and 4 retain their
 manual acceptance rows; the architecture tracker does not count them complete.

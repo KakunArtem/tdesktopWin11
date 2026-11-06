@@ -6,7 +6,6 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "dialogs/dialogs_inner_widget.h"
-#include "ui/ui_material.h"
 
 #include "dialogs/dialogs_three_state_icon.h"
 #include "dialogs/ui/chat_search_empty.h"
@@ -38,6 +37,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "ui/text/text_options.h"
 #include "ui/dynamic_thumbnails.h"
+#include "ui/ui_material.h"
 #include "ui/vertical_list.h"
 #include "ui/painter.h"
 #include "ui/rect.h"
@@ -1039,8 +1039,13 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		return;
 	}
 	if (Ui::Material::Active()) {
-		Ui::Material::PaintSurface(
-			p, rect(), Ui::Material::Surface::Navigation, st::dialogsBg);
+		Ui::Material::PaintTintedSurface(
+			p,
+			rect(),
+			Ui::Material::Surface::Navigation,
+			st::dialogsBg,
+			st::dialogsBgOver,
+			_childListShown.current().shown);
 	}
 	const auto activeEntry = _controller->activeChatEntryCurrent();
 	const auto videoPaused = _controller->isGifPausedAtLeastFor(
@@ -1073,8 +1078,13 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 			bool selected,
 			bool mayBeActive) {
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintSurface(p, QRect(0, 0, fullWidth, row->height()),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::PaintTintedSurface(
+				p,
+				QRect(0, 0, fullWidth, row->height()),
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg,
+				st::dialogsBgOver,
+				childListShown.shown);
 		}
 		const auto &key = row->key();
 		const auto active = mayBeActive && isRowActive(row, activeEntry);

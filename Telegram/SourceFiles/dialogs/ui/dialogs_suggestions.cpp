@@ -71,10 +71,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/dynamic_thumbnails.h"
 #include "ui/painter.h"
 #include "ui/search_field_controller.h"
+#include "ui/ui_material.h"
 #include "ui/unread_badge_paint.h"
 #include "ui/unread_counter_format.h"
 #include "ui/ui_utility.h"
-#include "ui/ui_material.h"
 #include "window/window_separate_id.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
@@ -3250,8 +3250,11 @@ void Suggestions::paintEvent(QPaintEvent *e) {
 
 	auto p = QPainter(this);
 	if (Ui::Material::Active()) {
-		Ui::Material::PaintAnimationBackground(p, e->rect(),
-			Ui::Material::Surface::Navigation, st::dialogsBg);
+		Ui::Material::PaintAnimationBackground(
+			p,
+			e->rect(),
+			Ui::Material::Surface::Navigation,
+			st::dialogsBg);
 	} else {
 		p.fillRect(e->rect(), color);
 	}

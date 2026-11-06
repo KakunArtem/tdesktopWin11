@@ -9,9 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "mainwidget.h"
 #include "mainwindow.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
-#include "window/window_material.h"
+#include "ui/ui_utility.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/painter.h"
 #include "boxes/premium_preview_box.h"
@@ -33,6 +32,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_custom_emoji.h"
 #include "ui/toast/toast.h"
 #include "window/section_memento.h"
+#include "window/window_material.h"
 #include "window/window_slide_animation.h"
 #include "window/window_session_controller.h"
 #include "window/themes/window_theme.h"
@@ -569,8 +569,11 @@ void SectionWidget::PaintBackground(
 }
 
 void SectionWidget::paintAnimationBackground(QPainter &p) {
-	Ui::Material::PaintAnimationBackground(p, rect(),
-		Ui::Material::Surface::Conversation, st::windowBg);
+	Ui::Material::PaintAnimationBackground(
+		p,
+		rect(),
+		Ui::Material::Surface::Conversation,
+		st::windowBg);
 }
 
 void SectionWidget::paintEvent(QPaintEvent *e) {

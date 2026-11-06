@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "platform/win/integration_win.h"
 #include "platform/win/window_material_win.h"
 #include "window/notifications_manager.h"
+#include "window/window_material.h"
 #include "window/window_session_controller.h"
 #include "mainwindow.h"
 #include "main/main_session.h"
@@ -27,12 +28,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_theme_readability.h"
 #include "ui/style/style_core_palette.h"
 #include "ui/widgets/popup_menu.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "ui/gl/gl_surface.h"
 #include "window/themes/window_theme.h"
 #include "window/window_controller.h"
-#include "window/window_material.h"
 #include "styles/style_window_soft_panels.h"
 #include "history/history.h"
 
@@ -734,7 +734,10 @@ void MainWindow::initHook() {
 	if (Window::Material::Capable()
 		&& !Core::App().settings().nativeWindowFrame()) {
 		setTitleBackgroundPainter([=](QPainter &p, const QRect &rect) {
-			Ui::Material::PaintSurface(p, rect, Ui::Material::Surface::Window,
+			Ui::Material::PaintSurface(
+				p,
+				rect,
+				Ui::Material::Surface::Window,
 				isActiveWindow() ? st::titleBgActive : st::titleBg);
 		});
 		Ui::Material::RepaintOnFillsChanged(titleWidget());

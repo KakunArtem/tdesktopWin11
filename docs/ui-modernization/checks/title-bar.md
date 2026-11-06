@@ -36,12 +36,12 @@ Qt raster output, not DWM-composited desktop screenshots.
 
 | Startup material | Interface scale | Native passes | Failures | PNGs |
 | --- | --- | --- | --- | --- |
-| On | 100% | 373 | 0 | 23 |
-| Off | 100% | 134 | 0 | 17 |
-| On | 150% | 373 | 0 | 23 |
-| Off | 150% | 134 | 0 | 17 |
+| On | 100% | 377 | 0 | 23 |
+| Off | 100% | 135 | 0 | 17 |
+| On | 150% | 377 | 0 | 23 |
+| Off | 150% | 135 | 0 | 17 |
 
-All 1014 native checks pass, including the
+All 1024 native checks pass, including the
 [chat background stage](conversation-chrome.md#automated-evidence). Each leg
 exercises light and dark palettes,
 active and inactive windows, and Soft Panels style switching. Checks cover:
@@ -82,7 +82,7 @@ day-theme checks above failed before the fix: 2 with material at startup and
 
 Evidence for the current matrix is under
 `%LOCALAPPDATA%\tdesktop-ui-checks\title-bar\`, in folders named
-`chatbg-<material|solid>-<100|150>`; each contains `test_log.txt` and
+`review-<material|solid>-<100|150>`; each contains `test_log.txt` and
 PNGs. The `final-<material|solid>-<100|150>` runs before the shadow fix, the
 overlay's execution folder, the build logs and the review notes were written
 from a Codex sandbox and are in its package cache instead:

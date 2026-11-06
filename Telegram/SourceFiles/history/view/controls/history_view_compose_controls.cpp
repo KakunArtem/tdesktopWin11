@@ -6,7 +6,6 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "history/view/controls/history_view_compose_controls.h"
-#include "ui/ui_material.h"
 
 #include "history/view/controls/history_view_bot_menu_button.h"
 
@@ -118,6 +117,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/item_text_options.h"
 #include "ui/text/text_options.h"
 #include "ui/text/text_utilities.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/dropdown_menu.h"
@@ -404,8 +404,11 @@ void FieldHeader::init(bool windowMaterial) {
 		Painter p(this);
 		p.setInactive(_show->paused(Window::GifPauseReason::Any));
 		if (windowMaterial) {
-			Ui::Material::PaintSurface(p, rect(),
-				Ui::Material::Surface::Composer, st::historyComposeAreaBg);
+			Ui::Material::PaintSurface(
+				p,
+				rect(),
+				Ui::Material::Surface::Composer,
+				st::historyComposeAreaBg);
 		} else {
 			p.fillRect(rect(), st::historyComposeAreaBg);
 		}
@@ -5742,8 +5745,11 @@ void ComposeControls::paintAnimationBackground(QPainter &p) {
 	p.translate(widget->pos());
 	paintBackground(p, widget->rect(), widget->rect());
 	if (!restricted && !_header->isHidden()) {
-		Ui::Material::PaintSurface(p, _header->geometry(),
-			Ui::Material::Surface::Composer, st::historyComposeAreaBg);
+		Ui::Material::PaintSurface(
+			p,
+			_header->geometry(),
+			Ui::Material::Surface::Composer,
+			st::historyComposeAreaBg);
 	}
 	p.restore();
 }
@@ -5766,10 +5772,16 @@ void ComposeControls::paintBackground(QPainter &p, QRect full, QRect clip) {
 			}
 			shape.addRoundedRect(full, r, r);
 			Ui::Material::PaintSurface(
-				p, shape, Ui::Material::Surface::Composer, _st.bg);
+				p,
+				shape,
+				Ui::Material::Surface::Composer,
+				_st.bg);
 		} else {
 			Ui::Material::PaintSurface(
-				p, clip, Ui::Material::Surface::Composer, _st.bg);
+				p,
+				clip,
+				Ui::Material::Surface::Composer,
+				_st.bg);
 		}
 		return;
 	}

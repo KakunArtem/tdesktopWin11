@@ -15,11 +15,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "platform/platform_window_title.h"
 #include "history/history.h"
 #include "info/media/info_media_widget.h" // SharedMediaTitle.
+#include "window/window_material.h"
 #include "window/window_saved_windows.h"
 #include "window/window_separate_id.h"
 #include "window/window_session_controller.h"
 #include "window/window_lock_widgets.h"
-#include "window/window_material.h"
 #include "window/window_controller.h"
 #include "main/main_account.h" // Account::sessionValue.
 #include "main/main_domain.h"
@@ -44,8 +44,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/window_screen_reader_bar.h"
 #include "ui/painter.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "ui/unread_counter_format.h"
 #include "apiwrap.h"
 #include "mainwidget.h" // session->content()->windowShown().
@@ -431,7 +431,10 @@ MainWindow::MainWindow(not_null<Controller*> controller)
 		_body->paintRequest() | rpl::on_next([=](QRect clip) {
 			auto p = QPainter(_body);
 			Ui::Material::PaintSurface(
-				p, clip, Ui::Material::Surface::Window, st::windowBg);
+				p,
+				clip,
+				Ui::Material::Surface::Window,
+				st::windowBg);
 		}, _body->lifetime());
 		Ui::Material::RepaintOnFillsChanged(_body);
 	}

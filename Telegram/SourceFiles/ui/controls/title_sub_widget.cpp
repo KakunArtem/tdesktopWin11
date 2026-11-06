@@ -98,7 +98,10 @@ not_null<RpWidget*> CreateTitleSubWidget(
 			}
 		};
 		if (Material::Active()) {
-			Material::PaintSurface(p, clip, Material::Surface::Window,
+			Material::PaintSurface(
+				p,
+				clip,
+				Material::Surface::Window,
 				active ? st::titleBgActive : st::titleBg);
 		} else {
 			fill(leftArea, left);

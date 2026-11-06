@@ -65,6 +65,17 @@ void PaintAnimationBackground(
 	const QRect &rect,
 	Surface surface,
 	const style::color &solid);
+[[nodiscard]] QColor MixFill(
+	const QColor &fill,
+	const QColor &tint,
+	float64 progress);
+void PaintTintedSurface(
+	QPainter &p,
+	const QRect &rect,
+	Surface surface,
+	const style::color &solid,
+	const style::color &tint,
+	float64 progress);
 void PaintFill(QPainter &p, const QRect &rect, const QColor &fill);
 void PaintFill(QPainter &p, const QPainterPath &shape, const QColor &fill);
 void PaintSurface(

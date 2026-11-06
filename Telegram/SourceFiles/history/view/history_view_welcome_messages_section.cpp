@@ -39,8 +39,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/elastic_scroll.h"
 #include "ui/widgets/shadow.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "window/window_session_controller.h"
 
 #include "styles/style_boxes.h"

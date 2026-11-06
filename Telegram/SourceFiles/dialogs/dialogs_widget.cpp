@@ -51,8 +51,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/rect.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "lang/lang_keys.h"
 #include "mainwindow.h"
 #include "mainwidget.h"
@@ -1450,9 +1450,11 @@ void Widget::updateCommunityAddChatButton() {
 			+ st::communityAddChatButton.height
 			+ st::communityAddChatButtonMargin.bottom();
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintSurface(p,
+			Ui::Material::PaintSurface(
+				p,
 				QRect(0, 0, entity->width(), fadeHeight),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg);
 		} else {
 			PaintBottomFade(p, entity->width(), fadeHeight, st::dialogsBg);
 		}
@@ -2670,7 +2672,10 @@ void Widget::startChatsFilterSlide(
 	animation->setSnapshots(std::move(wasCache), std::move(nowCache));
 	canvas->paintOn([=](QPainter &p) {
 		Ui::Material::PaintAnimationBackground(
-			p, canvas->rect(), Ui::Material::Surface::Navigation, st::dialogsBg);
+			p,
+			canvas->rect(),
+			Ui::Material::Surface::Navigation,
+			st::dialogsBg);
 		animation->paintFrame(p, 0, 0, canvas->width());
 	});
 	canvas->show();
@@ -4181,9 +4186,11 @@ void Widget::closeChildList(anim::type animated) {
 		) | rpl::on_next([=] {
 			QPainter p(_hideChildListCanvas.get());
 			if (Ui::Material::Active()) {
-				Ui::Material::PaintAnimationBackground(p,
+				Ui::Material::PaintAnimationBackground(
+					p,
 					_hideChildListCanvas->rect(),
-					Ui::Material::Surface::Navigation, st::dialogsBg);
+					Ui::Material::Surface::Navigation,
+					st::dialogsBg);
 			}
 			animation->paintContents(p);
 		}, _hideChildListCanvas->lifetime());
@@ -5040,8 +5047,11 @@ void Widget::paintEvent(QPaintEvent *e) {
 	}
 	if (_showAnimation) {
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintAnimationBackground(p, r,
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::PaintAnimationBackground(
+				p,
+				r,
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg);
 		}
 		_showAnimation->paintContents(p);
 		return;
@@ -5053,8 +5063,13 @@ void Widget::paintEvent(QPaintEvent *e) {
 	auto above = QRect(0, 0, width(), _scroll->y());
 	if (above.intersects(r)) {
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintSurface(p, above.intersected(r),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::PaintTintedSurface(
+				p,
+				above.intersected(r),
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg,
+				st::dialogsBgOver,
+				_childListShown.current());
 		} else {
 			p.fillRect(above.intersected(r), bg);
 		}
@@ -5076,17 +5091,27 @@ void Widget::paintEvent(QPaintEvent *e) {
 		if (top > aboveBottom) {
 			const auto between = QRect(0, aboveBottom, width(), top - aboveBottom);
 			if (Ui::Material::Active()) {
-				Ui::Material::PaintSurface(p, between,
-					Ui::Material::Surface::Navigation, st::dialogsBg);
+				Ui::Material::PaintTintedSurface(
+					p,
+					between,
+					Ui::Material::Surface::Navigation,
+					st::dialogsBg,
+					st::dialogsBgOver,
+					_childListShown.current());
 			} else {
 				p.fillRect(between, bg);
 			}
 		}
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintAnimationBackground(p,
-				QRect(0, top, width(),
-					_widthAnimationCache.height() / style::DevicePixelRatio()),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			const auto cacheHeight = _widthAnimationCache.height()
+				/ style::DevicePixelRatio();
+			Ui::Material::PaintTintedSurface(
+				p,
+				QRect(0, top, width(), cacheHeight),
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg,
+				st::dialogsBgOver,
+				_childListShown.current());
 		}
 		p.drawPixmapLeft(0, top, width(), _widthAnimationCache);
 		belowTop = top
@@ -5096,8 +5121,13 @@ void Widget::paintEvent(QPaintEvent *e) {
 	auto below = QRect(0, belowTop, width(), height() - belowTop);
 	if (below.intersects(r)) {
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintSurface(p, below.intersected(r),
-				Ui::Material::Surface::Navigation, st::dialogsBg);
+			Ui::Material::PaintTintedSurface(
+				p,
+				below.intersected(r),
+				Ui::Material::Surface::Navigation,
+				st::dialogsBg,
+				st::dialogsBgOver,
+				_childListShown.current());
 		} else {
 			p.fillRect(below.intersected(r), bg);
 		}

@@ -280,6 +280,21 @@ void TestMaterialFills() {
 		== QColor(127, 127, 127), "straight alpha composite rounds channels");
 }
 
+void TestMixFill() {
+	const auto fill = QColor(23, 33, 43, 153);
+	const auto tint = QColor(32, 43, 56);
+	Check(Ui::Material::MixFill(fill, tint, 0.) == fill,
+		"no progress keeps the exact fill");
+	const auto full = Ui::Material::MixFill(fill, tint, 1.);
+	Check(full.rgb() == tint.rgb() && full.alpha() == fill.alpha(),
+		"full progress takes the tint color and keeps the fill alpha");
+	const auto half = Ui::Material::MixFill(fill, tint, 0.5);
+	Check(half.red() > fill.red()
+		&& half.red() < tint.red()
+		&& half.alpha() == fill.alpha(),
+		"partial progress blends and keeps the fill alpha");
+}
+
 void TestChatColors() {
 	auto dark = QColor(0x17, 0x21, 0x2b);
 	dark.setAlphaF(0.90);
@@ -421,8 +436,11 @@ void TestShapeAndSurfaceFill() {
 		image.fill(Qt::transparent);
 		{
 			auto p = QPainter(&image);
-			Ui::Material::PaintSurface(p, shape,
-				Surface::Navigation, solid.color());
+			Ui::Material::PaintSurface(
+				p,
+				shape,
+				Surface::Navigation,
+				solid.color());
 		}
 		Check(image.pixelColor(6, 6).rgba() == expected,
 			"path surface chooses material or solid");
@@ -520,8 +538,11 @@ void TestScopedSurfacePainting() {
 		p.fillRect(image.rect(), sentinel);
 		auto shape = QPainterPath();
 		shape.addRect(image.rect());
-		Ui::Material::PaintSurface(p, shape,
-			Surface::Navigation, solid.color());
+		Ui::Material::PaintSurface(
+			p,
+			shape,
+			Surface::Navigation,
+			solid.color());
 		Check(image.pixelColor(6, 6).alpha() == 0,
 			"path role fill is absent during a content grab");
 		p.fillRect(image.rect(), sentinel);
@@ -618,6 +639,7 @@ int main(int argc, char *argv[]) {
 	TestMaterialMirror();
 	TestNames();
 	TestMaterialFills();
+	TestMixFill();
 	TestChatColors();
 	TestReadableOver();
 	TestMaterialFillMirror();

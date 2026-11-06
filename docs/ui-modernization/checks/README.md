@@ -37,6 +37,8 @@ Evidence can be an external capture path, a measured value or an embedded
 image. Commit at most four representative images per plan, under
 `images/<plan>/`. Keep full capture sets outside the repository at
 `$env:LOCALAPPDATA\tdesktop-ui-checks\<plan>\`. Do not commit private chats.
+Runs made from a Codex sandbox land in its package cache instead, and the
+records written from there name that path.
 Pending or invalid captures do not count as passes.
 
 ## Tools

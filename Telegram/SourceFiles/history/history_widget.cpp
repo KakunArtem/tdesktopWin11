@@ -65,9 +65,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/send_as_button.h"
 #include "ui/controls/silent_toggle.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
-#include "window/window_material.h"
+#include "ui/ui_utility.h"
 #include "inline_bots/inline_bot_result.h"
 #include "base/event_filter.h"
 #include "base/options.h"
@@ -197,6 +196,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/notifications_manager.h"
 #include "window/window_adaptive.h"
 #include "window/window_controller.h"
+#include "window/window_material.h"
 #include "window/window_session_controller.h"
 #include "window/window_slide_animation.h"
 #include "window/window_peer_menu.h"
@@ -11292,8 +11292,11 @@ void HistoryWidget::drawField(Painter &p, const QRect &rect) {
 	auto drawMsgText = (_editMsgId || _replyTo) ? _replyEditMsg : _kbReplyTo;
 	p.setInactive(
 		controller()->isGifPausedAtLeastFor(Window::GifPauseReason::Any));
-	Ui::Material::PaintSurface(p, background,
-		Ui::Material::Surface::Composer, st::historyReplyBg);
+	Ui::Material::PaintSurface(
+		p,
+		background,
+		Ui::Material::Surface::Composer,
+		st::historyReplyBg);
 
 	const auto media = (!_previewDrawPreview && drawMsgText)
 		? drawMsgText->media()
@@ -11567,11 +11570,16 @@ QRect HistoryWidget::fieldBackgroundRect() const {
 }
 
 void HistoryWidget::paintAnimationBackground(QPainter &p) {
-	Ui::Material::PaintAnimationBackground(p, rect(),
-		Ui::Material::Surface::Conversation, st::windowBg);
-	Ui::Material::PaintAnimationBackground(p,
+	Ui::Material::PaintAnimationBackground(
+		p,
+		rect(),
+		Ui::Material::Surface::Conversation,
+		st::windowBg);
+	Ui::Material::PaintAnimationBackground(
+		p,
 		_showAnimation ? _showAnimationComposerRect : fieldBackgroundRect(),
-		Ui::Material::Surface::Composer, st::historyReplyBg);
+		Ui::Material::Surface::Composer,
+		st::historyReplyBg);
 }
 
 bool HistoryWidget::paintShowAnimationFrame() {

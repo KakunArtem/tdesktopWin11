@@ -18,6 +18,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QPainterPath>
 #include <QtGui/QPixmap>
 
+#include <cmath>
+
 namespace Ui::Material {
 namespace {
 
@@ -43,7 +45,8 @@ struct WidgetBinding {
 		widget->property(kBindingProperty).value<void*>());
 	if (!result) {
 		result = Ui::CreateChild<WidgetBinding>(widget.get());
-		widget->setProperty(kBindingProperty,
+		widget->setProperty(
+			kBindingProperty,
 			QVariant::fromValue(static_cast<void*>(result)));
 	}
 	return result;
@@ -135,7 +138,8 @@ QPixmap Grab(not_null<QWidget*> widget, QRect rect) {
 		if (opaque && weak) {
 			const auto binding = static_cast<WidgetBinding*>(
 				weak->property(kBindingProperty).value<void*>());
-			weak->setAttribute(Qt::WA_OpaquePaintEvent,
+			weak->setAttribute(
+				Qt::WA_OpaquePaintEvent,
 				(binding && binding->opaqueBound)
 					? binding->opaqueInSolidMode && !Active()
 					: true);
@@ -162,6 +166,31 @@ void PaintAnimationBackground(
 		Surface surface,
 		const style::color &solid) {
 	PaintSurface(p, rect, surface, solid);
+}
+
+QColor MixFill(const QColor &fill, const QColor &tint, float64 progress) {
+	const auto mix = [&](int from, int to) {
+		return from + int(std::lround((to - from) * progress));
+	};
+	return QColor(
+		mix(fill.red(), tint.red()),
+		mix(fill.green(), tint.green()),
+		mix(fill.blue(), tint.blue()),
+		fill.alpha());
+}
+
+void PaintTintedSurface(
+		QPainter &p,
+		const QRect &rect,
+		Surface surface,
+		const style::color &solid,
+		const style::color &tint,
+		float64 progress) {
+	if (Active() && !Grabbing()) {
+		PaintFill(p, rect, MixFill(Fill(surface), tint->c, progress));
+	} else {
+		PaintSurface(p, rect, surface, solid);
+	}
 }
 
 void PaintFill(QPainter &p, const QRect &rect, const QColor &fill) {
@@ -211,12 +240,14 @@ void SetOpaquePaint(not_null<QWidget*> widget, bool opaqueInSolidMode) {
 		const auto weak = QPointer<QWidget>(widget.get());
 		ActiveValue() | rpl::on_next([=](bool active) {
 			if (weak) {
-				weak->setAttribute(Qt::WA_OpaquePaintEvent,
+				weak->setAttribute(
+					Qt::WA_OpaquePaintEvent,
 					binding->opaqueInSolidMode && !active);
 			}
 		}, binding->lifetime);
 	} else {
-		widget->setAttribute(Qt::WA_OpaquePaintEvent,
+		widget->setAttribute(
+			Qt::WA_OpaquePaintEvent,
 			opaqueInSolidMode && !Active());
 	}
 }

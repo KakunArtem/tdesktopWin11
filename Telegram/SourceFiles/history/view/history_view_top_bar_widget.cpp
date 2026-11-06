@@ -36,11 +36,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text.h"
 #include "ui/text/text_options.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/unread_badge.h"
 #include "ui/unread_counter_format.h"
 #include "ui/controls/button_context_menu.h"
 #include "ui/ui_utility.h"
-#include "ui/ui_material.h"
 #include "window/window_adaptive.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
@@ -537,8 +537,11 @@ void TopBarWidget::paintEvent(QPaintEvent *e) {
 		: -st::topBarHeight;
 	const auto slidingTop = std::max(selectedButtonsTop, searchFieldTop);
 
-	Ui::Material::PaintSurface(p, QRect(0, 0, width(), st::topBarHeight),
-		Ui::Material::Surface::Conversation, st::topBarBg);
+	Ui::Material::PaintSurface(
+		p,
+		QRect(0, 0, width(), st::topBarHeight),
+		Ui::Material::Surface::Conversation,
+		st::topBarBg);
 	if (slidingTop < 0) {
 		p.translate(0, slidingTop + st::topBarHeight);
 		paintTopBar(p);

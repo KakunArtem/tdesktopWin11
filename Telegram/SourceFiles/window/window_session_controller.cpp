@@ -7,12 +7,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_session_controller.h"
 
-#include "ui/chat/chat_theme_readability.h"
-#include "ui/style/style_core_palette.h"
-#include "ui/ui_material.h"
-#include "window/window_material.h"
-#include "window/window_material_fills.h"
-
 #include "apiwrap.h"
 #include "api/api_cloud_password.h"
 #include "api/api_text_entities.h"
@@ -28,6 +22,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_controller.h"
 #include "window/window_filters_menu.h"
 #include "window/section_widget.h"
+#include "window/window_material.h"
+#include "window/window_material_fills.h"
 #include "window/window_separate_id.h"
 #include "info/channel_statistics/earn/info_channel_earn_list.h"
 #include "info/peer_gifts/info_peer_gifts_widget.h"
@@ -87,6 +83,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/unixtime.h"
 #include "info/channel_statistics/earn/earn_icons.h"
 #include "ui/controls/userpic_button.h"
+#include "ui/chat/chat_theme_readability.h"
+#include "ui/style/style_core_palette.h"
 #include "ui/text/text_utilities.h"
 #include "ui/text/format_values.h" // Ui::FormatPhone.
 #include "ui/delayed_activation.h"
@@ -104,6 +102,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/boxes/collectible_info_box.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/dynamic_thumbnails.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "mainwidget.h"
 #include "main/main_app_config.h"

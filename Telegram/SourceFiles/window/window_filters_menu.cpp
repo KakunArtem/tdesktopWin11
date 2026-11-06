@@ -6,7 +6,6 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_filters_menu.h"
-#include "ui/ui_material.h"
 
 #include "menu/menu_mark_as_read.h"
 #include "mainwindow.h"
@@ -37,6 +36,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/boxes/confirm_box.h"
 #include "ui/power_saving.h"
 #include "ui/screen_reader_mode.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "boxes/filters/edit_filter_box.h"
 #include "boxes/choose_filter_box.h"
@@ -139,8 +139,11 @@ void FiltersMenu::setup() {
 	) | rpl::on_next([=](QRect clip) {
 		auto p = QPainter(&_outer);
 		if (Ui::Material::Active()) {
-			Ui::Material::PaintSurface(p, clip,
-				Ui::Material::Surface::Navigation, st::windowFiltersButton.textBg);
+			Ui::Material::PaintSurface(
+				p,
+				clip,
+				Ui::Material::Surface::Navigation,
+				st::windowFiltersButton.textBg);
 		} else {
 			p.setPen(Qt::NoPen);
 			p.setBrush(st::windowFiltersButton.textBg);

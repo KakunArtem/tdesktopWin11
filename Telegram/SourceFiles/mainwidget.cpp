@@ -35,8 +35,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/resize_area.h"
 #include "ui/text/text_utilities.h"
 #include "ui/toast/toast.h"
-#include "ui/ui_utility.h"
 #include "ui/ui_material.h"
+#include "ui/ui_utility.h"
 #include "window/window_connecting_widget.h"
 #include "window/window_top_bar_wrap.h"
 #include "window/notifications_manager.h"
@@ -2605,15 +2605,17 @@ void MainWidget::paintEvent(QPaintEvent *e) {
 				&& isOneColumn()
 				&& !_history->peer()
 				&& !_mainSection;
-			Ui::Material::PaintAnimationBackground(p, rect(),
-				navigation
-					? Ui::Material::Surface::Navigation
-					: Ui::Material::Surface::Conversation,
+			Ui::Material::PaintAnimationBackground(
+				p,
+				rect(),
+				navigation ? Ui::Material::Surface::Navigation : Ui::Material::Surface::Conversation,
 				navigation ? st::dialogsBg : st::windowBg);
 			if (_dialogs && !isOneColumn()) {
-				Ui::Material::PaintAnimationBackground(p,
+				Ui::Material::PaintAnimationBackground(
+					p,
 					_dialogs->geometry(),
-					Ui::Material::Surface::Navigation, st::dialogsBg);
+					Ui::Material::Surface::Navigation,
+					st::dialogsBg);
 			}
 			const auto paintSection = [&](auto section) {
 				p.save();
