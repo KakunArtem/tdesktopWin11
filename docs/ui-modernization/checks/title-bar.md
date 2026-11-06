@@ -130,10 +130,9 @@ These were not observed:
 
 ## Publication
 
-The toolkit hook is committed locally on `lib_ui`'s `soft-panels` branch;
-the shadow fix is committed after it, and the native caption change is still
-uncommitted in that checkout. Publishing needs
-explicit approval under the
-[toolkit rules](../toolkit-fork.md#branch-and-publication-rules). The app
-changes and gitlink update remain uncommitted until that fork commit is
-published and its remote reachability is verified.
+The toolkit hook, the shadow fix and the native caption change are committed
+locally on `lib_ui`'s `soft-panels` branch, and the app's gitlink points at
+them. Publishing needs explicit approval under the
+[toolkit rules](../toolkit-fork.md#branch-and-publication-rules). Until the fork
+commits are pushed and their remote reachability is verified, the app commits
+must not be pushed, because a fresh clone could not fetch that gitlink.
