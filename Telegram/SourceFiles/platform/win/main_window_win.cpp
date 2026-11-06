@@ -24,6 +24,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "core/sandbox.h"
 #include "lang/lang_keys.h"
 #include "storage/localstorage.h"
+#include "ui/chat/chat_theme_readability.h"
+#include "ui/style/style_core_palette.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/ui_utility.h"
 #include "ui/ui_material.h"
@@ -59,6 +61,10 @@ namespace ViewManagement = ABI::Windows::UI::ViewManagement;
 
 namespace Platform {
 namespace {
+
+[[nodiscard]] bool BackdropDark() {
+	return Ui::IsDarkPalette(*style::main_palette::get());
+}
 
 [[nodiscard]] style::WindowTitle MakeSoftPanelsTitleStyle(bool material) {
 	auto result = st::defaultWindowTitle;
@@ -453,7 +459,7 @@ void MainWindow::setupNativeWindowFrame() {
 		validateWindowTheme(native, night);
 		if (Window::Material::Capable()
 			&& !native
-			&& !Platform::Material::ApplyBackdrop(_hWnd, night)) {
+			&& !Platform::Material::ApplyBackdrop(_hWnd, BackdropDark())) {
 			Window::Material::ReportBackdropFailure();
 		}
 	}, lifetime());
@@ -732,11 +738,20 @@ void MainWindow::initHook() {
 				isActiveWindow() ? st::titleBgActive : st::titleBg);
 		});
 		Ui::Material::RepaintOnFillsChanged(titleWidget());
-		if (!Platform::Material::ApplyBackdrop(
-				_hWnd,
-				Window::Theme::IsNightMode())) {
+		if (!Platform::Material::ApplyBackdrop(_hWnd, BackdropDark())) {
 			Window::Material::ReportBackdropFailure();
 		}
+		Ui::Material::FillsChanged(
+		) | rpl::map(
+			BackdropDark
+		) | rpl::distinct_until_changed(
+		) | rpl::on_next([=](bool dark) {
+			if (Window::Material::Capable()
+				&& !Core::App().settings().nativeWindowFrame()
+				&& !Platform::Material::ApplyBackdrop(_hWnd, dark)) {
+				Window::Material::ReportBackdropFailure();
+			}
+		}, lifetime());
 		Ui::GL::LogWindowRhi("material", this);
 	}
 }

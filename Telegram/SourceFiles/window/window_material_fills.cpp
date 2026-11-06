@@ -26,14 +26,20 @@ namespace {
 
 float64 Floor(Surface surface, bool dark) {
 	switch (surface) {
-	case Surface::Window: return dark ? 0.74 : 0.72;
-	case Surface::Navigation: return dark ? 0.82 : 0.78;
-	case Surface::Conversation: return dark ? 0.81 : 0.79;
+	case Surface::Window: return dark ? 0.50 : 0.45;
+	case Surface::Navigation: return dark ? 0.60 : 0.52;
+	case Surface::Conversation: return dark ? 0.60 : 0.52;
 	case Surface::Bar: return 0.90;
 	case Surface::Composer: return 0.96;
 	case Surface::Popup: return 0.97;
 	}
 	Unexpected("Invalid material surface.");
+}
+
+BackdropRange AcrylicRange(bool dark) {
+	return dark
+		? BackdropRange{ QColor(54, 54, 54), QColor(169, 169, 169) }
+		: BackdropRange{ QColor(132, 132, 132), QColor(255, 255, 255) };
 }
 
 QColor Composite(const QColor &over, const QColor &under) {
@@ -60,11 +66,12 @@ QColor ComputeFill(Surface surface, const FillInputs &inputs) {
 			&& ContrastOver(inputs.secondaryText, background)
 				>= std::min(4.5, secondary);
 	};
+	const auto range = AcrylicRange(inputs.dark);
 	const auto first = int(std::lround(Floor(surface, inputs.dark) * 100));
 	for (auto step = first; step <= 100; ++step) {
 		fill.setAlphaF(step / 100.);
-		if (acceptable(Composite(fill, QColor(0, 0, 0)))
-			&& acceptable(Composite(fill, QColor(255, 255, 255)))) {
+		if (acceptable(Composite(fill, range.darkest))
+			&& acceptable(Composite(fill, range.brightest))) {
 			return fill;
 		}
 	}
@@ -86,9 +93,10 @@ QColor ReadableOver(
 		float64 target) {
 	auto fill = surface;
 	fill.setAlphaF(Floor(role, dark));
+	const auto range = AcrylicRange(dark);
 	return Ui::EnsureTextContrast(text, {
-		Composite(fill, QColor(0, 0, 0)),
-		Composite(fill, QColor(255, 255, 255)),
+		Composite(fill, range.darkest),
+		Composite(fill, range.brightest),
 	}, target);
 }
 

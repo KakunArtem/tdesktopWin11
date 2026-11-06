@@ -132,6 +132,7 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 			? 100
 			: int(std::lround(Floor(role, dark) * 100));
 	}
+	const auto range = AcrylicRange(dark);
 	auto blocked = base::flat_set<const style::color*>();
 	auto colors = Colors();
 	auto fills = Fills();
@@ -150,8 +151,8 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 			for (const auto role : rule.roles) {
 				auto fill = Inputs(role, dark).surface;
 				fill.setAlphaF(coverage[role] / 100.);
-				backgrounds.push_back(Composite(fill, QColor(0, 0, 0)));
-				backgrounds.push_back(Composite(fill, QColor(255, 255, 255)));
+				backgrounds.push_back(Composite(fill, range.darkest));
+				backgrounds.push_back(Composite(fill, range.brightest));
 			}
 			const auto adjusted = Ui::EnsureTextContrast(
 				original, backgrounds, rule.target);

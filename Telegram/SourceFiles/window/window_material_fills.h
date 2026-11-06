@@ -28,7 +28,13 @@ struct Adjustment {
 	QColor adjusted;
 };
 
+struct BackdropRange {
+	QColor darkest;
+	QColor brightest;
+};
+
 [[nodiscard]] float64 Floor(Surface surface, bool dark);
+[[nodiscard]] BackdropRange AcrylicRange(bool dark);
 [[nodiscard]] QColor Composite(const QColor &over, const QColor &under);
 [[nodiscard]] QColor ComputeFill(Surface surface, const FillInputs &inputs);
 [[nodiscard]] QColor BorderColor(const QColor &text);

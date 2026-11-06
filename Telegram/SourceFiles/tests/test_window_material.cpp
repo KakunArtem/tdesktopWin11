@@ -215,10 +215,10 @@ void TestMaterialFills() {
 		.text = QColor(0x13, 0x23, 0x35),
 		.secondaryText = QColor(0x3a, 0x4b, 0x5f),
 	};
-	Check(Near(ComputeFill(Surface::Navigation, light).alphaF(), 0.78),
-		"mockup light navigation fill is 0.78");
-	Check(Near(ComputeFill(Surface::Window, light).alphaF(), 0.78),
-		"window floor is raised until text is readable");
+	Check(Near(ComputeFill(Surface::Navigation, light).alphaF(), 0.52),
+		"mockup light navigation keeps its floor");
+	Check(Near(ComputeFill(Surface::Window, light).alphaF(), 0.50),
+		"light window floor is raised until text is readable");
 	const auto dark = FillInputs{
 		.surface = QColor(0x1b, 0x28, 0x38),
 		.text = QColor(0xf2, 0xf6, 0xfb),
@@ -226,8 +226,19 @@ void TestMaterialFills() {
 		.dark = true,
 	};
 	const auto fill = ComputeFill(Surface::Navigation, dark);
-	Check(Near(fill.alphaF(), 0.82), "dark navigation keeps its floor");
+	Check(Near(fill.alphaF(), 0.63),
+		"dark navigation floor is raised until text is readable");
 	Check(fill.rgb() == dark.surface.rgb(), "fill keeps surface color");
+	for (const auto &inputs : { light, dark }) {
+		const auto range = AcrylicRange(inputs.dark);
+		const auto result = ComputeFill(Surface::Navigation, inputs);
+		for (const auto &under : { range.darkest, range.brightest }) {
+			const auto background = Composite(result, under);
+			Check(Ui::CountContrast(inputs.text, background) >= 4.5
+				&& Ui::CountContrast(inputs.secondaryText, background) >= 4.5,
+				"both text colors read over the measured Acrylic range");
+		}
+	}
 	const auto weak = FillInputs{
 		.surface = QColor(255, 255, 255),
 		.text = QColor(0, 0, 0),
@@ -254,8 +265,8 @@ void TestMaterialFills() {
 		Surface::Bar, Surface::Composer, Surface::Popup,
 	};
 	const auto floors = std::array{
-		std::pair(0.72, 0.74), std::pair(0.78, 0.82),
-		std::pair(0.79, 0.81), std::pair(0.90, 0.90),
+		std::pair(0.45, 0.50), std::pair(0.52, 0.60),
+		std::pair(0.52, 0.60), std::pair(0.90, 0.90),
 		std::pair(0.96, 0.96), std::pair(0.97, 0.97),
 	};
 	for (auto i = 0; i != int(roles.size()); ++i) {
@@ -275,8 +286,9 @@ void TestReadableOver() {
 	const auto readable = ReadableOver(grey, surface, Surface::Navigation, false);
 	auto fill = surface;
 	fill.setAlphaF(Floor(Surface::Navigation, false));
-	Check(Ui::CountContrast(readable, Composite(fill, QColor(0, 0, 0))) >= 4.5
-		&& Ui::CountContrast(readable, Composite(fill, QColor(255, 255, 255))) >= 4.5,
+	const auto range = AcrylicRange(false);
+	Check(Ui::CountContrast(readable, Composite(fill, range.darkest)) >= 4.5
+		&& Ui::CountContrast(readable, Composite(fill, range.brightest)) >= 4.5,
 		"adjusted text reads over both navigation backdrops");
 	Check(readable.lightness() < grey.lightness(), "light theme text darkens");
 	const auto strong = QColor(0x13, 0x23, 0x35);
