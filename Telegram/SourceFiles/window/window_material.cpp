@@ -64,6 +64,12 @@ struct AdjustmentRule {
 			{ Surface::Navigation, Surface::Conversation } },
 		{ &st::historyComposeAreaFgService,
 			{ Surface::Navigation, Surface::Conversation } },
+		{ &st::titleButtonFg, { Surface::Window }, 3. },
+		{ &st::titleButtonFgActive, { Surface::Window }, 3. },
+		{ &st::titleButtonCloseFg, { Surface::Window }, 3. },
+		{ &st::titleButtonCloseFgActive, { Surface::Window }, 3. },
+		{ &st::titleFg, { Surface::Window } },
+		{ &st::titleFgActive, { Surface::Window } },
 	};
 	return result;
 }

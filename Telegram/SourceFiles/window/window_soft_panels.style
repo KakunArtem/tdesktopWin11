@@ -5,8 +5,19 @@ the official desktop application for the Telegram messaging service.
 For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
+using "ui/widgets/widgets.style";
+
 softPanelsFrame: margins(0px, 0px, 6px, 6px);
 softPanelsGap: 4px;
 softPanelsRadius: 14px;
 softPanelsNavigationRadius: 12px;
 softPanelsBorderWidth: 1px;
+
+materialTitleMinimize: icon {{ "title_button_minimize", titleButtonFg }};
+materialTitleMinimizeActive: icon {{ "title_button_minimize", titleButtonFgActive }};
+materialTitleMaximize: icon {{ "title_button_maximize", titleButtonFg }};
+materialTitleMaximizeActive: icon {{ "title_button_maximize", titleButtonFgActive }};
+materialTitleRestore: icon {{ "title_button_restore", titleButtonFg }};
+materialTitleRestoreActive: icon {{ "title_button_restore", titleButtonFgActive }};
+materialTitleClose: icon {{ "title_button_close", titleButtonCloseFg }};
+materialTitleCloseActive: icon {{ "title_button_close", titleButtonCloseFgActive }};

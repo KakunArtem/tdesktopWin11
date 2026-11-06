@@ -26,10 +26,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/localstorage.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
 #include "ui/gl/gl_surface.h"
 #include "window/themes/window_theme.h"
 #include "window/window_controller.h"
 #include "window/window_material.h"
+#include "styles/style_window_soft_panels.h"
 #include "history/history.h"
 
 #include <QtWidgets/QStyleFactory>
@@ -57,6 +59,22 @@ namespace ViewManagement = ABI::Windows::UI::ViewManagement;
 
 namespace Platform {
 namespace {
+
+[[nodiscard]] style::WindowTitle MakeSoftPanelsTitleStyle(bool material) {
+	auto result = st::defaultWindowTitle;
+	result.shadow = false;
+	if (material) {
+		result.minimize.icon = st::materialTitleMinimize;
+		result.minimizeIconActive = st::materialTitleMinimizeActive;
+		result.maximize.icon = st::materialTitleMaximize;
+		result.maximizeIconActive = st::materialTitleMaximizeActive;
+		result.restoreIcon = st::materialTitleRestore;
+		result.restoreIconActive = st::materialTitleRestoreActive;
+		result.close.icon = st::materialTitleClose;
+		result.closeIconActive = st::materialTitleCloseActive;
+	}
+	return result;
+}
 
 // Mouse down on tray icon deactivates the application.
 // So there is no way to know for sure if the tray icon was clicked from
@@ -695,8 +713,25 @@ void MainWindow::initHook() {
 	validateWindowTheme(
 		Core::App().settings().nativeWindowFrame(),
 		Window::Theme::IsNightMode());
+	static const auto softPanelsTitle = MakeSoftPanelsTitleStyle(false);
+	static const auto materialTitle = MakeSoftPanelsTitleStyle(true);
+	rpl::combine(
+		Ui::Material::ActiveValue(),
+		Ui::Material::SoftPanelsValue()
+	) | rpl::on_next([=](bool material, bool softPanels) {
+		setTitleStyle(material
+			? materialTitle
+			: softPanels
+			? softPanelsTitle
+			: st::defaultWindowTitle);
+	}, lifetime());
 	if (Window::Material::Capable()
 		&& !Core::App().settings().nativeWindowFrame()) {
+		setTitleBackgroundPainter([=](QPainter &p, const QRect &rect) {
+			Ui::Material::PaintSurface(p, rect, Ui::Material::Surface::Window,
+				isActiveWindow() ? st::titleBgActive : st::titleBg);
+		});
+		Ui::Material::RepaintOnFillsChanged(titleWidget());
 		if (!Platform::Material::ApplyBackdrop(
 				_hWnd,
 				Window::Theme::IsNightMode())) {

@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text.h"
 #include "ui/painter.h"
 #include "ui/rp_widget.h"
+#include "ui/ui_material.h"
 
 #include "styles/style_window.h"
 
@@ -66,6 +67,8 @@ not_null<RpWidget*> CreateTitleSubWidget(
 		result->update();
 	}, result->lifetime());
 
+	Material::RepaintOnFillsChanged(result);
+
 	result->paintRequest(
 	) | rpl::on_next([=](QRect clip) {
 		auto p = Painter(result);
@@ -94,11 +97,18 @@ not_null<RpWidget*> CreateTitleSubWidget(
 				icon.fill(p, area, st::titleBg->c);
 			}
 		};
-		fill(leftArea, left);
-		fill(rightArea, right);
+		if (Material::Active()) {
+			Material::PaintSurface(p, clip, Material::Surface::Window,
+				active ? st::titleBgActive : st::titleBg);
+		} else {
+			fill(leftArea, left);
+			fill(rightArea, right);
+		}
 		const auto middle = middleArea.intersected(clip);
 		if (!middle.isEmpty()) {
-			p.fillRect(middle, active ? st::titleBgActive : st::titleBg);
+			if (!Material::Active()) {
+				p.fillRect(middle, active ? st::titleBgActive : st::titleBg);
+			}
 			p.setPen(active ? st::titleFgActive : st::titleFg);
 			const auto top = (height - state->st.font->height) / 2;
 			state->text.draw(p, left.width(), top, width);
