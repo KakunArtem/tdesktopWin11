@@ -648,6 +648,25 @@ void TestControlFill() {
 	Check(!Ui::SoftControls(), "soft controls are off by default");
 }
 
+void TestIconHoverStronger() {
+	const auto white = QColor(0xff, 0xff, 0xff);
+	const auto rest = ReadableOver(
+		QColor(0x99, 0x99, 0x99),
+		white,
+		Surface::Navigation,
+		false,
+		3.);
+	const auto over = ReadableOver(
+		QColor(0x8a, 0x8a, 0x8a),
+		white,
+		Surface::Navigation,
+		false,
+		4.5);
+	Check(
+		Ui::CountContrast(over, white) > Ui::CountContrast(rest, white),
+		"a raised hover icon stays stronger than its resting icon");
+}
+
 } // namespace
 
 namespace crl {
@@ -679,6 +698,7 @@ int main(int argc, char *argv[]) {
 	TestContentGrabs();
 	TestAnimationBackgroundDensity();
 	TestControlFill();
+	TestIconHoverStronger();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;
