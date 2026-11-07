@@ -12,6 +12,8 @@ nice_target_sources(td_ui ${src_loc}
 PRIVATE
     ui/ui_material.cpp
     ui/ui_material.h
+    ui/ui_material_bars.cpp
+    ui/ui_material_bars.h
 )
 
 include(lib_ui/cmake/generate_styles.cmake)

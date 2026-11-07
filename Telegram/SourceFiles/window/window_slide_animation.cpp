@@ -6,6 +6,7 @@ For license and copyright information please follow this link:
 https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "window/window_slide_animation.h"
+#include "ui/ui_material.h"
 #include "styles/style_basic.h"
 
 
@@ -170,7 +171,7 @@ void SlideAnimation::setPixmaps(
 }
 
 void SlideAnimation::setTopBarShadow(bool enabled) {
-	_topBarShadowEnabled = enabled;
+	_topBarShadowEnabled = enabled && !Ui::Material::SoftPanels();
 }
 
 void SlideAnimation::setTopSkip(int skip) {

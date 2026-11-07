@@ -18,6 +18,9 @@ extern const char kOptionLayout[];
 
 void Initialize();
 [[nodiscard]] QPixmap GrabContent(not_null<QWidget*> widget, QRect rect);
+[[nodiscard]] int TopBarHeight();
+[[nodiscard]] int TopBarShift();
+[[nodiscard]] int TopBarShadowHeight();
 
 class PanelFrame final : public Ui::RpWidget {
 public:

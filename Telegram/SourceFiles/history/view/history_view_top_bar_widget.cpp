@@ -44,6 +44,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_adaptive.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
+#include "window/window_soft_panels.h"
 #include "calls/calls_instance.h"
 #include "data/stickers/data_custom_emoji.h"
 #include "data/data_peer_values.h"
@@ -98,6 +99,13 @@ QString TopBarNameText(
 		}
 	}
 	return peer->topBarNameText();
+}
+
+[[nodiscard]] int StatusTop() {
+	return Window::SoftPanels::TopBarHeight()
+		- Window::SoftPanels::TopBarShift()
+		- st::topBarArrowPadding.bottom()
+		- st::dialogsTextFont->height;
 }
 
 } // namespace
@@ -520,7 +528,7 @@ bool TopBarWidget::eventFilter(QObject *obj, QEvent *e) {
 }
 
 int TopBarWidget::resizeGetHeight(int newWidth) {
-	return st::topBarHeight;
+	return Window::SoftPanels::TopBarHeight();
 }
 
 void TopBarWidget::paintEvent(QPaintEvent *e) {
@@ -534,16 +542,16 @@ void TopBarWidget::paintEvent(QPaintEvent *e) {
 		_selectedShown.value(showSelectedActions() ? 1. : 0.));
 	const auto searchFieldTop = _searchField
 		? countSelectedButtonsTop(_searchShown.value(_searchMode ? 1. : 0.))
-		: -st::topBarHeight;
+		: -Window::SoftPanels::TopBarHeight();
 	const auto slidingTop = std::max(selectedButtonsTop, searchFieldTop);
 
 	Ui::Material::PaintSurface(
 		p,
-		QRect(0, 0, width(), st::topBarHeight),
+		QRect(0, 0, width(), Window::SoftPanels::TopBarHeight()),
 		Ui::Material::Surface::Conversation,
 		st::topBarBg);
 	if (slidingTop < 0) {
-		p.translate(0, slidingTop + st::topBarHeight);
+		p.translate(0, slidingTop + Window::SoftPanels::TopBarHeight());
 		paintTopBar(p);
 	}
 }
@@ -554,8 +562,9 @@ void TopBarWidget::paintTopBar(Painter &p) {
 	}
 	auto nameleft = _leftTaken;
 	auto statusleft = nameleft;
-	auto nametop = st::topBarArrowPadding.top();
-	auto statustop = st::topBarHeight - st::topBarArrowPadding.bottom() - st::dialogsTextFont->height;
+	auto nametop = st::topBarArrowPadding.top()
+		+ Window::SoftPanels::TopBarShift();
+	auto statustop = StatusTop();
 	auto namewidth = width()
 		- _rightTaken
 		- nameleft
@@ -829,16 +838,16 @@ void TopBarWidget::paintStatus(
 
 QRect TopBarWidget::getMembersShowAreaGeometry() const {
 	int membersTextLeft = _leftTaken;
-	int membersTextTop = st::topBarHeight - st::topBarArrowPadding.bottom() - st::dialogsTextFont->height;
+	int membersTextTop = StatusTop();
 	int membersTextWidth = _titlePeerText.maxWidth();
-	int membersTextHeight = st::topBarHeight - membersTextTop;
+	int membersTextHeight = Window::SoftPanels::TopBarHeight() - membersTextTop;
 
 	return myrtlrect(membersTextLeft, membersTextTop, membersTextWidth, membersTextHeight);
 }
 
 void TopBarWidget::mousePressEvent(QMouseEvent *e) {
 	const auto handleClick = (e->button() == Qt::LeftButton)
-		&& (e->pos().y() < st::topBarHeight)
+		&& (e->pos().y() < Window::SoftPanels::TopBarHeight())
 		&& !showSelectedState()
 		&& !_chooseForReportReason;
 	if (handleClick) {
@@ -998,10 +1007,9 @@ void TopBarWidget::handleEmojiInteractionSeen(const QString &emoticon) {
 					}
 				});
 			} else {
-				const auto skip = st::topBarArrowPadding.bottom();
 				update(
 					_leftTaken,
-					st::topBarHeight - skip - st::dialogsTextFont->height,
+					StatusTop(),
 					seen->animation.width(),
 					st::dialogsTextFont->height);
 			}
@@ -1111,7 +1119,7 @@ void TopBarWidget::resizeEvent(QResizeEvent *e) {
 }
 
 int TopBarWidget::countSelectedButtonsTop(float64 selectedShown) {
-	return (1. - selectedShown) * (-st::topBarHeight);
+	return (1. - selectedShown) * (-Window::SoftPanels::TopBarHeight());
 }
 
 void TopBarWidget::updateSearchVisibility() {
@@ -1152,10 +1160,13 @@ void TopBarWidget::updateControlsGeometry() {
 	}
 	auto searchFieldTop = _searchField
 		? countSelectedButtonsTop(_searchShown.value(_searchMode ? 1. : 0.))
-		: -st::topBarHeight;
+		: -Window::SoftPanels::TopBarHeight();
 	const auto otherButtonsTop = std::max(selectedButtonsTop, searchFieldTop)
-		+ st::topBarHeight;
-	const auto backButtonTop = selectedButtonsTop + st::topBarHeight;
+		+ Window::SoftPanels::TopBarHeight()
+		+ Window::SoftPanels::TopBarShift();
+	const auto backButtonTop = selectedButtonsTop
+		+ Window::SoftPanels::TopBarHeight()
+		+ Window::SoftPanels::TopBarShift();
 	auto buttonsLeft = st::topBarActionSkip
 		+ (_controller->adaptive().isOneColumn() ? 0 : st::lineWidth);
 	auto buttonsWidth = (_forward->isHidden() ? 0 : _forward->contentWidth())

@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/widgets/buttons.h"
 #include "ui/painter.h"
+#include "ui/ui_material_bars.h"
 #include "lang/lang_keys.h"
 #include "base/unixtime.h"
 #include "styles/style_chat.h"
@@ -110,7 +111,7 @@ GroupCallBar::GroupCallBar(
 	rpl::producer<GroupCallBarContent> content,
 	rpl::producer<bool> &&hideBlobs)
 : _wrap(parent, object_ptr<RpWidget>(parent))
-, _inner(_wrap.entity())
+, _inner(Material::CreateBarContent(_wrap.entity()))
 , _shadow(std::make_unique<PlainShadow>(_wrap.parentWidget()))
 , _userpics(std::make_unique<GroupCallUserpics>(
 		st::historyGroupCallUserpics,
@@ -121,9 +122,15 @@ GroupCallBar::GroupCallBar(
 
 	_wrap.entity()->paintRequest(
 	) | rpl::on_next([=](QRect clip) {
-		QPainter(_wrap.entity()).fillRect(clip, st::historyPinnedBg);
+		auto p = QPainter(_wrap.entity());
+		Material::PaintBar(
+			p,
+			_wrap.entity()->rect(),
+			clip,
+			st::historyPinnedBg,
+			_rowSurface);
 	}, lifetime());
-	_wrap.setAttribute(Qt::WA_OpaquePaintEvent);
+	Material::SetOpaquePaint(&_wrap, true);
 
 	auto copy = std::move(
 		content
@@ -212,7 +219,7 @@ void GroupCallBar::refreshScheduledProcess() {
 }
 
 void GroupCallBar::setupInner() {
-	_inner->resize(0, st::historyReplyHeight);
+	_wrap.entity()->resize(0, Material::BarRowHeight(st::historyReplyHeight));
 	_inner->paintRequest(
 	) | rpl::on_next([=](QRect rect) {
 		auto p = Painter(_inner);
@@ -273,7 +280,7 @@ void GroupCallBar::setupRightButton(not_null<RoundButton*> button) {
 }
 
 void GroupCallBar::paint(Painter &p) {
-	p.fillRect(_inner->rect(), st::historyComposeAreaBg);
+	Material::PaintBarContent(p, _inner->rect(), st::historyComposeAreaBg);
 
 	const auto narrow = (_inner->width() < st::columnMinimalWidthLeft / 2);
 	if (!narrow) {
@@ -380,13 +387,18 @@ void GroupCallBar::updateShadowGeometry(QRect wrapGeometry) {
 		wrapGeometry.y() + wrapGeometry.height(),
 		wrapGeometry.width(),
 		st::lineWidth);
-	_shadow->setGeometry(_shadowGeometryPostprocess
+	_shadow->setGeometry(Material::BarShadowGeometry(_shadowGeometryPostprocess
 		? _shadowGeometryPostprocess(regular)
-		: regular);
+		: regular));
+}
+
+void GroupCallBar::setRowSurface(Material::Surface surface) {
+	_rowSurface = surface;
+	_wrap.entity()->update();
 }
 
 void GroupCallBar::updateUserpics() {
-	const auto widget = _wrap.entity();
+	const auto widget = _inner.get();
 	const auto middle = widget->width() / 2;
 	const auto width = _userpics->maxWidth();
 	widget->update(
@@ -431,14 +443,13 @@ void GroupCallBar::move(int x, int y) {
 
 void GroupCallBar::resizeToWidth(int width) {
 	_wrap.entity()->resizeToWidth(width);
-	_inner->resizeToWidth(width);
 }
 
 int GroupCallBar::height() const {
 	return !_forceHidden
 		? _wrap.height()
 		: _shouldBeShown
-		? st::historyReplyHeight
+		? Material::BarRowHeight(st::historyReplyHeight)
 		: 0;
 }
 

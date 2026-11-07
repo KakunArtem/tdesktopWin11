@@ -42,6 +42,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_session_controller.h"
+#include "window/window_soft_panels.h"
 
 #include "styles/style_boxes.h"
 #include "styles/style_chat.h"
@@ -846,7 +847,9 @@ void WelcomeMessagesWidget::updateControlsGeometry() {
 		? std::nullopt
 		: base::make_optional(_scroll->scrollTop() + takeTopDelta());
 	_topBar->resizeToWidth(contentWidth);
-	_topBarShadow->resize(contentWidth, st::lineWidth);
+	_topBarShadow->resize(
+		contentWidth,
+		Window::SoftPanels::TopBarShadowHeight());
 
 	const auto bottom = height();
 	const auto controlsHeight = _composeControls->heightCurrent();

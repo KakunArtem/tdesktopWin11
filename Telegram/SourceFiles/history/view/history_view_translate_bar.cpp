@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/painter.h"
+#include "ui/ui_material_bars.h"
 #include "window/window_session_controller.h"
 #include "styles/style_chat.h"
 #include "styles/style_menu_icons.h"
@@ -269,9 +270,10 @@ void TranslateBar::updateShadowGeometry(QRect wrapGeometry) {
 		wrapGeometry.y() + wrapGeometry.height(),
 		wrapGeometry.width(),
 		st::lineWidth);
-	_shadow->setGeometry(_shadowGeometryPostprocess
-		? _shadowGeometryPostprocess(regular)
-		: regular);
+	_shadow->setGeometry(Ui::Material::BarShadowGeometry(
+		_shadowGeometryPostprocess
+			? _shadowGeometryPostprocess(regular)
+			: regular));
 }
 
 void TranslateBar::setup(not_null<History*> history) {
@@ -287,12 +289,20 @@ void TranslateBar::setup(not_null<History*> history) {
 		}
 	};
 	const auto button = static_cast<Ui::AbstractButton*>(_wrap.entity());
-	button->resize(0, st::historyTranslateBarHeight);
-	button->setAttribute(Qt::WA_OpaquePaintEvent);
+	button->resize(
+		0,
+		Ui::Material::BarRowHeight(st::historyTranslateBarHeight));
+	Ui::Material::SetOpaquePaint(button, true);
+	Ui::Material::RepaintOnFillsChanged(button);
 
 	button->paintRequest(
 	) | rpl::on_next([=](QRect clip) {
-		QPainter(button).fillRect(clip, st::historyComposeButtonBg);
+		auto p = QPainter(button);
+		Ui::Material::PaintBar(
+			p,
+			button->rect(),
+			clip,
+			st::historyComposeButtonBg);
 	}, button->lifetime());
 
 	button->setClickedCallback([=] {
@@ -316,27 +326,32 @@ void TranslateBar::setup(not_null<History*> history) {
 	settings->setClickedCallback([=] { showMenu(createMenu(settings)); });
 
 	const auto updateLabelGeometry = [=] {
-		const auto full = _wrap.width() - icon->width();
+		const auto pill = Ui::Material::BarPillRect(_wrap.rect());
+		const auto right = Ui::Material::BarMargins().right();
+		const auto full = pill.width() - icon->width();
 		const auto skip = st::semiboldFont->spacew * 2;
 		const auto natural = label->textMaxWidth();
 		const auto top = [&] {
-			return (_wrap.height() - label->height()) / 2;
+			return (pill.height() - label->height()) / 2;
 		};
 		if (natural <= full - 2 * (settings->width() + skip)) {
 			label->resizeToWidth(natural);
-			label->moveToRight((full - label->width()) / 2, top());
+			label->moveToRight(right + (full - label->width()) / 2, top());
 		} else {
 			const auto available = full - settings->width() - 2 * skip;
 			label->resizeToWidth(std::min(natural, available));
-			label->moveToRight(settings->width() + skip, top());
+			label->moveToRight(right + settings->width() + skip, top());
 		}
 		icon->move(
 			label->x() - icon->width(),
-			(_wrap.height() - icon->height()) / 2);
+			(pill.height() - icon->height()) / 2);
 	};
 
 	_wrap.sizeValue() | rpl::on_next([=](QSize size) {
-		settings->moveToRight(0, 0, size.width());
+		settings->moveToRight(
+			Ui::Material::BarMargins().right(),
+			0,
+			size.width());
 		updateLabelGeometry();
 	}, lifetime());
 
@@ -658,7 +673,7 @@ int TranslateBar::height() const {
 	return !_forceHidden
 		? _wrap.height()
 		: _shouldBeShown
-		? st::historyTranslateBarHeight
+		? Ui::Material::BarRowHeight(st::historyTranslateBarHeight)
 		: 0;
 }
 

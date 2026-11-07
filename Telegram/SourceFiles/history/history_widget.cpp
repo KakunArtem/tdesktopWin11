@@ -199,6 +199,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_material.h"
 #include "window/window_session_controller.h"
 #include "window/window_slide_animation.h"
+#include "window/window_soft_panels.h"
 #include "window/window_peer_menu.h"
 #include "inline_bots/inline_results_widget.h"
 #include "inline_bots/bot_attach_web_view.h"
@@ -8371,7 +8372,7 @@ void HistoryWidget::updateControlsGeometry() {
 		topShadowLeft,
 		_topBar->bottomNoMargins(),
 		width - topShadowLeft - topShadowRight,
-		st::lineWidth);
+		Window::SoftPanels::TopBarShadowHeight());
 }
 
 void HistoryWidget::itemRemoved(not_null<const HistoryItem*> item) {

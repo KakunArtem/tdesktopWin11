@@ -38,6 +38,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "boxes/premium_limits_box.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
+#include "window/window_soft_panels.h"
 #include "base/call_delayed.h"
 #include "base/qt/qt_key_modifiers.h"
 #include "core/mime_type.h"
@@ -1184,7 +1185,9 @@ void ScheduledWidget::updateControlsGeometry() {
 		? std::nullopt
 		: base::make_optional(_scroll->scrollTop() + takeTopDelta());
 	_topBar->resizeToWidth(contentWidth);
-	_topBarShadow->resize(contentWidth, st::lineWidth);
+	_topBarShadow->resize(
+		contentWidth,
+		Window::SoftPanels::TopBarShadowHeight());
 
 	const auto bottom = height();
 	const auto controlsHeight = _composeControls->heightCurrent();

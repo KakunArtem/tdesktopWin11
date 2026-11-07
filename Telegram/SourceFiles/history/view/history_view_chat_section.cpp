@@ -80,6 +80,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
+#include "window/window_soft_panels.h"
 #include "base/call_delayed.h"
 #include "base/qt/qt_key_modifiers.h"
 #include "core/application.h"
@@ -4302,7 +4303,9 @@ void ChatWidget::restoreState(not_null<ChatMemento*> memento) {
 			if (!view) {
 				return false;
 			}
-			const auto top = std::max(view->y() - st::topBarHeight, 0);
+			const auto top = std::max(
+				view->y() - Window::SoftPanels::TopBarHeight(),
+				0);
 			listScrollTo(top);
 			return true;
 		});
@@ -4381,7 +4384,9 @@ void ChatWidget::updateControlsGeometry() {
 		? base::make_optional(takeTopDelta() + _scrollTopDelta)
 		: 0;
 	_topBar->resizeToWidth(contentWidth);
-	_topBarShadow->resize(contentWidth, st::lineWidth);
+	_topBarShadow->resize(
+		contentWidth,
+		Window::SoftPanels::TopBarShadowHeight());
 	const auto tabsLeftSkip = _subsectionTabs
 		? _subsectionTabs->leftSkip()
 		: 0;

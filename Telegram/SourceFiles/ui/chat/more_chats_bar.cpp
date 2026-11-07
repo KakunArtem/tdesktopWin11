@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/text/text_options.h"
 #include "ui/painter.h"
+#include "ui/ui_material_bars.h"
 #include "lang/lang_keys.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/style_window.h" // st::columnMinimalWidthLeft
@@ -21,7 +22,7 @@ MoreChatsBar::MoreChatsBar(
 	not_null<QWidget*> parent,
 	rpl::producer<MoreChatsBarContent> content)
 : _wrap(parent, object_ptr<RpWidget>(parent))
-, _inner(_wrap.entity())
+, _inner(Material::CreateBarContent(_wrap.entity()))
 , _shadow(std::make_unique<PlainShadow>(_wrap.parentWidget()))
 , _close(_inner.get(), st::moreChatsBarClose) {
 	_wrap.hide(anim::type::instant);
@@ -29,9 +30,15 @@ MoreChatsBar::MoreChatsBar(
 
 	_wrap.entity()->paintRequest(
 	) | rpl::on_next([=](QRect clip) {
-		QPainter(_wrap.entity()).fillRect(clip, st::historyPinnedBg);
+		auto p = QPainter(_wrap.entity());
+		Material::PaintBar(
+			p,
+			_wrap.entity()->rect(),
+			clip,
+			st::historyPinnedBg,
+			_rowSurface);
 	}, lifetime());
-	_wrap.setAttribute(Qt::WA_OpaquePaintEvent);
+	Material::SetOpaquePaint(&_wrap, true);
 
 	auto copy = std::move(
 		content
@@ -80,7 +87,7 @@ MoreChatsBar::MoreChatsBar(
 MoreChatsBar::~MoreChatsBar() = default;
 
 void MoreChatsBar::setupInner() {
-	_inner->resize(0, st::moreChatsBarHeight);
+	_wrap.entity()->resize(0, Material::BarRowHeight(st::moreChatsBarHeight));
 	_inner->paintRequest(
 	) | rpl::on_next([=](QRect rect) {
 		auto p = Painter(_inner);
@@ -111,7 +118,7 @@ void MoreChatsBar::setupInner() {
 }
 
 void MoreChatsBar::paint(Painter &p) {
-	p.fillRect(_inner->rect(), st::historyComposeAreaBg);
+	Material::PaintBarContent(p, _inner->rect(), st::historyComposeAreaBg);
 
 	const auto width = std::max(
 		_inner->width(),
@@ -141,7 +148,7 @@ void MoreChatsBar::updateControlsGeometry(QRect wrapGeometry) {
 		_shadow->setVisible(!hidden);
 	}
 	const auto width = std::max(
-		wrapGeometry.width(),
+		Material::BarContentWidth(wrapGeometry.width()),
 		st::columnMinimalWidthLeft);
 	_close->move(width - _close->width(), 0);
 }
@@ -157,9 +164,14 @@ void MoreChatsBar::updateShadowGeometry(QRect wrapGeometry) {
 		wrapGeometry.y() + wrapGeometry.height(),
 		wrapGeometry.width(),
 		st::lineWidth);
-	_shadow->setGeometry(_shadowGeometryPostprocess
+	_shadow->setGeometry(Material::BarShadowGeometry(_shadowGeometryPostprocess
 		? _shadowGeometryPostprocess(regular)
-		: regular);
+		: regular));
+}
+
+void MoreChatsBar::setRowSurface(Material::Surface surface) {
+	_rowSurface = surface;
+	_wrap.entity()->update();
 }
 
 void MoreChatsBar::show() {
@@ -197,14 +209,13 @@ void MoreChatsBar::move(int x, int y) {
 
 void MoreChatsBar::resizeToWidth(int width) {
 	_wrap.entity()->resizeToWidth(width);
-	_inner->resizeToWidth(width);
 }
 
 int MoreChatsBar::height() const {
 	return !_forceHidden
 		? _wrap.height()
 		: _shouldBeShown
-		? st::moreChatsBarHeight
+		? Material::BarRowHeight(st::moreChatsBarHeight)
 		: 0;
 }
 

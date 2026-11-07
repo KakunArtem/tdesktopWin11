@@ -25,6 +25,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/image/image_prepare.h"
 #include "ui/power_saving.h"
 #include "ui/rect.h"
+#include "ui/ui_material_bars.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/shadow.h"
 #include "window/section_widget.h"
@@ -165,9 +166,20 @@ void FillSponsoredMessageBar(
 		st::defaultRippleAnimationBgOver);
 	widget->show();
 	container->sizeValue() | rpl::on_next([=](const QSize &s) {
-		widget->resize(s);
+		widget->setGeometry(Material::BarPillRect(QRect(QPoint(), s)));
 	}, widget->lifetime());
 	widget->setAcceptBoth();
+	if (Material::SoftPanels()) {
+		Material::RepaintOnFillsChanged(container);
+		container->paintRequest() | rpl::on_next([=](QRect clip) {
+			auto p = QPainter(container);
+			Material::PaintBar(
+				p,
+				container->rect(),
+				clip,
+				st::historyPinnedBg);
+		}, container->lifetime());
+	}
 
 	widget->addClickHandler([=](Qt::MouseButton button) {
 		if (button == Qt::RightButton) {
@@ -253,7 +265,9 @@ void FillSponsoredMessageBar(
 	if (rightHide) {
 		container->sizeValue(
 		) | rpl::on_next([=](const QSize &s) {
-			rightHide->moveToRight(st::buttonRadius, st::lineWidth);
+			rightHide->moveToRight(
+				st::buttonRadius + Material::BarMargins().right(),
+				st::lineWidth);
 		}, rightHide->lifetime());
 		rightHide->setClickedCallback(
 			hostedClick(HideSponsoredClickHandler()));
@@ -275,7 +289,7 @@ void FillSponsoredMessageBar(
 
 	const auto draw = [=](QPainter &p) {
 		const auto r = widget->rect();
-		p.fillRect(r, st::historyPinnedBg);
+		Material::PaintBarContent(p, r, st::historyPinnedBg);
 		widget->paintRipple(p, 0, 0);
 		const auto leftPadding = st::msgReplyBarSkip + st::msgReplyBarSkip;
 		const auto rightPadding = st::msgReplyBarSkip;
@@ -397,11 +411,11 @@ void FillSponsoredMessageBar(
 			? (rightPhotoPlaceholder + bottomPadding * 2)
 			: desiredHeight;
 		container->resize(
-			widget->width(),
-			std::clamp(
+			container->width(),
+			Material::BarRowHeight(std::clamp(
 				desiredHeight,
 				minHeight,
-				st::sponsoredMessageBarMaxHeight));
+				st::sponsoredMessageBarMaxHeight)));
 	}, widget->lifetime());
 	{ // Calculate a good size for container.
 		auto dummy = QImage(1, 1, QImage::Format_ARGB32);
@@ -409,7 +423,7 @@ void FillSponsoredMessageBar(
 		draw(p);
 	}
 
-	{
+	if (!Material::SoftPanels()) {
 		const auto top = Ui::CreateChild<PlainShadow>(widget);
 		const auto bottom = Ui::CreateChild<PlainShadow>(widget);
 		widget->sizeValue() | rpl::on_next([=] (const QSize &s) {

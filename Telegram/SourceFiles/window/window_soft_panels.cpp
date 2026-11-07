@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QPainter>
 #include <QtGui/QPixmap>
 
+#include "styles/style_info.h"
 #include "styles/style_window_soft_panels.h"
 
 namespace Window::SoftPanels {
@@ -45,6 +46,20 @@ QPixmap GrabContent(not_null<QWidget*> widget, QRect rect) {
 		--ContentGrabDepth;
 	});
 	return Ui::Material::Grab(widget, rect);
+}
+
+int TopBarHeight() {
+	return Ui::Material::SoftPanels()
+		? st::softPanelsTopBarHeight
+		: st::topBarHeight;
+}
+
+int TopBarShift() {
+	return (TopBarHeight() - st::topBarHeight) / 2;
+}
+
+int TopBarShadowHeight() {
+	return Ui::Material::SoftPanels() ? 0 : st::lineWidth;
 }
 
 PanelFrame::PanelFrame(not_null<QWidget*> parent, Corners corners)

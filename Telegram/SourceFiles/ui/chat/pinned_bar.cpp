@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/widgets/buttons.h"
 #include "ui/wrap/fade_wrap.h"
+#include "ui/ui_material_bars.h"
 #include "styles/style_chat_helpers.h"
 #include "styles/palette.h"
 
@@ -24,6 +25,7 @@ PinnedBar::PinnedBar(
 	Fn<bool()> customEmojiPaused,
 	rpl::producer<> customEmojiPausedChanges)
 : _wrap(parent, object_ptr<RpWidget>(parent))
+, _content(Material::CreateBarContent(_wrap.entity()))
 , _shadow(std::make_unique<PlainShadow>(_wrap.parentWidget()))
 , _customEmojiPaused(std::move(customEmojiPaused)) {
 	_wrap.hide(anim::type::instant);
@@ -39,9 +41,20 @@ PinnedBar::PinnedBar(
 
 	_wrap.entity()->paintRequest(
 	) | rpl::on_next([=](QRect clip) {
-		QPainter(_wrap.entity()).fillRect(clip, st::historyPinnedBg);
+		auto p = QPainter(_wrap.entity());
+		Material::PaintBar(
+			p,
+			_wrap.entity()->rect(),
+			clip,
+			st::historyPinnedBg);
 	}, lifetime());
-	_wrap.setAttribute(Qt::WA_OpaquePaintEvent);
+	Material::SetOpaquePaint(&_wrap, true);
+
+	_content->widthValue() | rpl::on_next([=] {
+		if (_right.button) {
+			_right.button->moveToRight(0, 0);
+		}
+	}, _content->lifetime());
 
 	if (customEmojiPausedChanges) {
 		std::move(
@@ -112,9 +125,9 @@ void PinnedBar::setRightButton(object_ptr<Ui::RpWidget> button) {
 		previous->hide(anim::type::normal);
 		_right.previousButtonLifetime.make_state<Unique>(Unique{ previous });
 	}
-	_right.button.create(_wrap.entity(), std::move(button));
+	_right.button.create(_content.get(), std::move(button));
 	if (_right.button) {
-		_right.button->setParent(_wrap.entity());
+		_right.button->setParent(_content.get());
 		if (hasPrevious) {
 			_right.button->setDuration(st::defaultMessageBar.duration);
 			_right.button->show(anim::type::normal);
@@ -133,7 +146,8 @@ void PinnedBar::setRightButton(object_ptr<Ui::RpWidget> button) {
 }
 
 void PinnedBar::updateControlsGeometry(QRect wrapGeometry) {
-	_bar->widget()->resizeToWidth(wrapGeometry.width());
+	_bar->widget()->resizeToWidth(
+		Material::BarContentWidth(wrapGeometry.width()));
 	if (_right.button) {
 		_right.button->moveToRight(0, 0);
 	}
@@ -150,16 +164,16 @@ void PinnedBar::updateShadowGeometry(QRect wrapGeometry) {
 		wrapGeometry.y() + wrapGeometry.height(),
 		wrapGeometry.width(),
 		st::lineWidth);
-	_shadow->setGeometry(_shadowGeometryPostprocess
+	_shadow->setGeometry(Material::BarShadowGeometry(_shadowGeometryPostprocess
 		? _shadowGeometryPostprocess(regular)
-		: regular);
+		: regular));
 }
 
 void PinnedBar::createControls() {
 	Expects(!_bar);
 
 	_bar = std::make_unique<MessageBar>(
-		_wrap.entity(),
+		_content.get(),
 		st::defaultMessageBar,
 		_customEmojiPaused);
 	if (_right.button) {
@@ -196,7 +210,7 @@ void PinnedBar::createControls() {
 	_bar->widget()->show();
 	_wrap.entity()->resize(
 		_wrap.entity()->width(),
-		_bar->widget()->height());
+		Material::BarRowHeight(_bar->widget()->height()));
 
 	_wrap.geometryValue(
 	) | rpl::on_next([=](QRect rect) {
@@ -266,7 +280,7 @@ int PinnedBar::height() const {
 	return !_forceHidden
 		? _wrap.height()
 		: _shouldBeShown
-		? st::historyReplyHeight
+		? Material::BarRowHeight(st::historyReplyHeight)
 		: 0;
 }
 

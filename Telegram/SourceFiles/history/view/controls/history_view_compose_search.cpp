@@ -32,8 +32,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/widgets/scroll_area.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_session_controller.h"
+#include "window/window_soft_panels.h"
 #include "styles/style_boxes.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
@@ -387,7 +389,7 @@ TopBar::TopBar(
 
 	sizeValue(
 	) | rpl::on_next([=](const QSize &s) {
-		const auto height = st::topBarHeight;
+		const auto height = Window::SoftPanels::TopBarHeight();
 		_cancel->moveToLeft(0, (height - _cancel->height()) / 2);
 
 		const auto selectLeft = _cancel->x() + _cancel->width();
@@ -399,8 +401,13 @@ TopBar::TopBar(
 	paintRequest(
 	) | rpl::on_next([=](const QRect &r) {
 		auto p = QPainter(this);
-		p.fillRect(r, st::dialogsBg);
+		Ui::Material::PaintSurface(
+			p,
+			r,
+			Ui::Material::Surface::Conversation,
+			st::dialogsBg);
 	}, lifetime());
+	Ui::Material::RepaintOnFillsChanged(this);
 
 	_select->setQueryChangedCallback([=](const QString &) {
 		requestSearchDelayed();
@@ -435,7 +442,7 @@ void TopBar::setInnerFocus() {
 }
 
 void TopBar::updateSize() {
-	const auto height = st::topBarHeight
+	const auto height = Window::SoftPanels::TopBarHeight()
 		+ (_searchTags ? _searchTags->height() : 0);
 	resize(parentWidget()->width(), height);
 }
@@ -540,12 +547,20 @@ void TopBar::refreshTags() {
 		_searchTags->heightValue()
 	) | rpl::on_next([=](int width, int height) {
 		height += padding.top() + padding.bottom();
-		parent->setGeometry(0, st::topBarHeight, width, height);
+		parent->setGeometry(
+			0,
+			Window::SoftPanels::TopBarHeight(),
+			width,
+			height);
 	}, _searchTags->lifetime());
 
 	parent->paintRequest() | rpl::on_next([=](const QRect &r) {
 		auto p = Painter(parent);
-		p.fillRect(r, st::dialogsBg);
+		Ui::Material::PaintSurface(
+			p,
+			r,
+			Ui::Material::Surface::Conversation,
+			st::dialogsBg);
 		_searchTags->paint(p, position, crl::now(), false);
 	}, parent->lifetime());
 

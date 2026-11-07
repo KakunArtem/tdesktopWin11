@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "ui/boxes/confirm_box.h"
 #include "ui/layers/generic_box.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "chat_helpers/message_field.h" // PaidSendButtonText
 #include "core/click_handler_types.h"
@@ -678,8 +679,9 @@ void ContactStatus::Bar::emojiStatusRepaint() {
 SlidingBar::SlidingBar(
 	not_null<Ui::RpWidget*> parent,
 	object_ptr<Ui::RpWidget> wrapped)
-: _wrapped(parent, std::move(wrapped))
+: _wrapped(parent, std::move(wrapped), Ui::Material::BarMargins())
 , _shadow(parent) {
+	Ui::Material::AddBarFrame(_wrapped.wrapped());
 	setup(parent);
 	_wrapped.hide(anim::type::instant);
 	_shadow.hide();
@@ -693,11 +695,11 @@ void SlidingBar::setup(not_null<Ui::RpWidget*> parent) {
 
 	_wrapped.geometryValue(
 	) | rpl::on_next([=](QRect geometry) {
-		_shadow.setGeometry(
+		_shadow.setGeometry(Ui::Material::BarShadowGeometry(QRect(
 			geometry.x(),
 			geometry.y() + geometry.height(),
 			geometry.width(),
-			st::lineWidth);
+			st::lineWidth)));
 	}, _shadow.lifetime());
 
 	_shadow.showOn(rpl::combine(

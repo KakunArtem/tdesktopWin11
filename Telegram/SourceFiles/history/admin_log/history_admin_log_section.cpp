@@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "window/themes/window_theme.h"
 #include "window/window_session_controller.h"
+#include "window/window_soft_panels.h"
 #include "ui/boxes/confirm_box.h"
 #include "base/timer.h"
 #include "data/data_channel.h"
@@ -258,10 +259,10 @@ void FixedBar::setAnimatingMode(bool enabled) {
 		_animatingMode = enabled;
 		setCursor(_animatingMode ? style::cur_pointer : style::cur_default);
 		if (_animatingMode) {
-			setAttribute(Qt::WA_OpaquePaintEvent, false);
+			Ui::Material::SetOpaquePaint(this, false);
 			hideChildren();
 		} else {
-			setAttribute(Qt::WA_OpaquePaintEvent);
+			Ui::Material::SetOpaquePaint(this, true);
 			showChildren();
 			_field->hide();
 			_cancel->setVisible(false);
@@ -273,7 +274,11 @@ void FixedBar::setAnimatingMode(bool enabled) {
 void FixedBar::paintEvent(QPaintEvent *e) {
 	if (!_animatingMode) {
 		auto p = QPainter(this);
-		p.fillRect(e->rect(), st::topBarBg);
+		Ui::Material::PaintSurface(
+			p,
+			e->rect(),
+			Ui::Material::Surface::Conversation,
+			st::topBarBg);
 	}
 }
 
@@ -592,7 +597,9 @@ void Widget::resizeEvent(QResizeEvent *e) {
 	const auto delta = takeTopDelta();
 	const auto newScrollTop = _scroll->scrollTop() + delta;
 	_fixedBar->resizeToWidth(contentWidth);
-	_fixedBarShadow->resize(contentWidth, st::lineWidth);
+	_fixedBarShadow->resize(
+		contentWidth,
+		Window::SoftPanels::TopBarShadowHeight());
 
 	const auto bottom = height();
 	const auto scrollHeight = bottom

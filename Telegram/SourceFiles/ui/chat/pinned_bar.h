@@ -58,6 +58,7 @@ private:
 	void updateControlsGeometry(QRect wrapGeometry);
 
 	Ui::SlideWrap<> _wrap;
+	const not_null<Ui::RpWidget*> _content;
 	std::unique_ptr<Ui::MessageBar> _bar;
 
 	struct {

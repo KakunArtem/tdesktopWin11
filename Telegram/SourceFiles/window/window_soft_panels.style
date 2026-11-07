@@ -12,6 +12,9 @@ softPanelsGap: 4px;
 softPanelsRadius: 14px;
 softPanelsNavigationRadius: 12px;
 softPanelsBorderWidth: 1px;
+softPanelsTopBarHeight: 56px;
+softPanelsBarMargins: margins(12px, 0px, 12px, 4px);
+softPanelsBarRadius: 9px;
 
 materialTitleMinimize: icon {{ "title_button_minimize", titleButtonFg }};
 materialTitleMinimizeActive: icon {{ "title_button_minimize", titleButtonFgActive }};

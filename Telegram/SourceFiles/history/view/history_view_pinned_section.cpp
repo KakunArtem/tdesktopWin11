@@ -35,6 +35,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_adaptive.h"
 #include "window/window_session_controller.h"
 #include "window/window_peer_menu.h"
+#include "window/window_soft_panels.h"
 #include "base/event_filter.h"
 #include "base/call_delayed.h"
 #include "base/qt/qt_key_modifiers.h"
@@ -521,7 +522,9 @@ void PinnedWidget::updateControlsGeometry() {
 		? std::nullopt
 		: base::make_optional(_scroll->scrollTop() + takeTopDelta());
 	_topBar->resizeToWidth(contentWidth);
-	_topBarShadow->resize(contentWidth, st::lineWidth);
+	_topBarShadow->resize(
+		contentWidth,
+		Window::SoftPanels::TopBarShadowHeight());
 
 	const auto bottom = height() - _clearButton->height();
 	_clearButton->resizeToWidth(width());

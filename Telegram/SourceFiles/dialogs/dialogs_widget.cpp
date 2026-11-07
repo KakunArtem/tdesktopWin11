@@ -72,6 +72,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_slide_animation.h"
 #include "window/window_connecting_widget.h"
 #include "window/window_main_menu.h"
+#include "window/window_soft_panels.h"
 #include "storage/storage_media_prepare.h"
 #include "storage/storage_account.h"
 #include "storage/storage_domain.h"
@@ -1553,6 +1554,7 @@ void Widget::setupMoreChatsBar() {
 		_moreChatsBar = std::make_unique<Ui::MoreChatsBar>(
 			this,
 			filters->moreChatsContent(id));
+		_moreChatsBar->setRowSurface(Ui::Material::Surface::Navigation);
 
 		trackScroll(_moreChatsBar->wrap());
 
@@ -2550,6 +2552,8 @@ void Widget::refreshTopBars() {
 				st::historyGroupCallUserpics.size,
 				true),
 			Core::App().appDeactivatedValue());
+		_forumRequestsBar->setRowSurface(Ui::Material::Surface::Navigation);
+		_forumGroupCallBar->setRowSurface(Ui::Material::Surface::Navigation);
 		_forumTopShadow = std::make_unique<Ui::PlainShadow>(this);
 
 		_forumRequestsBar->barClicks(
@@ -4707,7 +4711,8 @@ void Widget::updateControlsGeometry() {
 	const auto filterWidth = std::max(ratiow, smallw)
 		- filterLeft
 		- filterRight;
-	const auto filterAreaHeight = st::topBarHeight;
+	const auto filterAreaHeight = Window::SoftPanels::TopBarHeight();
+	const auto filterAreaShift = Window::SoftPanels::TopBarShift();
 	_searchControls->setGeometry(0, filterAreaTop, ratiow, filterAreaHeight);
 	if (_subsectionTopBar) {
 		_subsectionTopBar->setGeometryWithNarrowRatio(
@@ -4728,7 +4733,9 @@ void Widget::updateControlsGeometry() {
 		st::dialogsFilterPadding.x(),
 		(_narrowWidth - _mainMenu.toggle->width()) / 2,
 		narrowRatio);
-	_mainMenu.toggle->moveToLeft(mainMenuLeft, st::dialogsFilterPadding.y());
+	_mainMenu.toggle->moveToLeft(
+		mainMenuLeft,
+		st::dialogsFilterPadding.y() + filterAreaShift);
 	_mainMenu.under->setGeometry(
 		0,
 		0,
@@ -4742,7 +4749,7 @@ void Widget::updateControlsGeometry() {
 		narrowRatio);
 	_searchForNarrowLayout->moveToLeft(
 		searchLeft,
-		st::dialogsFilterPadding.y());
+		st::dialogsFilterPadding.y() + filterAreaShift);
 
 	auto right = filterLeft + filterWidth;
 	_cancelSearch->moveToLeft(right - _cancelSearch->width(), _search->y());
@@ -4776,7 +4783,7 @@ void Widget::updateControlsGeometry() {
 			0,
 			expandedStoriesTop,
 			barw,
-			st::lineWidth);
+			Window::SoftPanels::TopBarShadowHeight());
 	}
 
 	updateLockUnlockPosition();

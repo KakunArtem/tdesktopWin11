@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/slide_wrap.h"
 #include "ui/effects/animations.h"
 #include "ui/text/text.h"
+#include "ui/ui_material.h"
 #include "base/object_ptr.h"
 #include "base/timer.h"
 
@@ -42,6 +43,7 @@ public:
 	void finishAnimating();
 
 	void setShadowGeometryPostprocess(Fn<QRect(QRect)> postprocess);
+	void setRowSurface(Material::Surface surface);
 
 	void move(int x, int y);
 	void resizeToWidth(int width);
@@ -69,6 +71,7 @@ private:
 	Fn<QRect(QRect)> _shadowGeometryPostprocess;
 	bool _shouldBeShown = false;
 	bool _forceHidden = false;
+	Material::Surface _rowSurface = Material::Surface::Conversation;
 
 	RequestsBarContent _content;
 	std::unique_ptr<GroupCallUserpics> _userpics;

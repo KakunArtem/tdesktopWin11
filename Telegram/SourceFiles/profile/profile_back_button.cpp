@@ -8,6 +8,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "profile/profile_back_button.h"
 
 #include "ui/text/text.h"
+#include "ui/ui_material.h"
+#include "window/window_soft_panels.h"
 #include "styles/style_profile.h"
 #include "styles/style_info.h"
 #include "styles/style_chat.h"
@@ -19,6 +21,7 @@ namespace Profile {
 
 BackButton::BackButton(QWidget *parent) : Ui::AbstractButton(parent) {
 	setCursor(style::cur_pointer);
+	Ui::Material::RepaintOnFillsChanged(this);
 }
 
 void BackButton::setText(const QString &text) {
@@ -39,7 +42,7 @@ void BackButton::setWidget(not_null<Ui::RpWidget*> widget) {
 	_widget->show();
 	_widget->move(
 		st::historyAdminLogTopBarLeft + st::historyAdminLogTopBarUserpicSkip,
-		(st::profileTopBarHeight - _widget->height()) / 2);
+		(Window::SoftPanels::TopBarHeight() - _widget->height()) / 2);
 	_cachedWidth = -1;
 	update();
 }
@@ -64,7 +67,7 @@ void BackButton::setOpacity(float64 opacity) {
 
 int BackButton::resizeGetHeight(int newWidth) {
 	_cachedWidth = -1;
-	return st::profileTopBarHeight;
+	return Window::SoftPanels::TopBarHeight();
 }
 
 void BackButton::updateCache() {
@@ -86,11 +89,15 @@ void BackButton::paintEvent(QPaintEvent *e) {
 
 	auto p = QPainter(this);
 
-	p.fillRect(e->rect(), st::profileBg);
+	Ui::Material::PaintSurface(
+		p,
+		e->rect(),
+		Ui::Material::Surface::Conversation,
+		st::profileBg);
 	st::topBarBack.paint(
 		p,
 		st::historyAdminLogTopBarLeft,
-		(st::topBarHeight - st::topBarBack.height()) / 2,
+		(Window::SoftPanels::TopBarHeight() - st::topBarBack.height()) / 2,
 		width());
 	p.setOpacity(_opacity);
 

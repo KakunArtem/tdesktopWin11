@@ -31,6 +31,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/dynamic_thumbnails.h"
 #include "ui/effects/ripple_animation.h"
 #include "ui/text/text_utilities.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/discrete_sliders.h"
@@ -171,10 +172,12 @@ void SubsectionTabs::setupHorizontal(
 		auto p = QPainter(widget);
 
 		const auto line = st::lineWidth;
-		p.fillRect(
+		Ui::Material::PaintSurface(
+			p,
 			clip.intersected(
 				widget->rect().marginsRemoved(
 					{ 0, bottom ? line : 0, 0, bottom ? 0 : line })),
+			Ui::Material::Surface::Conversation,
 			st::windowBg);
 		if (bottom) {
 			const auto shadow = QRect(
@@ -187,6 +190,7 @@ void SubsectionTabs::setupHorizontal(
 			}
 		}
 	}, widget->lifetime());
+	Ui::Material::RepaintOnFillsChanged(widget);
 
 	_layoutRequests.fire({});
 
@@ -245,8 +249,14 @@ void SubsectionTabs::setupVertical(not_null<QWidget*> parent) {
 	}, scroll->lifetime());
 
 	_vertical->paintRequest() | rpl::on_next([=](QRect clip) {
-		QPainter(_vertical).fillRect(clip, st::windowBg);
+		auto p = QPainter(_vertical);
+		Ui::Material::PaintSurface(
+			p,
+			clip,
+			Ui::Material::Surface::Conversation,
+			st::windowBg);
 	}, _vertical->lifetime());
+	Ui::Material::RepaintOnFillsChanged(_vertical);
 
 	_layoutRequests.fire({});
 
