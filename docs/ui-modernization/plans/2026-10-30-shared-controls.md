@@ -38,6 +38,11 @@
 
 ### Task 1: Soft controls mapping in the fork
 
+Correction, 2026-11-07: `ControlFill` exempts the chat bars' palette entries, which
+sit on the wallpaper. `MaskedInputField` uses the mapping too. `SelectedFill()` is in
+`ui_material_bars.cpp`, and the test's CMake file is unchanged. See
+[the checks](../checks/shared-controls.md#changes-from-the-plans).
+
 **Files (in the `lib_ui` fork):**
 - Create: `ui/widgets/soft_controls.h`, `ui/widgets/soft_controls.cpp`; register both in `lib_ui`'s `CMakeLists.txt` next to `ui/widgets/buttons.cpp`
 - Modify: `ui/widgets/buttons.cpp`, `ui/widgets/fields/input_field.cpp`, `ui/widgets/box_content_divider.cpp`
@@ -132,6 +137,11 @@ Pushing needs the user's approval.
 ---
 
 ### Task 2: Lists and multi-select in the app
+
+Correction, 2026-11-07: `RowsScrollCache` also needs a transparent image under Soft
+Panels, because it used `Format_RGB32` and never cleared. `MultiSelect` drops its
+opaque attribute, and `PeerListBox::paintEvent` maps its fill. See
+[the checks](../checks/shared-controls.md#changes-from-the-plans).
 
 **Files:**
 - Modify: `Telegram/SourceFiles/boxes/peer_list_box.cpp`
