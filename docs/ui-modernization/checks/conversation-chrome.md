@@ -1,12 +1,30 @@
 # C11 conversation chrome checks
 
-Date: 2026-11-06. Only Task 3, the "Window material" chat background, is
-implemented. It was built ahead of C11's other tasks at the user's request, with
-the service colors from [C13](../plans/2026-10-29-messages.md) Task 1 that keep
-messages readable on it. Plan:
+Date: 2026-11-07. Tasks 1 to 3 are implemented. Task 4 is partial: the header and
+most bars need a signed-in session, and only one resting state has been seen in a
+real window.
+The chat background was built first, at the user's request, with the service
+colors from [C13](../plans/2026-10-29-messages.md) Task 1 that keep messages
+readable on it. Plan:
 [conversation chrome](../plans/2026-10-29-conversation-chrome.md).
 
 ## Implemented behavior
+
+### Header and bars
+
+Under Soft Panels the chat header is 56 px tall and its shadow is gone, so its
+bottom edge is the panel's continuous fill. The chats list header aligns with it.
+The call, requests, pinned, more chats, sponsored, translate and contact status
+bars become rounded pills inset by 12 px, with a 4 px gap below each. Their
+animations, close buttons, click targets and context menus are the same code.
+Topic tabs paint the Conversation fill. Bars in the chats list keep the Navigation
+fill around their pills.
+
+Soft Panels off leaves all of this as it was, with material on or off, apart from
+the topic tabs, header search bar and admin log header, which now paint the
+Conversation fill while material is active, as the chat header already did.
+
+### Chat background
 
 Settings > Chat Settings has "Show window material behind messages", shown only
 while material is capable. It applies live and defaults to off, so the wallpaper
@@ -33,8 +51,44 @@ measured Acrylic range. Turning the option off restores Telegram's colors.
   `AcrylicRange()` instead, as C3 now does.
 - `ChatStyle` resets to its palette on theme changes. The overrides are reapplied
   from its `paletteChanged()` signal, which fires after that reset.
+- The plan puts the bar helpers in `ui_material.cpp`, but `test_window_material`
+  compiles that file without generated styles. They live in
+  `ui/ui_material_bars.*`.
+- The plan offsets each bar's content by the pill margins. A child widget sized to
+  the pill holds the content instead, so its paint and layout code stays the same.
+  Without Soft Panels that widget is the bar's own, as before.
+- The plan hides header shadows wherever they are shown. They take zero height
+  under Soft Panels instead, which needs one change per section rather than one
+  per show call.
+- Header buttons and text keep their 54 px styles and are centered in the 56 px
+  header.
+- Added to the plan: the header search bar, the admin log header and the back
+  button paint the Conversation fill, so these headers match the chat header.
 
 ## Automated evidence
+
+### Header and bars
+
+A disposable `-testagent` overlay builds the real `GroupCallBar`, `RequestsBar`,
+`PinnedBar`, `MoreChatsBar` and `SlidingBar` with an empty profile, in day and
+night, with Soft Panels on and off, material on and off, at 100% and 150%.
+
+- Before the change the test failed 84, 86, 39 and 41 of its 129 checks across
+  those four runs. After it, each run passes all 133, which include four header
+  value checks added in between.
+- With Soft Panels on: each row adds the bottom margin, the gaps and corners show
+  the panel, the pill uses the Bar fill and has a border, bar shadows are gone, and
+  buttons stay inside the pill.
+- With Soft Panels off, all eight captures are byte-identical to the unchanged
+  code.
+- The header height and shadow height values are checked. The header widget itself
+  needs a session and was not built by this test.
+
+The [title bar matrix](title-bar.md#automated-evidence) still passes 1024 checks,
+and all 80 captures are byte-identical to the run before this change.
+`test_window_material` passes 136 checks.
+
+### Chat background
 
 `test_window_material` passes 136 checks. The chat color checks had 10 failures
 against a stub first.
@@ -59,10 +113,32 @@ screenshot of a chat and confirmed that it looks right. It shows the Saved
 Messages history painting the material, with readable date pills, intact bubbles
 including a link preview, and the composer.
 
+That check predates the header and bars, so it does not cover them.
+
+On 2026-11-07 the user shared a screenshot of a signed-in chat with the header and
+bars built, in the day theme with material on. It shows the header blending into
+the panel with no shadow, its text and buttons centered, and the chats list search
+field level with it. A single pinned message sits in an inset rounded pill with its
+accent line and close button inside. Message bubbles are cut with a hard edge at the
+bottom of the bar's row, just below the pill, where a shadow line used to mark it.
+
 ## Not verified
 
 There is no test-server account on this machine, so no automated check has run
-these. The screenshot is a single resting state and does not establish them:
+these. The screenshot is a single resting state and does not establish them.
+
+Header and bars, beyond the resting state in that screenshot:
+
+- The header in a topic, pinned and scheduled messages, search mode and selection
+  mode, and in night mode.
+- The chats list bars on the Navigation fill.
+- The translate and sponsored bars, topic tabs in both orientations, and contact
+  status bars with their real buttons.
+- Showing, switching, hiding and closing each bar, the pinned bar's message
+  switching, and several bars stacked in a real chat.
+- Contrast of each bar's text over a real backdrop, and RTL.
+
+Chat background:
 
 - Scrolling and repaint in a long chat.
 - Service messages other than date pills, selected service messages and the
@@ -79,3 +155,13 @@ Also open:
   was left out because the history scroll style reads the global palette, not
   `ChatStyle`, so it would not have reached them.
 - C13's 14 px bubble radius and its message survey have not been done.
+- Contact status pills are opaque, not 90%, because their buttons keep their own
+  fills.
+- The sponsored bar's ripple has square corners inside the pill.
+- The pinned bar's fade at the bottom of a multi-message preview uses
+  `historyPinnedBg`, not the Bar fill.
+- The translate bar's gaps stay clickable, because the row is the button.
+- The header search field keeps its own fill, which may differ from the panel.
+- During a section slide a pill is painted over the panel, so it looks slightly
+  more opaque until the slide ends.
+- The info pane's top bar stays 54 px until [C15](../architecture.md#components).

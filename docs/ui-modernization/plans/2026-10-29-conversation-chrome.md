@@ -35,6 +35,11 @@
 
 ### Task 1: Header inside the conversation panel
 
+Correction, 2026-11-07: header shadows take zero height through
+`TopBarShadowHeight()` rather than a hide condition at each show call, and the
+content keeps its 54 px styles, centered by `TopBarShift()`. See
+[the checks](../checks/conversation-chrome.md#changes-from-the-plans).
+
 **Files:**
 - Modify: `Telegram/SourceFiles/history/history_widget.cpp`
 - Modify: `Telegram/SourceFiles/history/view/history_view_chat_section.cpp`, `history_view_pinned_section.cpp`, `history_view_scheduled_section.cpp`, `history_view_welcome_messages_section.cpp`
@@ -67,6 +72,12 @@ git commit -m "Merged the chat header into the Soft Panels conversation panel."
 ---
 
 ### Task 2: Bars as pills
+
+Correction, 2026-11-07: the helpers live in the new `ui/ui_material_bars.*`,
+because `test_window_material` compiles `ui_material.cpp` without generated
+styles. Bar content moves into a child widget sized to the pill instead of
+offsetting every paint call. See
+[the checks](../checks/conversation-chrome.md#changes-from-the-plans).
 
 **Files:**
 - Modify: `Telegram/SourceFiles/ui/ui_material.h`, `ui_material.cpp`
