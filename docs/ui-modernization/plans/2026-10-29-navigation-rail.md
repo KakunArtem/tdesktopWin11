@@ -38,6 +38,10 @@
 
 ### Task 1: Rail buttons and selection
 
+Correction, 2026-11-07: `SideBarButton` is opaque by design, so this needs a small fork
+change after all. The button paints its own pill through `setBackgroundPainter`, instead
+of the container. See [the checks](../checks/navigation-rail.md#changes-from-the-plans).
+
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window.style`
 - Modify: `Telegram/SourceFiles/window/window_filters_menu.h`, `window_filters_menu.cpp`
@@ -108,6 +112,10 @@ git commit -m "Adjusted folder rail badges for Soft Panels."
 ---
 
 ### Task 3: Main menu drawer
+
+Correction, 2026-11-07: rows take their rounded hover from new `SettingsButton` style
+values, and the layer dim needs the fork's `SetMainMenuCornerRadius` to reach the
+corners. See [the checks](../checks/navigation-rail.md#changes-from-the-plans).
 
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_main_menu.cpp`
