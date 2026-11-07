@@ -34,5 +34,16 @@ void PaintBarContent(
 	const style::color &solid);
 [[nodiscard]] not_null<RpWidget*> CreateBarContent(not_null<RpWidget*> row);
 void AddBarFrame(not_null<RpWidget*> row);
+void PaintSurfaceOutline(
+	QPainter &p,
+	const QRect &rect,
+	int radius,
+	Surface surface);
+void PaintRoundedSurface(
+	QPainter &p,
+	const QRect &rect,
+	int radius,
+	Surface surface,
+	const style::color &solid);
 
 } // namespace Ui::Material

@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_style_radius.h"
 #include "ui/painter.h"
 #include "ui/round_rect.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_session_controller.h"
 #include "styles/style_chat.h"
@@ -202,7 +203,9 @@ void BotKeyboard::paintEvent(QPaintEvent *e) {
 	Painter p(this);
 
 	auto clip = e->rect();
-	p.fillRect(clip, st::historyComposeAreaBg);
+	if (!Ui::Material::SoftPanels()) {
+		p.fillRect(clip, st::historyComposeAreaBg);
+	}
 
 	if (_impl) {
 		int x = rtl() ? st::botKbScroll.width : _st->margin;

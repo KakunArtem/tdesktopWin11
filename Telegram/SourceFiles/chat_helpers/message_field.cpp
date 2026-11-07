@@ -35,6 +35,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/shadow.h"
 #include "ui/power_saving.h"
 #include "ui/vertical_list.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "data/data_session.h"
 #include "data/data_user.h"
@@ -1332,6 +1333,12 @@ base::unique_qptr<Ui::RpWidget> CreateDisabledFieldView(
 	return result;
 }
 
+const style::FlatButton &ComposeButtonStyle() {
+	return Ui::Material::SoftPanels()
+		? st::softPanelsComposeButton
+		: st::historyComposeButton;
+}
+
 std::unique_ptr<Ui::RpWidget> TextErrorSendRestriction(
 		QWidget *parent,
 		const QString &text) {
@@ -1343,7 +1350,9 @@ std::unique_ptr<Ui::RpWidget> TextErrorSendRestriction(
 		st::historySendPremiumRequired);
 	label->setAttribute(Qt::WA_TransparentForMouseEvents);
 	raw->paintRequest() | rpl::on_next([=](QRect clip) {
-		QPainter(raw).fillRect(clip, st::windowBg);
+		if (!Ui::Material::SoftPanels()) {
+			QPainter(raw).fillRect(clip, st::windowBg);
+		}
 	}, raw->lifetime());
 	raw->sizeValue(
 	) | rpl::on_next([=](QSize size) {
@@ -1378,7 +1387,9 @@ std::unique_ptr<Ui::RpWidget> PremiumRequiredSendRestriction(
 		result.get(),
 		tr::lng_restricted_send_non_premium_more(tr::now));
 	raw->paintRequest() | rpl::on_next([=](QRect clip) {
-		QPainter(raw).fillRect(clip, st::windowBg);
+		if (!Ui::Material::SoftPanels()) {
+			QPainter(raw).fillRect(clip, st::windowBg);
+		}
 	}, raw->lifetime());
 	raw->widthValue(
 	) | rpl::on_next([=](int width) {
@@ -1407,7 +1418,7 @@ std::unique_ptr<Ui::AbstractButton> BoostsToLiftWriteRestriction(
 	auto result = std::make_unique<Ui::FlatButton>(
 		parent,
 		tr::lng_restricted_boost_group(tr::now),
-		st::historyComposeButton);
+		ComposeButtonStyle());
 	result->setClickedCallback([=] {
 		const auto window = show->resolveWindow();
 		window->resolveBoostState(peer->asChannel(), boosts);
@@ -1422,13 +1433,13 @@ std::unique_ptr<Ui::AbstractButton> FrozenWriteRestriction(
 		FreezeInfoStyleOverride st) {
 	using namespace Ui;
 
+	const auto bar = (type == FrozenWriteRestrictionType::DialogsList);
 	auto result = std::make_unique<FlatButton>(
 		parent,
 		QString(),
-		st::historyComposeButton);
+		bar ? st::historyComposeButton : ComposeButtonStyle());
 	const auto raw = result.get();
 
-	const auto bar = (type == FrozenWriteRestrictionType::DialogsList);
 	const auto title = CreateChild<FlatLabel>(
 		raw,
 		(bar ? tr::lng_frozen_bar_title : tr::lng_frozen_restrict_title)(

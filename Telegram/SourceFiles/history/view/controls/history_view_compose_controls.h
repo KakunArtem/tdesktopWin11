@@ -189,6 +189,7 @@ public:
 
 	void move(int x, int y);
 	void resizeToWidth(int width);
+	[[nodiscard]] QMargins outerMargins() const;
 	void setAutocompleteBoundingRect(QRect rect);
 	[[nodiscard]] rpl::producer<int> height() const;
 	[[nodiscard]] int heightCurrent() const;
@@ -418,6 +419,7 @@ private:
 	bool updateReplaceMediaButton();
 	void updateOuterGeometry(QRect rect);
 	void paintBackground(QPainter &p, QRect full, QRect clip);
+	void paintBackgroundOutline(QPainter &p, QRect full);
 
 	[[nodiscard]] auto baseSendButtonType() const;
 	[[nodiscard]] auto computeSendButtonType() const;

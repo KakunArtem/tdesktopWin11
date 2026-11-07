@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_style.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "window/themes/window_theme.h"
 
 #include <QtGui/QLinearGradient>
@@ -173,7 +174,9 @@ void RichDraftPreview::paint(QRect clip) {
 	Painter p(this);
 	const auto paused = _paused && _paused();
 	p.setInactive(paused);
-	p.fillRect(rect(), st::historyComposeAreaBg);
+	if (!Ui::Material::SoftPanels()) {
+		p.fillRect(rect(), st::historyComposeAreaBg);
+	}
 
 	if (_style && (_paletteVersion != _style->paletteVersion())) {
 		_paletteVersion = _style->paletteVersion();

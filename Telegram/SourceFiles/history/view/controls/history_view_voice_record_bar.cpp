@@ -44,6 +44,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/fields/input_field.h" // ShouldSubmit.
 #include "ui/widgets/tooltip.h"
 #include "ui/rect.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "webrtc/webrtc_video_track.h"
 #include "styles/style_chat.h"
@@ -2104,6 +2105,7 @@ VoiceRecordBar::VoiceRecordBar(
 	VoiceRecordBarDescriptor &&descriptor)
 : RpWidget(parent)
 , _st(descriptor.stOverride ? *descriptor.stOverride : st::defaultRecordBar)
+, _windowMaterial(descriptor.windowMaterial)
 , _outerContainer(descriptor.outerContainer)
 , _show(std::move(descriptor.show))
 , _send(std::move(descriptor.send))
@@ -2220,7 +2222,9 @@ void VoiceRecordBar::updateTTLGeometry(
 }
 
 void VoiceRecordBar::init() {
-	if (_st.radius > 0) {
+	if (_windowMaterial) {
+		Ui::Material::RepaintOnFillsChanged(this);
+	} else if (_st.radius > 0) {
 		_backgroundRect.emplace(_st.radius, _st.bg);
 	}
 
@@ -2271,7 +2275,21 @@ void VoiceRecordBar::init() {
 		if (_showAnimation.animating()) {
 			p.setOpacity(showAnimationRatio());
 		}
-		if (_backgroundRect) {
+		if (_windowMaterial) {
+			// Inset so the composer's outline stays visible around the bar.
+			const auto inset = st::lineWidth;
+			auto shape = QPainterPath();
+			shape.addRoundedRect(
+				QRectF(rect().marginsRemoved({ inset, inset, inset, inset })),
+				_st.radius - inset,
+				_st.radius - inset);
+			auto hq = PainterHighQualityEnabler(p);
+			Ui::Material::PaintSurface(
+				p,
+				shape,
+				Ui::Material::Surface::Composer,
+				_st.bg);
+		} else if (_backgroundRect) {
 			_backgroundRect->paint(p, rect());
 		} else {
 			p.fillRect(clip, _st.bg);

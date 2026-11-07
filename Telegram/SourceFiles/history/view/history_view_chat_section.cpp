@@ -58,7 +58,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/rect.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "base/timer_rpl.h"
 #include "api/api_bot.h"
@@ -4416,7 +4416,11 @@ void ChatWidget::updateControlsGeometry() {
 				- tabsBottomSkip
 				- (_suggestOptions ? st::historyReplyHeight : 0));
 		if (_kbScroll && _kbShown && keyboardRowsVisible() && _keyboard) {
-			_keyboard->resizeToWidth(innerWidth, maxFieldHeight);
+			const auto margins = _composeControls->outerMargins();
+			const auto keyboardWidth = innerWidth
+				- margins.left()
+				- margins.right();
+			_keyboard->resizeToWidth(keyboardWidth, maxFieldHeight);
 			const auto keyboardReserve = std::min(
 				_keyboard->height(),
 				maxFieldHeight - (maxFieldHeight / 2));
@@ -4425,14 +4429,14 @@ void ChatWidget::updateControlsGeometry() {
 			const auto maxKbHeight = std::max(
 				0,
 				maxFieldHeight - _composeControls->fieldHeightCurrent());
-			_keyboard->resizeToWidth(innerWidth, maxKbHeight);
+			_keyboard->resizeToWidth(keyboardWidth, maxKbHeight);
 			const auto kbHeight = std::min(
 				_keyboard->height(),
 				maxKbHeight);
 			_kbScroll->setGeometry(
-				tabsLeftSkip,
-				bottom - kbHeight,
-				innerWidth,
+				tabsLeftSkip + margins.left(),
+				bottom - margins.bottom() - kbHeight,
+				keyboardWidth,
 				kbHeight);
 			bottom -= kbHeight;
 		} else {
@@ -4515,21 +4519,42 @@ void ChatWidget::paintEvent(QPaintEvent *e) {
 		QRect(0, aboveHeight, width(), height() - aboveHeight));
 	SectionWidget::PaintChatBackground(controller(), _theme.get(), this, bg);
 
+	const auto softPanels = Ui::Material::SoftPanels();
+	const auto margins = _composeControls->outerMargins();
+	if (softPanels && _kbScroll && !_kbScroll->isHidden()) {
+		auto p = QPainter(this);
+		Ui::Material::PaintRoundedSurface(
+			p,
+			_kbScroll->geometry(),
+			st::softPanelsComposeRadius,
+			Ui::Material::Surface::Composer,
+			st::historyComposeAreaBg);
+	}
 	if (_suggestOptions && !_bottom->isButtonActive()) {
 		auto p = Painter(this);
 		const auto backy = _composeControlsTop
 			- st::historyReplyHeight;
 		const auto backh = st::historyReplyHeight;
-		p.fillRect(
-			myrtlrect(0, backy, width(), backh),
-			st::historyReplyBg);
-		_suggestOptions->paintIcon(p, 0, backy, width());
+		const auto backw = width() - margins.left() - margins.right();
+		const auto back = myrtlrect(margins.left(), backy, backw, backh);
+		if (softPanels) {
+			Ui::Material::PaintRoundedSurface(
+				p,
+				back,
+				st::softPanelsComposeRadius,
+				Ui::Material::Surface::Composer,
+				st::historyReplyBg);
+		} else {
+			p.fillRect(back, st::historyReplyBg);
+		}
+		p.translate(margins.left(), 0);
+		_suggestOptions->paintIcon(p, 0, backy, backw);
 		_suggestOptions->paintLines(
 			p,
 			st::historyReplySkip,
 			backy,
-			width());
-		_suggestOptions->paintBar(p, 0, backy, width());
+			backw);
+		_suggestOptions->paintBar(p, 0, backy, backw);
 	}
 }
 

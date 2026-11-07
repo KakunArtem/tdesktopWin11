@@ -55,6 +55,7 @@ struct VoiceRecordBarDescriptor {
 	const style::RecordBar *stOverride = nullptr;
 	int recorderHeight = 0;
 	bool lockFromBottom = false;
+	bool windowMaterial = false;
 };
 
 class VoiceRecordBar final : public Ui::RpWidget {
@@ -174,6 +175,7 @@ private:
 	[[nodiscard]] bool createVideoRecorder();
 
 	const style::RecordBar &_st;
+	const bool _windowMaterial = false;
 	const not_null<Ui::RpWidget*> _outerContainer;
 	const std::shared_ptr<ChatHelpers::Show> _show;
 	const std::shared_ptr<Ui::SendButton> _send;

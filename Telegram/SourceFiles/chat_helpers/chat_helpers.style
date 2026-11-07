@@ -258,6 +258,7 @@ ComposeControls {
 	bg: color;
 	radius: pixels;
 	padding: margins;
+	outerMargins: margins;
 
 	field: InputField;
 	fieldLeft: pixels;
@@ -1670,6 +1671,36 @@ defaultComposeControls: ComposeControls {
 	boxField: defaultInputField;
 	restrictionLabel: defaultRestrictionLabel;
 	chooseSendAs: defaultChooseSendAs;
+}
+
+softPanelsComposeMargins: margins(16px, 0px, 16px, 14px);
+softPanelsComposeRadius: 18px;
+softPanelsComposeField: InputField(historyComposeField) {
+	textBg: transparent;
+}
+softPanelsRecordBar: RecordBar(defaultRecordBar) {
+	radius: softPanelsComposeRadius;
+}
+softPanelsAttachEmoji: EmojiButton(historyAttachEmoji) {
+	bg: transparent;
+}
+softPanelsComposeControls: ComposeControls(defaultComposeControls) {
+	radius: softPanelsComposeRadius;
+	outerMargins: softPanelsComposeMargins;
+	field: softPanelsComposeField;
+	emoji: softPanelsAttachEmoji;
+	record: softPanelsRecordBar;
+}
+softPanelsRepliesComposeControls: ComposeControls(softPanelsComposeControls) {
+	tabbedHeightMin: 220px;
+}
+softPanelsComposeButton: FlatButton(historyComposeButton) {
+	bgColor: transparent;
+	overBgColor: transparent;
+}
+softPanelsUnblock: FlatButton(historyUnblock) {
+	bgColor: transparent;
+	overBgColor: transparent;
 }
 
 moreChatsBarHeight: 48px;

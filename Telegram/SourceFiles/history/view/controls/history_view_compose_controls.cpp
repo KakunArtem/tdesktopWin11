@@ -117,7 +117,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/item_text_options.h"
 #include "ui/text/text_options.h"
 #include "ui/text/text_utilities.h"
-#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/dropdown_menu.h"
@@ -403,14 +403,14 @@ void FieldHeader::init(bool windowMaterial) {
 	) | rpl::on_next([=] {
 		Painter p(this);
 		p.setInactive(_show->paused(Window::GifPauseReason::Any));
-		if (windowMaterial) {
+		if (!windowMaterial) {
+			p.fillRect(rect(), st::historyComposeAreaBg);
+		} else if (!Ui::Material::SoftPanels()) {
 			Ui::Material::PaintSurface(
 				p,
 				rect(),
 				Ui::Material::Surface::Composer,
 				st::historyComposeAreaBg);
-		} else {
-			p.fillRect(rect(), st::historyComposeAreaBg);
 		}
 
 		const auto position = st::historyReplyIconPosition;
@@ -1211,6 +1211,8 @@ ComposeControls::ComposeControls(
 	ComposeControlsDescriptor descriptor)
 : _st(descriptor.stOverride
 	? *descriptor.stOverride
+	: (descriptor.regularWindow && Ui::Material::SoftPanels())
+	? st::softPanelsComposeControls
 	: st::defaultComposeControls)
 , _features(descriptor.features)
 , _parent(parent)
@@ -1306,6 +1308,8 @@ ComposeControls::ComposeControls(
 		.stOverride = &_st.record,
 		.recorderHeight = _st.attach.height,
 		.lockFromBottom = descriptor.voiceLockFromBottom,
+		.windowMaterial = (descriptor.regularWindow
+			&& Ui::Material::SoftPanels()),
 	}))
 , _sendMenuDetails(descriptor.sendMenuDetails)
 , _currentSuggest(descriptor.currentSuggest)
@@ -1733,18 +1737,26 @@ PeerData *ComposeControls::sendAsPeer() const {
 }
 
 void ComposeControls::move(int x, int y) {
-	_wrap->move(x, y);
+	const auto left = x + _st.outerMargins.left();
+	_wrap->move(left, y);
 	if (_writeRestricted) {
-		_writeRestricted->move(x, y);
+		_writeRestricted->move(left, y);
 	}
 }
 
 void ComposeControls::resizeToWidth(int width) {
-	_wrap->resizeToWidth(width);
+	const auto inner = width
+		- _st.outerMargins.left()
+		- _st.outerMargins.right();
+	_wrap->resizeToWidth(inner);
 	if (_writeRestricted) {
-		_writeRestricted->resizeToWidth(width);
+		_writeRestricted->resizeToWidth(inner);
 	}
 	updateHeight();
+}
+
+QMargins ComposeControls::outerMargins() const {
+	return _st.outerMargins;
 }
 
 void ComposeControls::setAutocompleteBoundingRect(QRect rect) {
@@ -1755,18 +1767,23 @@ void ComposeControls::setAutocompleteBoundingRect(QRect rect) {
 
 rpl::producer<int> ComposeControls::height() const {
 	using namespace rpl::mappers;
+	const auto bottom = _st.outerMargins.bottom();
 	return rpl::conditional(
 		rpl::combine(
 			_writeRestriction.value(),
 			_hidden.value()) | rpl::map(!_1 && !_2),
 		_wrap->heightValue(),
-		rpl::single(_st.attach.height));
+		rpl::single(_st.attach.height)
+	) | rpl::map([=](int height) {
+		return height + bottom;
+	});
 }
 
 int ComposeControls::heightCurrent() const {
-	return (_writeRestriction.current() || _hidden.current())
-		? _st.attach.height
-		: _wrap->height();
+	return _st.outerMargins.bottom()
+		+ ((_writeRestriction.current() || _hidden.current())
+			? _st.attach.height
+			: _wrap->height());
 }
 
 int ComposeControls::fieldHeightCurrent() const {
@@ -3290,7 +3307,7 @@ void ComposeControls::initField() {
 		}
 		return false;
 	});
-	InitMessageFieldFade(_field, _st.field.textBg);
+	InitMessageFieldFade(_field, _st.bg);
 	_field->setEditLinkCallback(
 		DefaultEditLinkCallback(_show, _field, &_st.boxField));
 	_field->setEditLanguageCallback(DefaultEditLanguageCallback(_show));
@@ -5600,7 +5617,9 @@ void ComposeControls::updateOuterGeometry(QRect rect) {
 		_tabbedPanel->moveBottomRight(bottom, rect.x() + rect.width());
 	}
 	if (_attachBotsMenu) {
-		_attachBotsMenu->moveToLeft(0, bottom - _attachBotsMenu->height());
+		_attachBotsMenu->moveToLeft(
+			_st.outerMargins.left(),
+			bottom - _attachBotsMenu->height());
 	}
 }
 
@@ -5744,7 +5763,9 @@ void ComposeControls::paintAnimationBackground(QPainter &p) {
 	p.save();
 	p.translate(widget->pos());
 	paintBackground(p, widget->rect(), widget->rect());
-	if (!restricted && !_header->isHidden()) {
+	if (!restricted
+		&& !_header->isHidden()
+		&& !Ui::Material::SoftPanels()) {
 		Ui::Material::PaintSurface(
 			p,
 			_header->geometry(),
@@ -5771,11 +5792,13 @@ void ComposeControls::paintBackground(QPainter &p, QRect full, QRect clip) {
 					- _st.starsSkip);
 			}
 			shape.addRoundedRect(full, r, r);
+			auto hq = PainterHighQualityEnabler(p);
 			Ui::Material::PaintSurface(
 				p,
 				shape,
 				Ui::Material::Surface::Composer,
 				_st.bg);
+			paintBackgroundOutline(p, full);
 		} else {
 			Ui::Material::PaintSurface(
 				p,
@@ -5802,8 +5825,21 @@ void ComposeControls::paintBackground(QPainter &p, QRect full, QRect clip) {
 				- _st.starsSkip);
 		}
 		p.drawRoundedRect(full, _st.radius, _st.radius);
+		paintBackgroundOutline(p, full);
 	} else {
 		p.fillRect(clip, _st.bg);
+	}
+}
+
+void ComposeControls::paintBackgroundOutline(QPainter &p, QRect full) {
+	if (_regularWindow
+		&& Ui::Material::SoftPanels()
+		&& !Ui::Material::Grabbing()) {
+		Ui::Material::PaintSurfaceOutline(
+			p,
+			full,
+			_st.radius,
+			Ui::Material::Surface::Composer);
 	}
 }
 

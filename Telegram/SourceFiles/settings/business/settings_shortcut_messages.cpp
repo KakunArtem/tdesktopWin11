@@ -59,6 +59,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/scroll_area.h"
 #include "ui/painter.h"
 #include "ui/screen_reader_mode.h"
+#include "ui/ui_material.h"
 #include "window/themes/window_theme.h"
 #include "window/section_widget.h"
 #include "window/window_peer_menu.h"
@@ -803,7 +804,9 @@ base::weak_qptr<Ui::RpWidget> ShortcutMessages::createPinnedToBottom(
 	_composeControls = std::make_unique<ComposeControls>(
 		dynamic_cast<Ui::RpWidget*>(_scroll->parentWidget()),
 		ComposeControlsDescriptor{
-			.stOverride = &st::repliesComposeControls,
+			.stOverride = (Ui::Material::SoftPanels()
+				? &st::softPanelsRepliesComposeControls
+				: &st::repliesComposeControls),
 			.show = _controller->uiShow(),
 			.unavailableEmojiPasted = [=](not_null<DocumentData*> emoji) {
 				listShowPremiumToast(emoji);

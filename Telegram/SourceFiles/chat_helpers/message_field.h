@@ -54,6 +54,10 @@ class PopupMenu;
 class Show;
 } // namespace Ui
 
+namespace style {
+struct FlatButton;
+} // namespace style
+
 [[nodiscard]] QString PrepareMentionTag(not_null<UserData*> user);
 [[nodiscard]] TextWithTags PrepareEditText(not_null<HistoryItem*> item);
 [[nodiscard]] bool EditTextChanged(
@@ -184,6 +188,7 @@ private:
 	QWidget *parent,
 	not_null<PeerData*> peer,
 	QWidget *toastParent = nullptr);
+[[nodiscard]] const style::FlatButton &ComposeButtonStyle();
 [[nodiscard]] std::unique_ptr<Ui::RpWidget> TextErrorSendRestriction(
 	QWidget *parent,
 	const QString &text);

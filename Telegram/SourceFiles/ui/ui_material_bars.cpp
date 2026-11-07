@@ -30,18 +30,7 @@ namespace {
 }
 
 void PaintPillOutline(QPainter &p, const QRect &pill) {
-	const auto width = float64(st::softPanelsBorderWidth);
-	const auto inset = width / 2.;
-	const auto radius = std::max(st::softPanelsBarRadius - inset, 0.);
-	p.save();
-	p.setRenderHint(QPainter::Antialiasing);
-	p.setPen(QPen(Active() ? Border(Surface::Bar) : st::shadowFg->c, width));
-	p.setBrush(Qt::NoBrush);
-	p.drawRoundedRect(
-		QRectF(pill).adjusted(inset, inset, -inset, -inset),
-		radius,
-		radius);
-	p.restore();
+	PaintSurfaceOutline(p, pill, st::softPanelsBarRadius, Surface::Bar);
 }
 
 } // namespace
@@ -146,6 +135,45 @@ void AddBarFrame(not_null<RpWidget*> row) {
 			PaintPillOutline(p, pill);
 		}
 	}, frame->lifetime());
+}
+
+void PaintSurfaceOutline(
+		QPainter &p,
+		const QRect &rect,
+		int radius,
+		Surface surface) {
+	const auto width = float64(st::softPanelsBorderWidth);
+	const auto inset = width / 2.;
+	const auto inner = std::max(radius - inset, 0.);
+	p.save();
+	p.setRenderHint(QPainter::Antialiasing);
+	p.setPen(QPen(Active() ? Border(surface) : st::shadowFg->c, width));
+	p.setBrush(Qt::NoBrush);
+	p.drawRoundedRect(
+		QRectF(rect).adjusted(inset, inset, -inset, -inset),
+		inner,
+		inner);
+	p.restore();
+}
+
+void PaintRoundedSurface(
+		QPainter &p,
+		const QRect &rect,
+		int radius,
+		Surface surface,
+		const style::color &solid) {
+	if (rect.isEmpty()) {
+		return;
+	}
+	auto shape = QPainterPath();
+	shape.addRoundedRect(QRectF(rect), radius, radius);
+	p.save();
+	p.setRenderHint(QPainter::Antialiasing);
+	PaintSurface(p, shape, surface, solid);
+	p.restore();
+	if (!Grabbing()) {
+		PaintSurfaceOutline(p, rect, radius, surface);
+	}
 }
 
 } // namespace Ui::Material

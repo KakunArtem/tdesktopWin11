@@ -662,6 +662,10 @@ private:
 
 	void drawField(Painter &p, const QRect &rect);
 	[[nodiscard]] QRect fieldBackgroundRect() const;
+	[[nodiscard]] QMargins composerMargins() const;
+	[[nodiscard]] int composerWidth() const;
+	[[nodiscard]] QRect composerButtonRect() const;
+	void paintComposerBackground(QPainter &p, const QRect &rect) const;
 	void paintEditHeader(
 		Painter &p,
 		const QRect &rect,
