@@ -46,10 +46,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/unread_badge.h"
 #include "ui/unread_badge_paint.h"
 #include "ui/unread_counter_format.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
+#include "ui/widgets/soft_controls.h"
 #include "styles/style_dialogs.h"
 #include "styles/style_dialogs_layout.h"
 #include "styles/style_widgets.h"
 #include "styles/style_window.h"
+#include "styles/style_window_soft_panels.h"
 
 namespace Dialogs::Ui {
 
@@ -65,6 +69,19 @@ base::options::toggle DialogsMuteIcon({
 });
 
 const auto kPsaBadgePrefix = "cloud_lng_badge_psa_";
+
+[[nodiscard]] QRect RowPillRect(const QRect &geometry, bool narrow) {
+	const auto &margins = narrow
+		? st::dialogsSoftPanelsNarrowRowMargins
+		: st::dialogsSoftPanelsRowMargins;
+	return geometry.marginsRemoved(style::RightToLeft()
+		? QMargins(
+			margins.right(),
+			margins.top(),
+			margins.left(),
+			margins.bottom())
+		: margins);
+}
 
 [[nodiscard]] bool ShowUserBotIcon(not_null<UserData*> user) {
 	return user->isBot()
@@ -484,12 +501,12 @@ void PaintRow(
 	if (swipeTranslation) {
 		p.translate(swipeMirrored ? swipeTranslation : -swipeTranslation, 0);
 	}
-	p.fillRect(geometry, bg);
+	PaintRowBackground(p, geometry, bg, context);
 	if (!(flags & Flag::TopicJumpRipple)) {
 		auto ripple = context.active
 			? st::dialogsRippleBgActive
 			: st::dialogsRippleBg;
-		row->paintRipple(p, 0, 0, context.width, &ripple->c);
+		PaintRowRipple(p, *row, geometry, context, &ripple->c);
 	}
 
 	if (flags & Flag::SavedMessages) {
@@ -1133,6 +1150,10 @@ void RowPainter::Paint(
 		not_null<const Row*> row,
 		VideoUserpic *videoUserpic,
 		const PaintContext &context) {
+	if (const auto soft = SoftActiveContext(context)) {
+		Paint(p, row, videoUserpic, *soft);
+		return;
+	}
 	const auto entry = row->entry();
 	const auto history = row->history();
 	const auto thread = row->thread();
@@ -1271,6 +1292,10 @@ void RowPainter::Paint(
 		Painter &p,
 		not_null<const FakeRow*> row,
 		const PaintContext &context) {
+	if (const auto soft = SoftActiveContext(context)) {
+		Paint(p, row, *soft);
+		return;
+	}
 	const auto item = row->item();
 	const auto topic = context.forum ? row->topic() : nullptr;
 	const auto history = topic ? nullptr : item->history().get();
@@ -1412,11 +1437,19 @@ void PaintCollapsedRow(
 		const QString &text,
 		int unread,
 		const PaintContext &context) {
-	p.fillRect(
-		QRect{ 0, 0, context.width, st::dialogsImportantBarHeight },
-		context.selected ? st::dialogsBgOver : context.currentBg);
+	const auto geometry = QRect{
+		0,
+		0,
+		context.width,
+		st::dialogsImportantBarHeight,
+	};
+	PaintRowBackground(
+		p,
+		geometry,
+		context.selected ? st::dialogsBgOver : context.currentBg,
+		context);
 
-	row.paintRipple(p, 0, 0, context.width);
+	PaintRowRipple(p, row, geometry, context);
 
 	const auto unreadTop = (st::dialogsImportantBarHeight - st::dialogsUnreadHeight) / 2;
 	if (!context.narrow || !folder) {
@@ -1453,6 +1486,100 @@ void PaintCollapsedRow(
 
 int PaintRightButton(QPainter &p, const PaintContext &context) {
 	return PaintRightButtonImpl(p, context);
+}
+
+std::optional<PaintContext> SoftActiveContext(const PaintContext &context) {
+	if (!context.active || !::Ui::Material::SoftPanels()) {
+		return std::nullopt;
+	}
+	auto result = context;
+	result.active = false;
+	result.softActive = true;
+	result.selected = true;
+	return result;
+}
+
+void PaintRowBackground(
+		QPainter &p,
+		const QRect &geometry,
+		const QBrush &bg,
+		const PaintContext &context) {
+	if (!::Ui::Material::SoftPanels()) {
+		p.fillRect(geometry, bg);
+		return;
+	}
+	p.fillRect(geometry, context.currentBg);
+	if (!context.softActive && !context.selected) {
+		return;
+	}
+	const auto fill = context.softActive
+		? ::Ui::Material::SelectedFill()
+		: ::Ui::Material::Active()
+		? ::Ui::ControlFill(st::windowBgOver)
+		: st::dialogsBgOver->c;
+	const auto radius = st::dialogsSoftPanelsRowRadius;
+	p.save();
+	p.setRenderHint(QPainter::Antialiasing);
+	p.setPen(Qt::NoPen);
+	p.setBrush(fill);
+	p.drawRoundedRect(RowPillRect(geometry, context.narrow), radius, radius);
+	p.restore();
+}
+
+void PaintRowRipple(
+		QPainter &p,
+		const BasicRow &row,
+		const QRect &geometry,
+		const PaintContext &context,
+		const QColor *colorOverride) {
+	if (!::Ui::Material::SoftPanels()) {
+		row.paintRipple(p, 0, 0, context.width, colorOverride);
+		return;
+	} else if (!row.hasRipple()) {
+		return;
+	}
+	const auto radius = st::dialogsSoftPanelsRowRadius;
+	auto clip = QPainterPath();
+	clip.addRoundedRect(
+		QRectF(RowPillRect(geometry, context.narrow)),
+		radius,
+		radius);
+	p.save();
+	p.setRenderHint(QPainter::Antialiasing);
+	p.setClipPath(clip, Qt::IntersectClip);
+	row.paintRipple(p, 0, 0, context.width, colorOverride);
+	p.restore();
+}
+
+void PaintSearchPill(QPainter &p, const QRect &rect, bool focused) {
+	const auto radius = st::dialogsSoftPanelsSearchRadius;
+	::Ui::Material::PaintRoundedSurface(
+		p,
+		rect,
+		radius,
+		::Ui::Material::Surface::Bar,
+		focused ? st::filterInputActiveBg : st::filterInputInactiveBg);
+	if (focused) {
+		const auto width = float64(st::softPanelsBorderWidth);
+		const auto inset = width / 2.;
+		const auto inner = std::max(radius - inset, 0.);
+		p.save();
+		p.setRenderHint(QPainter::Antialiasing);
+		p.setPen(QPen(st::activeLineFg->c, width));
+		p.setBrush(Qt::NoBrush);
+		p.drawRoundedRect(
+			QRectF(rect).adjusted(inset, inset, -inset, -inset),
+			inner,
+			inner);
+		p.restore();
+	}
+	const auto iconWidth = st::dialogsFilterSoftPanels.textMargins.left();
+	const auto left = style::RightToLeft()
+		? (rect.x() + rect.width() - iconWidth)
+		: rect.x();
+	st::dialogsSoftPanelsSearchIcon.paintInCenter(
+		p,
+		QRect(left, rect.y(), iconWidth, rect.height()));
 }
 
 } // namespace Dialogs::Ui

@@ -667,6 +667,34 @@ void TestIconHoverStronger() {
 		"a raised hover icon stays stronger than its resting icon");
 }
 
+void TestRowHoverTextReads() {
+	for (const auto dark : { false, true }) {
+		const auto surface = dark
+			? QColor(0x17, 0x21, 0x2b)
+			: QColor(0xff, 0xff, 0xff);
+		const auto grey = dark
+			? QColor(0x7f, 0x91, 0xa4)
+			: QColor(0x91, 0x91, 0x91);
+		auto tint = dark ? QColor(0xf5, 0xf5, 0xf5) : QColor(0, 0, 0);
+		tint.setAlphaF(dark ? 0.07 : 0.06);
+		auto fill = surface;
+		fill.setAlphaF(Floor(Surface::Navigation, dark));
+		const auto text = ReadableOver(
+			grey,
+			surface,
+			Surface::Navigation,
+			dark,
+			5.4);
+		const auto range = AcrylicRange(dark);
+		for (const auto &under : { range.darkest, range.brightest }) {
+			const auto hover = Composite(tint, Composite(fill, under));
+			Check(
+				Ui::CountContrast(text, hover) >= 4.5,
+				"row text keeps 4.5:1 under the hover tint");
+		}
+	}
+}
+
 } // namespace
 
 namespace crl {
@@ -699,6 +727,7 @@ int main(int argc, char *argv[]) {
 	TestAnimationBackgroundDensity();
 	TestControlFill();
 	TestIconHoverStronger();
+	TestRowHoverTextReads();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;

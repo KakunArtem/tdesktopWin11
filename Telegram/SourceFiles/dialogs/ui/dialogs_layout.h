@@ -70,6 +70,7 @@ struct PaintContext {
 	QStringView searchLowerText;
 	int width = 0;
 	bool active = false;
+	bool softActive = false;
 	bool selected = false;
 	bool topicJumpSelected = false;
 	bool paused = false;
@@ -117,5 +118,20 @@ void PaintCollapsedRow(
 	const PaintContext &context);
 
 int PaintRightButton(QPainter &p, const PaintContext &context);
+
+[[nodiscard]] std::optional<PaintContext> SoftActiveContext(
+	const PaintContext &context);
+void PaintRowBackground(
+	QPainter &p,
+	const QRect &geometry,
+	const QBrush &bg,
+	const PaintContext &context);
+void PaintRowRipple(
+	QPainter &p,
+	const BasicRow &row,
+	const QRect &geometry,
+	const PaintContext &context,
+	const QColor *colorOverride = nullptr);
+void PaintSearchPill(QPainter &p, const QRect &rect, bool focused);
 
 } // namespace Dialogs::Ui

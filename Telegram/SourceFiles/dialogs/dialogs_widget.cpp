@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/qt/qt_key_modifiers.h"
 #include "base/options.h"
 #include "dialogs/ui/chat_search_in.h"
+#include "dialogs/ui/dialogs_layout.h"
 #include "dialogs/ui/dialogs_stories_content.h"
 #include "dialogs/ui/dialogs_stories_list.h"
 #include "dialogs/ui/dialogs_suggestions.h"
@@ -116,6 +117,12 @@ namespace {
 constexpr auto kSearchPerPage = 50;
 constexpr auto kStoriesExpandDuration = crl::time(200);
 constexpr auto kSearchRequestDelay = crl::time(900);
+
+[[nodiscard]] const style::InputField &SearchFieldStyle() {
+	return Ui::Material::SoftPanels()
+		? st::dialogsFilterSoftPanels
+		: st::dialogsFilter;
+}
 
 base::options::toggle OptionForumHideChatsList({
 	.id = kOptionForumHideChatsList,
@@ -411,7 +418,7 @@ Widget::Widget(
 	.under = object_ptr<MenuUnderButton>(_searchControls),
 })
 , _searchForNarrowLayout(_searchControls, st::dialogsSearchForNarrowFilters)
-, _search(_searchControls, st::dialogsFilter, tr::lng_dlg_filter())
+, _search(_searchControls, SearchFieldStyle(), tr::lng_dlg_filter())
 , _chooseFromUser(
 	_searchControls,
 	object_ptr<Ui::IconButton>(this, st::dialogsSearchFrom))
@@ -434,6 +441,9 @@ Widget::Widget(
 , _peerSearch(&controller->session(), Api::PeerSearch::Type::WithSponsored)
 , _singleMessageSearch(&controller->session()) {
 	Ui::Material::RepaintOnFillsChanged(this);
+	if (Ui::Material::SoftPanels()) {
+		setupSearchPill();
+	}
 	rpl::merge(
 		Ui::Material::ActiveValue() | rpl::skip(1) | rpl::to_empty,
 		Ui::Material::FillsChanged() | rpl::filter([] {
@@ -4687,6 +4697,24 @@ void Widget::updateSearchFromVisibility(bool fast) {
 	}
 }
 
+void Widget::setupSearchPill() {
+	Ui::Material::RepaintOnFillsChanged(_searchControls);
+	rpl::merge(
+		_search->focusedChanges() | rpl::to_empty,
+		_search->geometryValue() | rpl::to_empty,
+		_search->shownValue() | rpl::to_empty
+	) | rpl::on_next([=] {
+		_searchControls->update();
+	}, _searchControls->lifetime());
+	_searchControls->paintRequest() | rpl::on_next([=] {
+		if (_search->isHidden()) {
+			return;
+		}
+		auto p = QPainter(_searchControls.data());
+		Ui::PaintSearchPill(p, _search->geometry(), _search->hasFocus());
+	}, _searchControls->lifetime());
+}
+
 void Widget::updateControlsGeometry() {
 	if (width() < _narrowWidth) {
 		return;
@@ -4702,12 +4730,16 @@ void Widget::updateControlsGeometry() {
 		? ((smallw - ratiow) / float64(smallw - _narrowWidth))
 		: 0.;
 
-	auto filterLeft = (controller()->filtersWidth()
-		? st::dialogsFilterSkip
-		: (st::dialogsFilterPadding.x() + _mainMenu.toggle->width()))
-		+ st::dialogsFilterPadding.x();
-	const auto filterRight = st::dialogsFilterSkip
-		+ st::dialogsFilterPadding.x();
+	const auto soft = Ui::Material::SoftPanels();
+	auto filterLeft = (soft && controller()->filtersWidth())
+		? st::dialogsSoftPanelsSearchLeft
+		: ((controller()->filtersWidth()
+			? st::dialogsFilterSkip
+			: (st::dialogsFilterPadding.x() + _mainMenu.toggle->width()))
+			+ st::dialogsFilterPadding.x());
+	const auto filterRight = soft
+		? st::dialogsSoftPanelsSearchRight
+		: (st::dialogsFilterSkip + st::dialogsFilterPadding.x());
 	const auto filterWidth = std::max(ratiow, smallw)
 		- filterLeft
 		- filterRight;
@@ -4762,7 +4794,7 @@ void Widget::updateControlsGeometry() {
 	const auto expandedStoriesTop = filterAreaTop + filterAreaHeight;
 	const auto storiesHeight = 2 * st::dialogsStories.photoTop
 		+ st::dialogsStories.photo;
-	const auto added = (st::dialogsFilter.heightMin - storiesHeight) / 2;
+	const auto added = (SearchFieldStyle().heightMin - storiesHeight) / 2;
 	if (_stories) {
 		const auto inFolderTitle = _openedFolder && _subsectionTopBar;
 		const auto storiesLeft = inFolderTitle

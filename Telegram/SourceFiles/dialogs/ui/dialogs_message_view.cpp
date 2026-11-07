@@ -437,7 +437,9 @@ void MessageView::paint(
 			: st::dialogsTextPalette));
 
 	auto rect = geometry;
-	const auto checkJump = withTopic && !context.active;
+	const auto checkJump = withTopic
+		&& !context.active
+		&& !context.softActive;
 	const auto jump1 = checkJump ? _topics->jumpToTopicWidth() : 0;
 	if (jump1) {
 		paintJumpToLast(p, rect, context, jump1);

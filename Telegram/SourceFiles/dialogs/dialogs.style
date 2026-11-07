@@ -337,6 +337,29 @@ dialogsFilter: InputField(defaultInputField) {
 
 	heightMin: 35px;
 }
+dialogsFilterSoftPanels: InputField(dialogsFilter) {
+	textBg: transparent;
+	textBgActive: transparent;
+	textMargins: margins(34px, 8px, 30px, 5px);
+
+	placeholderFgActive: placeholderFg;
+	placeholderFgError: placeholderFg;
+	placeholderMargins: margins(0px, 0px, 2px, 0px);
+
+	borderFg: transparent;
+	borderFgActive: transparent;
+
+	borderRadius: 9px;
+
+	heightMin: 34px;
+}
+dialogsSoftPanelsSearchLeft: 10px;
+dialogsSoftPanelsSearchRight: 8px;
+dialogsSoftPanelsSearchRadius: 9px;
+dialogsSoftPanelsSearchIcon: icon {{ "box_search", dialogsMenuIconFg }};
+dialogsSoftPanelsRowMargins: margins(6px, 1px, 2px, 1px);
+dialogsSoftPanelsNarrowRowMargins: margins(4px, 1px, 4px, 1px);
+dialogsSoftPanelsRowRadius: 10px;
 dialogsCancelSearchInPeer: IconButton(dialogsMenuToggle) {
 	icon: icon {{ "dialogs/dialogs_cancel_search", dialogsMenuIconFg }};
 	iconOver: icon {{ "dialogs/dialogs_cancel_search", dialogsMenuIconFgOver }};

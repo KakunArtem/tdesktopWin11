@@ -207,7 +207,7 @@ void TopicsView::paint(
 		: st::dialogsTextPaletteArchive);
 	auto rect = geometry;
 	rect.setWidth(rect.width() - _lastTopicJumpGeometry.rightCut);
-	auto skipBig = _jumpToTopic && !context.active;
+	auto skipBig = _jumpToTopic && !context.active && !context.softActive;
 	if (_titles.empty()) {
 		const auto text = _allLoaded
 			? tr::lng_filters_no_chats(tr::now)

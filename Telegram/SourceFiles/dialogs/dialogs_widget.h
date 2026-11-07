@@ -257,6 +257,7 @@ private:
 	void updateStoriesTitleShown();
 	void updateJumpToDateVisibility(bool fast = false);
 	void updateSearchFromVisibility(bool fast = false);
+	void setupSearchPill();
 	void updateControlsGeometry();
 	void refreshTopBars();
 	void showSearchInTopBar(anim::type animated);

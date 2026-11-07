@@ -107,6 +107,11 @@ struct AdjustmentRule {
 		{ &st::smallCloseIconFgOver, { Surface::Popup } },
 		{ &st::sideBarTextFg, { Surface::Navigation } },
 		{ &st::sideBarTextFgActive, { Surface::Navigation } },
+		{ &st::placeholderFg, { Surface::Navigation, Surface::Bar } },
+		// The row hover tint takes this margin, leaving 4.5:1 on the pill.
+		{ &st::dialogsTextFgOver, { Surface::Navigation }, 5.4 },
+		{ &st::dialogsDateFgOver, { Surface::Navigation }, 5.4 },
+		{ &st::dialogsTextFgServiceOver, { Surface::Navigation }, 5.4 },
 	};
 	return result;
 }

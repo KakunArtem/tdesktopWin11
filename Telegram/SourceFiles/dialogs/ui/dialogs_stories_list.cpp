@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/tooltip.h"
 #include "ui/dynamic_image.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
@@ -395,7 +396,8 @@ void List::paintEvent(QPaintEvent *e) {
 	};
 	const auto line = elerp(st.lineTwice, full.lineTwice) / 2.;
 	const auto photo = lerp(st.photo, full.photo);
-	const auto layered = (layout.single < (photo + 4 * line))
+	const auto layered = Ui::Material::Active()
+		|| (layout.single < (photo + 4 * line))
 		|| (hidden > 0.);
 	auto p = QPainter(this);
 	if (_changingFromTop) {
@@ -706,7 +708,9 @@ void List::paint(
 					std::ceil(userpic.x() - skip),
 					std::ceil(userpic.y() - skip),
 					std::ceil(userpic.width() + 2 * skip),
-					st::windowBg->c);
+					(Ui::Material::Active()
+						? std::optional<QColor>()
+						: st::windowBg->c));
 			}
 		}
 		p.setOpacity(1.);

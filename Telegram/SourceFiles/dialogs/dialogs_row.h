@@ -55,6 +55,9 @@ public:
 		const Ui::PaintContext &context,
 		bool hasUnreadBadgesAbove) const;
 
+	[[nodiscard]] bool hasRipple() const {
+		return _ripple != nullptr;
+	}
 	void addRipple(QPoint origin, QSize size, Fn<void()> updateCallback);
 	virtual void stopLastRipple();
 	virtual void clearRipple();

@@ -91,6 +91,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/controls/delete_message_context_action.h"
 #include "ui/widgets/multi_select.h"
 #include "ui/widgets/menu/menu_add_action_callback_factory.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/unread_badge.h"
 #include "boxes/delete_messages_box.h"
 #include "boxes/filters/edit_filter_box.h"
@@ -1161,7 +1162,7 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		if (context.narrow) {
 			context.chatsFilterTags = nullptr;
 		} else if (row->entry()->hasChatsFilterTags(context.filter)) {
-			const auto a = active;
+			const auto a = active && !Ui::Material::SoftPanels();
 			context.st = (forum || monoforum)
 				? &st::taggedForumDialogRow
 				: &st::taggedDialogRow;
@@ -1485,8 +1486,27 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 				for (; from < to; ++from) {
 					const auto &result = _hashtagResults[from];
 					bool selected = (from == (isPressed() ? _hashtagPressed : _hashtagSelected));
-					p.fillRect(0, 0, fullWidth, st::mentionHeight, selected ? st::mentionBgOver : currentBg());
-					result->row.paintRipple(p, 0, 0, fullWidth);
+					const auto hashtagRect = QRect(
+						0,
+						0,
+						fullWidth,
+						st::mentionHeight);
+					const auto hashtagContext = Ui::PaintContext{
+						.st = _st,
+						.currentBg = currentBg(),
+						.width = fullWidth,
+						.selected = selected,
+					};
+					Ui::PaintRowBackground(
+						p,
+						hashtagRect,
+						selected ? st::mentionBgOver : currentBg(),
+						hashtagContext);
+					Ui::PaintRowRipple(
+						p,
+						result->row,
+						hashtagRect,
+						hashtagContext);
 					const auto &tag = result->tag;
 					if (selected) {
 						int skip = (st::mentionHeight - st::smallCloseIconOver.height()) / 2;
@@ -1540,7 +1560,12 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		}
 
 		if (!_peerSearchResults.empty()) {
-			p.fillRect(0, 0, fullWidth, st::searchedBarHeight, st::searchedBarBg);
+			p.fillRect(
+				0,
+				0,
+				fullWidth,
+				st::searchedBarHeight,
+				Ui::ControlFill(st::searchedBarBg));
 			p.setFont(st::searchedBarFont);
 			p.setPen(st::searchedBarFg);
 			p.drawTextLeft(st::searchedBarPosition.x(), st::searchedBarPosition.y(), width(), tr::lng_search_global_results(tr::now));
@@ -1594,6 +1619,7 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 						.active = active,
 						.selected = selected,
 						.paused = videoPaused,
+						.narrow = (fullWidth < st::columnMinimalWidthLeft / 2),
 					});
 					p.translate(0, st::dialogsRowHeight);
 				}
@@ -1607,7 +1633,12 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		if (_previewResults.empty() && _searchResults.empty()) {
 			if (_loadingAnimation) {
 				const auto text = tr::lng_contacts_loading(tr::now);
-				p.fillRect(0, 0, fullWidth, st::searchedBarHeight, st::searchedBarBg);
+				p.fillRect(
+					0,
+					0,
+					fullWidth,
+					st::searchedBarHeight,
+					Ui::ControlFill(st::searchedBarBg));
 				p.setFont(st::searchedBarFont);
 				p.setPen(st::searchedBarFg);
 				p.drawTextLeft(st::searchedBarPosition.x(), st::searchedBarPosition.y(), width(), text);
@@ -1617,7 +1648,12 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 		}
 		if (!_previewResults.empty()) {
 			const auto text = tr::lng_search_tab_public_posts(tr::now);
-			p.fillRect(0, 0, fullWidth, st::searchedBarHeight, st::searchedBarBg);
+			p.fillRect(
+				0,
+				0,
+				fullWidth,
+				st::searchedBarHeight,
+				Ui::ControlFill(st::searchedBarBg));
 			p.setFont(st::searchedBarFont);
 			p.setPen(st::searchedBarFg);
 			p.drawTextLeft(st::searchedBarPosition.x(), st::searchedBarPosition.y(), width(), text);
@@ -1699,7 +1735,12 @@ void InnerWidget::paintEvent(QPaintEvent *e) {
 			const auto searchLowerText = (_searchHashOrCashtag == HashOrCashtag::None)
 				? _searchState.query.toLower()
 				: QString();
-			p.fillRect(0, 0, fullWidth, st::searchedBarHeight, st::searchedBarBg);
+			p.fillRect(
+				0,
+				0,
+				fullWidth,
+				st::searchedBarHeight,
+				Ui::ControlFill(st::searchedBarBg));
 			p.setFont(st::searchedBarFont);
 			p.setPen(st::searchedBarFg);
 			p.drawTextLeft(st::searchedBarPosition.x(), st::searchedBarPosition.y(), width(), text);
@@ -1920,16 +1961,22 @@ void InnerWidget::paintPeerSearchResult(
 		Painter &p,
 		not_null<const PeerSearchResult*> result,
 		const Ui::PaintContext &context) {
+	if (const auto soft = Ui::SoftActiveContext(context)) {
+		paintPeerSearchResult(p, result, *soft);
+		return;
+	}
 	QRect fullRect(0, 0, context.width, st::dialogsRowHeight);
-	p.fillRect(
+	Ui::PaintRowBackground(
+		p,
 		fullRect,
 		(context.active
 			? st::dialogsBgActive
 			: context.selected
 			? st::dialogsBgOver
-			: currentBg()));
+			: currentBg()),
+		context);
 	if (!context.active) {
-		result->row.paintRipple(p, 0, 0, context.width);
+		Ui::PaintRowRipple(p, result->row, fullRect, context);
 	}
 
 	auto peer = result->peer;
