@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 using "window/window.style";
 
 mainMenuWidth: 274px;
+mainMenuSoftPanelsRadius: 14px;
 mainMenuCoverHeight: 134px;
 mainMenuUserpicLeft: 24px;
 mainMenuUserpicTop: 20px;

@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/palette.h"
 #include "ui/style/style_core_palette.h"
 #include "ui/chat/chat_theme_readability.h"
+#include "ui/layers/layer_widget.h"
 #include "ui/ui_material.h"
 #include "ui/widgets/soft_controls.h"
 
@@ -19,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <QtGui/QPixmap>
 
 #include "styles/style_info.h"
+#include "styles/style_window_main_menu.h"
 #include "styles/style_window_soft_panels.h"
 
 namespace Window::SoftPanels {
@@ -52,6 +54,9 @@ void Initialize() {
 
 void RefreshSoftControls() {
 	Ui::SetSoftControls(Ui::Material::SoftPanels());
+	Ui::SetMainMenuCornerRadius(Ui::Material::SoftPanels()
+		? st::mainMenuSoftPanelsRadius
+		: 0);
 	if (Ui::SoftControls()) {
 		auto hover = st::windowFg->c;
 		hover.setAlphaF(Ui::IsDarkPalette(*style::main_palette::get())

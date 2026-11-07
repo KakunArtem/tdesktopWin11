@@ -115,6 +115,12 @@ mainMenuButton: SettingsButton(defaultSettingsButton) {
 	toggleSkip: 19px;
 	iconLeft: 21px;
 }
+mainMenuSoftPanelsRowMargins: margins(8px, 0px, 8px, 0px);
+mainMenuSoftPanelsRowRadius: 8px;
+mainMenuButtonSoftPanels: SettingsButton(mainMenuButton) {
+	pillMargins: mainMenuSoftPanelsRowMargins;
+	pillRadius: mainMenuSoftPanelsRowRadius;
+}
 mainMenuAddAccountButton: SettingsButton(mainMenuButton) {
 	iconLeft: 23px;
 }
@@ -264,6 +270,49 @@ windowFiltersMainMenuUnread: icon {
 };
 windowFiltersMainMenuUnreadMuted: icon {
 	{ "dialogs/dialogs_menu_unread", sideBarIconFg },
+	{ "dialogs/dialogs_menu_unread_dot", sideBarBadgeBgMuted },
+};
+windowFiltersSoftPanelsWidth: 64px;
+windowFiltersSoftPanelsRadius: 10px;
+windowFiltersSoftPanelsPill: margins(6px, 2px, 6px, 2px);
+windowFiltersSoftPanelsMarker: size(3px, 20px);
+windowFiltersSoftPanelsMarkerRadius: 2px;
+windowFiltersSoftPanelsFocusWidth: 2px;
+windowFiltersSoftPanelsScrollTop: 2px;
+windowFiltersSoftPanelsScrollBottom: 6px;
+windowFiltersButtonSoftPanels: SideBarButton(windowFiltersButton) {
+	textBg: transparent;
+	textBgActive: transparent;
+	textFg: windowSubTextFg;
+	textFgActive: windowActiveTextFg;
+	textTop: 35px;
+	textSkip: 8px;
+	minHeight: 58px;
+	badgePosition: point(3px, 8px);
+	iconPosition: point(-1px, 7px);
+	ripple: defaultRippleAnimation;
+	pillMargins: windowFiltersSoftPanelsPill;
+	pillRadius: windowFiltersSoftPanelsRadius;
+}
+windowFiltersButtonTextOnlySoftPanels: SideBarButton(windowFiltersButtonSoftPanels) {
+	textTop: 17px;
+	minHeight: 48px;
+	badgePosition: point(15px, 3px);
+}
+windowFiltersButtonIconsOnlySoftPanels: SideBarButton(windowFiltersButtonSoftPanels) {
+	iconPosition: point(-1px, -1px);
+}
+windowFiltersMainMenuSoftPanels: SideBarButton(windowFiltersButtonSoftPanels) {
+	icon: icon {{ "dialogs/dialogs_menu", menuIconFg }};
+	iconPosition: point(-1px, -1px);
+	minHeight: 54px;
+}
+windowFiltersMainMenuUnreadSoftPanels: icon {
+	{ "dialogs/dialogs_menu_unread", menuIconFg },
+	{ "dialogs/dialogs_menu_unread_dot", sideBarBadgeBg },
+};
+windowFiltersMainMenuUnreadMutedSoftPanels: icon {
+	{ "dialogs/dialogs_menu_unread", menuIconFg },
 	{ "dialogs/dialogs_menu_unread_dot", sideBarBadgeBgMuted },
 };
 windowFilterSmallItem: PeerListItem(defaultPeerListItem) {

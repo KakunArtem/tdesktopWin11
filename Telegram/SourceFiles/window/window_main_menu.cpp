@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/text/text_options.h"
 #include "ui/text/text_utilities.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "ui/unread_badge_paint.h"
 #include "ui/vertical_list.h"
@@ -71,6 +72,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_main_menu_helpers.h"
 #include "window/window_peer_menu.h"
 #include "window/window_session_controller.h"
+#include "window/window_soft_panels_layout.h"
 #include "styles/style_chat.h" // popupMenuExpandedSeparator
 #include "styles/style_menu_icons.h"
 #include "styles/style_settings.h"
@@ -307,6 +309,18 @@ void MainMenu::ResetScaleButton::paintEvent(QPaintEvent *e) {
 		kText);
 }
 
+void PaintMainMenuBackground(QPainter &p, const QRect &rect) {
+	auto hq = PainterHighQualityEnabler(p);
+	Ui::Material::PaintSurface(
+		p,
+		SoftPanels::PanelShape(
+			QRectF(rect),
+			st::mainMenuSoftPanelsRadius,
+			SoftPanels::Corners::Right),
+		Ui::Material::Surface::Popup,
+		st::mainMenuBg);
+}
+
 MainMenu::MainMenu(
 	QWidget *parent,
 	not_null<SessionController*> controller)
@@ -346,7 +360,11 @@ MainMenu::MainMenu(
 , _telegram(
 	Ui::CreateChild<Ui::FlatLabel>(_footer.get(), st::mainMenuTelegramLabel))
 , _version(AddVersionLabel(_footer)) {
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	if (Ui::Material::SoftPanels()) {
+		Ui::Material::RepaintOnFillsChanged(this);
+	} else {
+		setAttribute(Qt::WA_OpaquePaintEvent);
+	}
 
 	setupUserpicButton();
 	setupAccountsToggle();
@@ -445,7 +463,11 @@ MainMenu::MainMenu(
 			snowRaw->paintRequest(
 			) | rpl::on_next([=](const QRect &r) {
 				auto p = Painter(snowRaw);
-				p.fillRect(r, st::mainMenuBg);
+				if (Ui::Material::SoftPanels()) {
+					PaintMainMenuBackground(p, rect());
+				} else {
+					p.fillRect(r, st::mainMenuBg);
+				}
 				drawName(p);
 				snow->paint(p, snowRaw->rect());
 			}, snowRaw->lifetime());
@@ -525,7 +547,7 @@ void MainMenu::setupArchive() {
 	const auto button = AddButtonWithIcon(
 		inner,
 		tr::lng_archived_name(),
-		st::mainMenuButton,
+		MainMenuButtonStyle(),
 		{ &st::menuIconArchiveOpen });
 	inner->add(
 		object_ptr<Ui::PlainShadow>(inner),
@@ -664,7 +686,7 @@ void MainMenu::setupMenu() {
 		return AddButtonWithIcon(
 			_menu,
 			std::move(text),
-			st::mainMenuButton,
+			MainMenuButtonStyle(),
 			std::move(descriptor));
 	};
 	if (!_controller->session().supportMode()) {
@@ -672,7 +694,7 @@ void MainMenu::setupMenu() {
 			CreateButtonWithIcon(
 				_menu,
 				tr::lng_menu_my_profile(),
-				st::mainMenuButton,
+				MainMenuButtonStyle(),
 				{ &st::menuIconProfile })
 		)->setClickedCallback([=] {
 			controller->showSection(
@@ -728,7 +750,7 @@ void MainMenu::setupMenu() {
 				CreateButtonWithIcon(
 					_menu,
 					tr::lng_wallet_menu(),
-					st::mainMenuButton,
+					MainMenuButtonStyle(),
 					{ &st::walletMenuIcon })));
 		Ui::NewBadge::AddAfterButtonText(
 			wallet->entity(),
@@ -903,7 +925,11 @@ void MainMenu::paintEvent(QPaintEvent *e) {
 	const auto clip = e->rect();
 	const auto cover = QRect(0, 0, width(), st::mainMenuCoverHeight);
 
-	p.fillRect(clip, st::mainMenuBg);
+	if (Ui::Material::SoftPanels()) {
+		PaintMainMenuBackground(p, rect());
+	} else {
+		p.fillRect(clip, st::mainMenuBg);
+	}
 	if (cover.intersects(clip)) {
 		drawName(p);
 	}

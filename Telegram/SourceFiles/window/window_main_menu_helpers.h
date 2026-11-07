@@ -14,9 +14,15 @@ class SettingsButton;
 class VerticalLayout;
 } // namespace Ui
 
+namespace style {
+struct SettingsButton;
+} // namespace style
+
 namespace Window {
 
 class SessionController;
+
+[[nodiscard]] const style::SettingsButton &MainMenuButtonStyle();
 
 [[nodiscard]] not_null<Ui::FlatLabel*> AddVersionLabel(
 	not_null<Ui::RpWidget*>);

@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/dynamic_thumbnails.h"
 #include "ui/layers/generic_box.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/menu/menu_add_action_callback.h"
 #include "ui/widgets/menu/menu_add_action_callback_factory.h"
@@ -234,7 +235,7 @@ FolderFavoriteButton::FolderFavoriteButton(
 , _st(st)
 , _api(&controller->session().mtp())
 , _label(st.minTextWidth) {
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	setAttribute(Qt::WA_OpaquePaintEvent, !Ui::Material::SoftPanels());
 
 	setClickedCallback([=] { openLink(); });
 

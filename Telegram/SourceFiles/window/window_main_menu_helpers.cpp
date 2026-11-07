@@ -28,6 +28,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/popup_menu.h"
 #include "ui/widgets/tooltip.h"
 #include "ui/wrap/slide_wrap.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
@@ -37,6 +38,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_window.h"
 
 namespace Window {
+
+const style::SettingsButton &MainMenuButtonStyle() {
+	return Ui::Material::SoftPanels()
+		? st::mainMenuButtonSoftPanels
+		: st::mainMenuButton;
+}
 
 [[nodiscard]] not_null<Ui::FlatLabel*> AddVersionLabel(
 		not_null<Ui::RpWidget*> parent) {
@@ -316,7 +323,7 @@ void SetupMenuBots(
 			const auto button = wrap->add(object_ptr<Ui::SettingsButton>(
 				wrap,
 				rpl::single(bot.name),
-				st::mainMenuButton));
+				MainMenuButtonStyle()));
 			const auto menu = button->lifetime().make_state<
 				base::unique_qptr<Ui::PopupMenu>
 			>();

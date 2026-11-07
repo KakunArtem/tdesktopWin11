@@ -105,6 +105,8 @@ struct AdjustmentRule {
 		{ &st::emojiIconFg, { Surface::Popup }, 3. },
 		{ &st::smallCloseIconFg, { Surface::Popup }, 3. },
 		{ &st::smallCloseIconFgOver, { Surface::Popup } },
+		{ &st::sideBarTextFg, { Surface::Navigation } },
+		{ &st::sideBarTextFgActive, { Surface::Navigation } },
 	};
 	return result;
 }

@@ -33,6 +33,11 @@ namespace Window {
 class SessionController;
 class FolderFavoriteButton;
 
+[[nodiscard]] int FiltersMenuWidth();
+[[nodiscard]] const style::SideBarButton &FiltersButtonStyle(
+	Ui::ChatsFiltersTabsMode mode);
+void SetupFiltersButton(not_null<Ui::SideBarButton*> button);
+
 class FiltersMenu final {
 public:
 	FiltersMenu(

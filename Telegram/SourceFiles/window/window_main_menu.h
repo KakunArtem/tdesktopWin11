@@ -46,6 +46,8 @@ namespace Window {
 
 class SessionController;
 
+void PaintMainMenuBackground(QPainter &p, const QRect &rect);
+
 class MainMenu final : public Ui::LayerWidget {
 public:
 	MainMenu(QWidget *parent, not_null<SessionController*> controller);

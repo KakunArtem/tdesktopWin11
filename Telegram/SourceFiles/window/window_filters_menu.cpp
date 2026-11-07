@@ -36,8 +36,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/boxes/confirm_box.h"
 #include "ui/power_saving.h"
 #include "ui/screen_reader_mode.h"
-#include "ui/ui_material.h"
+#include "ui/painter.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
+#include "ui/widgets/soft_controls.h"
 #include "boxes/filters/edit_filter_box.h"
 #include "boxes/choose_filter_box.h"
 #include "boxes/premium_limits_box.h"
@@ -95,7 +97,90 @@ public:
 	}
 };
 
+void PaintFiltersPill(
+		QPainter &p,
+		const QRect &rect,
+		bool active,
+		bool over,
+		bool focused) {
+	const auto pill = rect.marginsRemoved(st::windowFiltersSoftPanelsPill);
+	const auto radius = st::windowFiltersSoftPanelsRadius;
+	auto hq = PainterHighQualityEnabler(p);
+	p.setPen(Qt::NoPen);
+	if (active) {
+		p.setBrush(Ui::Material::SelectedFill());
+		p.drawRoundedRect(pill, radius, radius);
+
+		const auto marker = st::windowFiltersSoftPanelsMarker;
+		const auto markerRadius = st::windowFiltersSoftPanelsMarkerRadius;
+		p.setBrush(st::windowBgActive->c);
+		p.drawRoundedRect(
+			QRect(
+				0,
+				rect.y() + (rect.height() - marker.height()) / 2,
+				marker.width(),
+				marker.height()),
+			markerRadius,
+			markerRadius);
+	} else if (over) {
+		p.setBrush(Ui::ControlFill(st::windowBgOver));
+		p.drawRoundedRect(pill, radius, radius);
+	}
+	if (focused) {
+		const auto width = st::windowFiltersSoftPanelsFocusWidth;
+		const auto inset = width / 2.;
+		p.setPen(QPen(st::windowBgActive->c, width));
+		p.setBrush(Qt::NoBrush);
+		p.drawRoundedRect(
+			QRectF(pill).adjusted(inset, inset, -inset, -inset),
+			radius - inset,
+			radius - inset);
+	}
+}
+
+void SetupFiltersPill(not_null<Ui::SideBarButton*> button) {
+	const auto raw = button.get();
+	button->setBackgroundPainter([=](
+			QPainter &p,
+			const QRect &rect,
+			bool active,
+			bool over) {
+		PaintFiltersPill(p, rect, active, over, raw->hasFocus());
+	});
+}
+
 } // namespace
+
+int FiltersMenuWidth() {
+	return Ui::Material::SoftPanels()
+		? st::windowFiltersSoftPanelsWidth
+		: st::windowFiltersWidth;
+}
+
+const style::SideBarButton &FiltersButtonStyle(Ui::ChatsFiltersTabsMode mode) {
+	using Mode = Ui::ChatsFiltersTabsMode;
+	const auto soft = Ui::Material::SoftPanels();
+	switch (mode) {
+	case Mode::TextOnly:
+		return soft
+			? st::windowFiltersButtonTextOnlySoftPanels
+			: st::windowFiltersButtonTextOnly;
+	case Mode::IconsOnly:
+		return soft
+			? st::windowFiltersButtonIconsOnlySoftPanels
+			: st::windowFiltersButtonIconsOnly;
+	case Mode::TextAndIcons:
+		break;
+	}
+	return soft ? st::windowFiltersButtonSoftPanels : st::windowFiltersButton;
+}
+
+void SetupFiltersButton(not_null<Ui::SideBarButton*> button) {
+	if (Ui::Material::SoftPanels()) {
+		SetupFiltersPill(button);
+		button->setIconColors(&st::menuIconFg, &st::windowActiveTextFg);
+	}
+}
 
 FiltersMenu::FiltersMenu(
 	not_null<Ui::RpWidget*> parent,
@@ -103,7 +188,12 @@ FiltersMenu::FiltersMenu(
 : _session(session)
 , _parent(parent)
 , _outer(_parent)
-, _menu(&_outer, TextWithEntities(), st::windowFiltersMainMenu)
+, _menu(
+	&_outer,
+	TextWithEntities(),
+	(Ui::Material::SoftPanels()
+		? st::windowFiltersMainMenuSoftPanels
+		: st::windowFiltersMainMenu))
 , _scroll(&_outer)
 , _container(
 	_scroll.setOwnedWidget(
@@ -122,6 +212,9 @@ FiltersMenu::~FiltersMenu() = default;
 void FiltersMenu::setup() {
 	setupDragAndDrop();
 	setupMainMenuIcon();
+	if (Ui::Material::SoftPanels()) {
+		SetupFiltersPill(&_menu);
+	}
 	_menu.setIsMenuButton(true);
 	_menu.setAccessibleName(tr::lng_main_menu(tr::now));
 
@@ -146,7 +239,9 @@ void FiltersMenu::setup() {
 				st::windowFiltersButton.textBg);
 		} else {
 			p.setPen(Qt::NoPen);
-			p.setBrush(st::windowFiltersButton.textBg);
+			p.setBrush(Ui::Material::SoftPanels()
+				? st::dialogsBg
+				: st::windowFiltersButton.textBg);
 			p.drawRect(clip);
 		}
 	}, _outer.lifetime());
@@ -157,12 +252,17 @@ void FiltersMenu::setup() {
 	) | rpl::on_next([=](int height, bool softPanels) {
 		height = std::max(0, height
 			- (softPanels ? st::softPanelsFrame.bottom() : 0));
-		const auto width = st::windowFiltersWidth;
+		const auto width = FiltersMenuWidth();
+		const auto scrollTop = _menu.height()
+			+ (softPanels ? st::windowFiltersSoftPanelsScrollTop : 0);
+		const auto scrollBottom = softPanels
+			? st::windowFiltersSoftPanelsScrollBottom
+			: 0;
 		_outer.setGeometry({ 0, 0, width, height });
 		_menu.resizeToWidth(width);
 		_menu.move(0, 0);
 		_scroll.setGeometry(
-			{ 0, _menu.height(), width, height - _menu.height() });
+			{ 0, scrollTop, width, height - scrollTop - scrollBottom });
 		_container->resizeToWidth(width);
 		_container->move(0, 0);
 	}, _outer.lifetime());
@@ -249,11 +349,16 @@ void FiltersMenu::setupMainMenuIcon() {
 	OtherAccountsUnreadState(
 		&_session->session().account()
 	) | rpl::on_next([=](const OthersUnreadState &state) {
+		const auto soft = Ui::Material::SoftPanels();
 		const auto icon = !state.count
 			? nullptr
 			: !state.allMuted
-			? &st::windowFiltersMainMenuUnread
-			: &st::windowFiltersMainMenuUnreadMuted;
+			? (soft
+				? &st::windowFiltersMainMenuUnreadSoftPanels
+				: &st::windowFiltersMainMenuUnread)
+			: (soft
+				? &st::windowFiltersMainMenuUnreadMutedSoftPanels
+				: &st::windowFiltersMainMenuUnreadMuted);
 		_menu.setIconOverride(icon, icon);
 	}, _outer.lifetime());
 }
@@ -546,13 +651,7 @@ Ui::ChatsFiltersTabsMode FiltersMenu::tabsMode() const {
 }
 
 const style::SideBarButton &FiltersMenu::buttonStyle() const {
-	using Mode = Ui::ChatsFiltersTabsMode;
-	switch (tabsMode()) {
-	case Mode::TextOnly: return st::windowFiltersButtonTextOnly;
-	case Mode::TextAndIcons: return st::windowFiltersButton;
-	case Mode::IconsOnly: return st::windowFiltersButtonIconsOnly;
-	}
-	return st::windowFiltersButton;
+	return FiltersButtonStyle(tabsMode());
 }
 
 base::unique_qptr<Ui::SideBarButton> FiltersMenu::prepareButton(
@@ -587,6 +686,7 @@ base::unique_qptr<Ui::SideBarButton> FiltersMenu::prepareButton(
 	prepared->setIsListItem(listItem);
 	prepared->setShowIcon(mode != Ui::ChatsFiltersTabsMode::TextOnly);
 	prepared->setShowText(mode != Ui::ChatsFiltersTabsMode::IconsOnly);
+	SetupFiltersButton(prepared.data());
 	auto added = toBeginning
 		? container->insert(0, std::move(prepared))
 		: container->add(std::move(prepared));
@@ -670,6 +770,10 @@ base::unique_qptr<Ui::SideBarButton> FiltersMenu::prepareButton(
 		base::install_event_filter(raw, [=](not_null<QEvent*> event) {
 			if (event->type() == QEvent::FocusIn) {
 				setListTabStop(raw);
+				raw->update();
+				return base::EventFilterResult::Continue;
+			} else if (event->type() == QEvent::FocusOut) {
+				raw->update();
 				return base::EventFilterResult::Continue;
 			} else if (event->type() != QEvent::KeyPress) {
 				return base::EventFilterResult::Continue;
