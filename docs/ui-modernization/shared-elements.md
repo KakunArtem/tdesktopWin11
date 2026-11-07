@@ -61,9 +61,8 @@ Badges belong to C10, and tooltips and toasts to C14.
   Font family already offers Default (bundled Open Sans), System font and any
   installed family (`Core::Settings::customFontFamily`,
   `style::SystemFontTag()`). On Windows, System is the Segoe UI family, sized
-  to Open Sans's x-height. Choosing it is a user setting today. Making it the
-  Soft Panels default is a decision; if the user makes it, C18 adds one
-  function so that Default means the system font under Soft Panels.
+  to Open Sans's x-height. Choosing it stays a user setting: the user kept Open
+  Sans as the Soft Panels default on 2026-11-07, after trying Segoe UI.
 - Text drawn on a translucent surface loses ClearType subpixel rendering, as
   the roadmap's risks note. Bubbles stay opaque (C13), so message text keeps
   it; list and header text is the case to compare in the Phase 1 record.
@@ -115,9 +114,9 @@ by C2 and C7.
   rows, fields and hovers on it, and so before C14 and C15. Its plan maps the surface fills and the opaque
   hover in one `lib_ui` switch, raises three state colors, and checks the
   subgroups that paint no fill.
-- C18 comes after C17 and before C9–C13, whose checks include its icons. Its plan raises the grey icon entries,
-  implements the system font default the user chose, and checks
-  text rendering and motion. Icon shapes stay Telegram's.
+- C18 comes after C17 and before C9–C13, whose checks include its icons. Its plan raises the grey icon entries
+  and checks text rendering and motion. Icon shapes stay Telegram's, and Default
+  stays Open Sans.
 - C19 comes after C14, whose popup radius it reuses, and before C15's final
   pass. Its plan gives the
   restore shell the material, gives notifications and separate panels

@@ -34,8 +34,10 @@ Windows 11 as the design target.
   and `lib_base` are forked as `KakunArtem/lib_ui` and `KakunArtem/lib_base`,
   branch `soft-panels`; `lib_ui`'s default styles stay upstream, and Soft
   Panels uses parallel app styles and fork flags.
-- Look (2026-10-31): under Soft Panels, Default font means the system font
-  (Segoe UI); Telegram's notifications and separate panels take the popup
+- Font (2026-11-07, replacing the 2026-10-31 choice of the system font): Default
+  stays Open Sans under Soft Panels, because the user found Segoe UI hard to read
+  in the real window.
+- Look (2026-10-31): Telegram's notifications and separate panels take the popup
   shape (radius 12, the Popup border, opaque); the day theme rail becomes a
   light rail with readable labels and the mockup's light selected pill.
 - Mockup values adopted (2026-10-31): rail width 64 px, chat header height

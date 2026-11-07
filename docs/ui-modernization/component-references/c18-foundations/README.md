@@ -5,6 +5,9 @@ Date: 2026-10-31. Status: proposal. Component: C18 in the
 [foundations](../../plans/2026-10-31-foundations.md). Grouping:
 [shared elements](../../shared-elements.md#c18-foundations).
 
+Update, 2026-11-07: the user kept Open Sans as the default after trying the system
+font in the real window, so this sheet's font choice no longer applies.
+
 C18 keeps Telegram's type scale, icon shapes and durations, and changes only
 what fails on the material: the grey icon colors. While material is active,
 resting icon entries are raised to 3:1 and hover entries to 4.5:1, the way C3

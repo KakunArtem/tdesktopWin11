@@ -38,6 +38,10 @@
 
 ### Task 1: Readable icon colors
 
+Correction, 2026-11-07: Step 4's table predates C3's move to the measured Acrylic
+range, so the built values differ slightly. `ReadableOver` is in `Window::Material`.
+See [the checks](../checks/foundations.md#changes-from-the-plans).
+
 **Files:**
 - Modify: `Telegram/SourceFiles/window/window_material.cpp` (C3's adjusted-entry table)
 - Test: `Telegram/SourceFiles/tests/test_window_material.cpp`
@@ -99,6 +103,11 @@ git commit -m "Kept grey icons readable on the window material."
 ---
 
 ### Task 2: Default font family under Soft Panels
+
+Withdrawn, 2026-11-07: this task was built and then removed. The user tried Segoe UI
+in the real window, found it hard to read, and kept Open Sans as the default. The
+Goal, Global Constraints and Done when lines about the system font no longer apply.
+See [the checks](../checks/foundations.md#changes-from-the-plans).
 
 **Files:**
 - Modify: `Telegram/SourceFiles/ui/ui_material.h`, `ui/ui_material.cpp`
