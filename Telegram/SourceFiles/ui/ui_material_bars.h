@@ -34,6 +34,7 @@ void PaintBarContent(
 	const style::color &solid);
 [[nodiscard]] not_null<RpWidget*> CreateBarContent(not_null<RpWidget*> row);
 void AddBarFrame(not_null<RpWidget*> row);
+[[nodiscard]] QColor SelectedFill();
 void PaintSurfaceOutline(
 	QPainter &p,
 	const QRect &rect,

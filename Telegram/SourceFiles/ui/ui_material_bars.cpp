@@ -18,6 +18,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Ui::Material {
 namespace {
 
+constexpr auto kSelectedAlpha = 0.30;
+
 [[nodiscard]] const style::color &RowSolid(Surface surface) {
 	return (surface == Surface::Navigation) ? st::dialogsBg : st::windowBg;
 }
@@ -135,6 +137,19 @@ void AddBarFrame(not_null<RpWidget*> row) {
 			PaintPillOutline(p, pill);
 		}
 	}, frame->lifetime());
+}
+
+QColor SelectedFill() {
+	const auto active = st::windowBgActive->c;
+	const auto background = st::windowBg->c;
+	const auto mix = [](int over, int under) {
+		return int(std::lround(over * kSelectedAlpha
+			+ under * (1. - kSelectedAlpha)));
+	};
+	return QColor(
+		mix(active.red(), background.red()),
+		mix(active.green(), background.green()),
+		mix(active.blue(), background.blue()));
 }
 
 void PaintSurfaceOutline(

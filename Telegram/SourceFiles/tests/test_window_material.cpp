@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_soft_panels_layout.h"
 #include "ui/ui_material.h"
 #include "ui/ui_utility.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/color_contrast.h"
 #include "ui/style/style_core_color.h"
 
@@ -620,6 +621,33 @@ void TestAnimationBackgroundDensity() {
 	Ui::Material::SetActive(false);
 }
 
+void TestControlFill() {
+	const auto colors = Ui::SoftControlColors{
+		.windowBg = QColor(0xff, 0xff, 0xff),
+		.boxBg = QColor(0xf4, 0xf6, 0xf8),
+		.windowBgOver = QColor(0xf1, 0xf1, 0xf1),
+		.hover = QColor(0, 0, 0, 15),
+	};
+	Check(
+		Ui::ResolveControlFill(colors.windowBg, colors).alpha() == 0,
+		"window color is skipped");
+	Check(
+		Ui::ResolveControlFill(colors.boxBg, colors).alpha() == 0,
+		"box color is skipped");
+	Check(
+		Ui::ResolveControlFill(colors.windowBgOver, colors) == colors.hover,
+		"opaque hover becomes the soft hover");
+	const auto filled = QColor(0x40, 0xa7, 0xe3);
+	Check(
+		Ui::ResolveControlFill(filled, colors) == filled,
+		"a filled button keeps its fill");
+	const auto translucent = QColor(0xff, 0xff, 0xff, 0x80);
+	Check(
+		Ui::ResolveControlFill(translucent, colors) == translucent,
+		"a translucent fill is unchanged");
+	Check(!Ui::SoftControls(), "soft controls are off by default");
+}
+
 } // namespace
 
 namespace crl {
@@ -650,6 +678,7 @@ int main(int argc, char *argv[]) {
 	TestScopedSurfacePainting();
 	TestContentGrabs();
 	TestAnimationBackgroundDensity();
+	TestControlFill();
 	std::cout << "Checks: " << TotalChecks
 		<< ", failures: " << FailedChecks << std::endl;
 	return FailedChecks ? 1 : 0;

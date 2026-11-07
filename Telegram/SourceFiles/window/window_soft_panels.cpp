@@ -10,7 +10,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/options.h"
 #include "styles/palette.h"
 #include "ui/style/style_core_palette.h"
+#include "ui/chat/chat_theme_readability.h"
 #include "ui/ui_material.h"
+#include "ui/widgets/soft_controls.h"
 
 #include <QtGui/QPaintEvent>
 #include <QtGui/QPainter>
@@ -22,7 +24,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Window::SoftPanels {
 namespace {
 
+constexpr auto kSoftControlHoverLight = 0.06;
+constexpr auto kSoftControlHoverDark = 0.07;
+
 auto ContentGrabDepth = 0;
+auto SoftControlsLifetime = rpl::lifetime();
 
 base::options::toggle LayoutOption({
 	.id = kOptionLayout,
@@ -38,6 +44,21 @@ const char kOptionLayout[] = "soft-panels-layout";
 
 void Initialize() {
 	Ui::Material::SetSoftPanels(LayoutOption.value());
+	RefreshSoftControls();
+	style::PaletteChanged() | rpl::on_next([] {
+		RefreshSoftControls();
+	}, SoftControlsLifetime);
+}
+
+void RefreshSoftControls() {
+	Ui::SetSoftControls(Ui::Material::SoftPanels());
+	if (Ui::SoftControls()) {
+		auto hover = st::windowFg->c;
+		hover.setAlphaF(Ui::IsDarkPalette(*style::main_palette::get())
+			? kSoftControlHoverDark
+			: kSoftControlHoverLight);
+		Ui::SetSoftControlHover(hover);
+	}
 }
 
 QPixmap GrabContent(not_null<QWidget*> widget, QRect rect) {

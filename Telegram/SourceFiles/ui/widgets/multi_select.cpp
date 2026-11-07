@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/scroll_area.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/effects/animations.h"
 #include "ui/effects/cross_animation.h"
 #include "ui/text/text_options.h"
@@ -550,7 +551,7 @@ MultiSelect::MultiSelect(
 		}
 	});
 
-	setAttribute(Qt::WA_OpaquePaintEvent, _st.bg->c.alpha() == 255);
+	setAttribute(Qt::WA_OpaquePaintEvent, ControlFill(_st.bg).alpha() == 255);
 	auto defaultWidth = _st.item.maxWidth + _st.fieldMinWidth + _st.fieldCancelSkip;
 	resizeToWidth(_st.padding.left() + defaultWidth + _st.padding.right());
 }
@@ -844,7 +845,10 @@ void MultiSelect::Inner::paintEvent(QPaintEvent *e) {
 	Painter p(this);
 
 	auto paintRect = e->rect();
-	p.fillRect(paintRect, _st.bg);
+	const auto fill = ControlFill(_st.bg);
+	if (fill.alpha() > 0) {
+		p.fillRect(paintRect, fill);
+	}
 
 	auto offset = QPoint(
 		style::RightToLeft() ? _st.padding.right() : _st.padding.left(),

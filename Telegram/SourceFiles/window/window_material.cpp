@@ -71,6 +71,14 @@ struct AdjustmentRule {
 		{ &st::titleButtonCloseFgActive, { Surface::Window }, 3. },
 		{ &st::titleFg, { Surface::Window } },
 		{ &st::titleFgActive, { Surface::Window } },
+		{ &st::checkboxFg,
+			{ Surface::Navigation, Surface::Conversation, Surface::Popup },
+			3. },
+		{ &st::activeLineFg,
+			{ Surface::Navigation, Surface::Conversation, Surface::Popup },
+			3. },
+		{ &st::lightButtonFg,
+			{ Surface::Navigation, Surface::Conversation, Surface::Popup } },
 	};
 	return result;
 }

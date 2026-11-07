@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "base/timer.h"
 #include "base/flat_map.h"
+#include "ui/widgets/soft_controls.h"
 
 namespace Ui {
 
@@ -41,8 +42,15 @@ public:
 			p.drawImage(0, 0, i->second);
 			return;
 		}
-		auto image = QImage(physicalSize, QImage::Format_RGB32);
+		auto image = QImage(
+			physicalSize,
+			(SoftControls()
+				? QImage::Format_ARGB32_Premultiplied
+				: QImage::Format_RGB32));
 		image.setDevicePixelRatio(ratio);
+		if (SoftControls()) {
+			image.fill(Qt::transparent);
+		}
 		paintToImage(image);
 		p.drawImage(0, 0, image);
 		auto &slot = _images[rowId];

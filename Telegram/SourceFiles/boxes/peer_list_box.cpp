@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/labels.h"
 #include "ui/widgets/scroll_area.h"
 #include "ui/widgets/popup_menu.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/empty_userpic.h"
 #include "ui/wrap/slide_wrap.h"
 #include "ui/text/text_options.h"
@@ -339,7 +340,10 @@ void PeerListBox::resizeEvent(QResizeEvent *e) {
 void PeerListBox::paintEvent(QPaintEvent *e) {
 	auto p = QPainter(this);
 
-	const auto &bg = _controller->computeListSt().bg;
+	const auto bg = Ui::ControlFill(_controller->computeListSt().bg);
+	if (!bg.alpha()) {
+		return;
+	}
 	const auto fill = QRect(
 		0,
 		_addedTopScrollSkip,
@@ -1703,8 +1707,11 @@ void PeerListContent::paintEvent(QPaintEvent *e) {
 				}
 			}
 		}
-		for (const auto &rect : fill) {
-			p.fillRect(rect, _st.item.button.textBg);
+		const auto bg = Ui::ControlFill(_st.item.button.textBg);
+		if (bg.alpha() > 0) {
+			for (const auto &rect : fill) {
+				p.fillRect(rect, bg);
+			}
 		}
 	}
 	p.translate(0, rowsTopCached);
@@ -2081,7 +2088,15 @@ crl::time PeerListContent::paintRow(
 				paintRowContent(q, now, index, false, 0);
 				const auto statusRect = row->statusIconRect();
 				if (!statusRect.isEmpty()) {
-					q.fillRect(statusRect, st.button.textBg);
+					const auto bg = Ui::ControlFill(st.button.textBg);
+					if (bg.alpha() > 0) {
+						q.fillRect(statusRect, bg);
+					} else {
+						q.setCompositionMode(QPainter::CompositionMode_Source);
+						q.fillRect(statusRect, Qt::transparent);
+						q.setCompositionMode(
+							QPainter::CompositionMode_SourceOver);
+					}
 				}
 			});
 		if (!row->statusIconRect().isEmpty()) {
@@ -2107,9 +2122,9 @@ void PeerListContent::paintRowContent(
 	const auto peer = row->special() ? nullptr : row->peer().get();
 
 	const auto opacity = row->opacity();
-	const auto &bg = selected
+	const auto bg = Ui::ControlFill(selected
 		? st.button.textBgOver
-		: st.button.textBg;
+		: st.button.textBg);
 	if (opacity < 1.) {
 		p.setOpacity(opacity);
 	}
@@ -2119,7 +2134,9 @@ void PeerListContent::paintRowContent(
 		}
 	});
 
-	p.fillRect(0, 0, outerWidth, _rowHeight, bg);
+	if (bg.alpha() > 0) {
+		p.fillRect(0, 0, outerWidth, _rowHeight, bg);
+	}
 	row->paintRipple(p, st, 0, 0, outerWidth);
 	row->paintUserpic(
 		p,
