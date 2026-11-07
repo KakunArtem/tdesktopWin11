@@ -64,8 +64,9 @@ and the contrast numbers.
   reads, and `windowFg` (`#f5f5f5`) stays above 11:1.
 - The day wallpaper column approximates Telegram's default wallpaper and its
   adjusted service colors. The night column uses `night.tdesktop-theme`.
-- Bubble radii stay `BubbleRadiusLarge()` (16) and the small grouped
-  corners; the mockup's 14 / 5 is not applied.
+- The user adopted the mockup's large radius on 2026-10-31: 14 px under Soft Panels.
+  The small grouped corners stay; the mockup's 5 is not applied. The sheet still draws
+  16.
 - The sticker is a placeholder drawing.
 
 ![C13 messages reference](messages.png)

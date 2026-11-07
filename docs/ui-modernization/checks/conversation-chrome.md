@@ -151,10 +151,9 @@ Chat background:
 
 Also open:
 
-- Scroll bars keep their wallpaper-tinted colors. The plan's `applyScrollColors`
-  was left out because the history scroll style reads the global palette, not
-  `ChatStyle`, so it would not have reached them.
-- C13's 14 px bubble radius and its message survey have not been done.
+- C13 later corrected this record: the history scroll style does read `ChatStyle`, and
+  the scroll bars now leave their wallpaper tint. See
+  [messages checks](messages.md#changes-from-the-plan).
 - Contact status pills are opaque, not 90%, because their buttons keep their own
   fills.
 - The sponsored bar's ripple has square corners inside the pill.
