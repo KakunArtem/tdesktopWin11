@@ -41,7 +41,7 @@ execution keeps its row; note the correction in the plan.
 | C18 | Foundations | [plan](plans/2026-10-31-foundations.md) | [reference](component-references/c18-foundations/README.md) | 0 / 3 | Not started | `checks/foundations.md` |
 | C9 | Navigation rail | [plan](plans/2026-10-29-navigation-rail.md) | [reference](component-references/c9-navigation-rail/README.md) | 0 / 4 | Not started | `checks/navigation-rail.md` |
 | C10 | Chat list and search | [plan](plans/2026-10-29-chat-list.md) | [reference](component-references/c10-chat-list/README.md) | 0 / 4 | Not started | `checks/chat-list.md` |
-| C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 3 / 4 | In progress: header, bars and chat background built; automated checks pass, and the user confirmed the chat background in a signed-in chat; the header and bars still need a signed-in check | [conversation checks](checks/conversation-chrome.md) |
+| C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 3 / 4 | In progress: header, bars and chat background built; automated checks pass, the user confirmed the chat background in a signed-in chat and shared one signed-in screenshot of the header and pinned pill; other modes, other bars and animations still need a signed-in check | [conversation checks](checks/conversation-chrome.md) |
 | C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 0 / 4 | Not started | `checks/composer.md` |
 | C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 0 / 3 | In progress: Task 1 service and unread colors built for the chat background; bubble radius and message survey not started | [conversation checks](checks/conversation-chrome.md), `checks/messages.md` |
 | C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
@@ -167,7 +167,7 @@ Each component has one responsibility, one owner directory and one plan.
 | C8 | Title bar | Transparent title area with the existing caption buttons, drag regions and inactive state. | forked `lib_ui/ui/platform/win/`, `platform/win/main_window_win.cpp` | C3, C6, C7 | 3 | [title bar](plans/2026-10-29-title-bar.md) |
 | C9 | Navigation rail | Folder rail and main menu entry on the shared navigation panel. | `window/window_filters_menu.*`, `window/window.style`, `window/window_main_menu.*` | C4, C7 | 4 | [navigation rail](plans/2026-10-29-navigation-rail.md) |
 | C10 | Chat list and search | Search field, rows, states, archive, topics and stories strip. | `dialogs/`, `dialogs/dialogs.style` | C4, C7 | 4 | [chat list](plans/2026-10-29-chat-list.md) |
-| C11 | Conversation chrome | Header, pinned and contextual bars, "Window material" chat background. | `history/view/history_view_top_bar_widget.*`, `ui/chat/*_bar.*`, `window/section_widget.cpp` | C4, C7 | 5 | [conversation chrome](plans/2026-10-29-conversation-chrome.md) |
+| C11 | Conversation chrome | Header, pinned and contextual bars, "Window material" chat background. | `history/view/history_view_top_bar_widget.*`, `ui/chat/*_bar.*`, `ui/ui_material_bars.*`, `window/section_widget.cpp` | C4, C7 | 5 | [conversation chrome](plans/2026-10-29-conversation-chrome.md) |
 | C12 | Composer | Floating rounded composer in both implementations with every state. | `history/view/controls/`, `history/history_widget.cpp`, `chat_helpers/chat_helpers.style` | C4, C7 | 6 | [composer](plans/2026-10-29-composer.md) |
 | C13 | Messages | Bubbles, service messages, date pills, reactions and attachment cards. | `ui/chat/chat.style`, `history/view/`, `history/view/media/` | C3, C11 | 7 | [messages](plans/2026-10-29-messages.md) |
 | C14 | Transient surfaces | Menus, tooltips, pickers, boxes and toasts; optional popup Acrylic. | forked `lib_ui/ui/widgets/`, `lib_ui/ui/layers/`, `chat_helpers/`, `boxes/` | C6, C9–C13, C17 | 8 | [transient surfaces](plans/2026-10-29-transient-surfaces.md) |
@@ -467,10 +467,16 @@ is on.
 
 ### Conversation bars and chat background (C11)
 
-`Ui::Material` (`td_ui`) adds `BarPillRect(row)`, `PaintBar(p, row, clip,
-solid)` and `PaintBarContent(p, row, solid)`; the sizes are
-`softPanelsBarMargins` and `softPanelsBarRadius` in
-`window/window_soft_panels.style`. `Window::Material` adds
+`ui/ui_material_bars.*` (`td_ui`) adds these to `Ui::Material`: `BarMargins()`,
+`BarPillRect(row)`, `BarContentWidth(rowWidth)`, `BarRowHeight(contentHeight)`,
+`BarShadowGeometry(regular)`, `PaintBar(p, row, clip, solid, rowSurface)`,
+`PaintBarContent(p, rect, solid)`, `CreateBarContent(row)` and
+`AddBarFrame(row)`. They are separate from `ui_material.cpp` because they read
+generated styles. The sizes are `softPanelsBarMargins` and
+`softPanelsBarRadius` in `window/window_soft_panels.style`.
+`Window::SoftPanels` adds `TopBarHeight()`, `TopBarShift()` and
+`TopBarShadowHeight()`; the header height is `softPanelsTopBarHeight`.
+`Window::Material` adds
 `ChatBackgroundEnabled()`, `SetChatBackgroundEnabled(bool)`,
 `ChatBackgroundActive()` (enabled and `Active()`) and
 `ChatBackgroundActiveValue()`.
