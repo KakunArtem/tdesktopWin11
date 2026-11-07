@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "ui/chat/chat_theme.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "styles/style_chat.h"
 
@@ -36,6 +37,8 @@ int BubbleRadiusLarge() {
 	static const auto result = [] {
 		if (UseSmallMsgBubbleRadius.value()) {
 			return st::bubbleRadiusSmall;
+		} else if (Material::SoftPanels()) {
+			return st::bubbleRadiusSoftPanels;
 		} else {
 			return st::bubbleRadiusLarge;
 		}

@@ -682,6 +682,11 @@ void ChatStyle::applyServiceColors(const ServiceColors &colors) {
 	set(historyUnreadBarBg(), colors.unreadBg);
 	set(historyUnreadBarBorder(), colors.unreadBorder);
 	set(historyUnreadBarFg(), colors.unreadFg);
+	const auto main = style::main_palette::get();
+	set(historyScrollBg(), main->historyScrollBg()->c);
+	set(historyScrollBgOver(), main->historyScrollBgOver()->c);
+	set(historyScrollBarBg(), main->historyScrollBarBg()->c);
+	set(historyScrollBarBgOver(), main->historyScrollBarBgOver()->c);
 	resetPaletteCaches();
 }
 
