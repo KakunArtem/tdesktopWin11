@@ -12,7 +12,9 @@
 
 **Visual reference:** [C19 separate windows](../component-references/c19-separate-windows/README.md): notifications and a Mini App panel today and in the popup shape, day and night, the restore shell before and after, and the inventory of separate windows.
 
-**Depends on:** [material state](2026-10-29-material-state.md) (`Capable()`, `ActiveValue()`), [surface roles](2026-10-29-surface-roles.md) (`PaintSurface`), [title bar](2026-10-29-title-bar.md) (the title painter hook), [material fills](2026-10-29-material-fills.md) (`Border`), [transient surfaces](2026-10-29-transient-surfaces.md) (`Ui::PopupPanelRadius()`). Comes after C14 and before [info and settings](2026-10-29-info-settings.md), whose final pass checks these windows.
+**Depends on:** [material state](2026-10-29-material-state.md) (`Capable()`, `ActiveValue()`), [surface roles](2026-10-29-surface-roles.md) (`PaintSurface`), [title bar](2026-10-29-title-bar.md) (the title painter hook), [material fills](2026-10-29-material-fills.md) (`Border`), [transient surfaces](2026-10-29-transient-surfaces.md) (`Ui::PopupPanelRadius()`). Comes after C14 and before [info and settings](2026-10-29-info-settings.md), whose final pass checks these windows. Task 2 (notifications) is the exception: the user moved it forward on 2026-11-08, so it runs once C14 Tasks 1–3 are committed and before C14 Task 4.
+
+**Implementation note (2026-11-08):** Task 2 is done. The reply field paints an opaque `windowBg` over the card's bottom-left corner, so it takes a new transparent `notifyReplyAreaSoftPanels` style in `window/window.style`. Cards keep their opaque cache and clear only the area outside the rounded shape, which keeps the corners anti-aliased. The reply area strokes its part of the card border, since it covers the card's own. Windows notification banners being held back by Do not disturb during a full-screen game is Windows behavior, unrelated to this task.
 
 ## Global Constraints
 

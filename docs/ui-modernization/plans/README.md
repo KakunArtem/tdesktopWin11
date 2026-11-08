@@ -25,9 +25,15 @@ before starting any of them.
 | 10, parallel | C11 Conversation chrome | [2026-10-29-conversation-chrome.md](2026-10-29-conversation-chrome.md) |
 | 10, parallel | C12 Composer | [2026-10-29-composer.md](2026-10-29-composer.md) |
 | 10, after C11 | C13 Messages | [2026-10-29-messages.md](2026-10-29-messages.md) |
-| 11 | C14 Transient surfaces | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
-| 12 | C19 Separate windows | [2026-10-31-separate-windows.md](2026-10-31-separate-windows.md) |
-| 13 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
+| 11 | C14 Transient surfaces, Tasks 1–3 | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
+| 12 | C19 Separate windows, Task 2 (notifications) | [2026-10-31-separate-windows.md](2026-10-31-separate-windows.md) |
+| 13 | C14 Transient surfaces, Task 4 onwards | [2026-10-29-transient-surfaces.md](2026-10-29-transient-surfaces.md) |
+| 14 | C19 Separate windows, remaining tasks | [2026-10-31-separate-windows.md](2026-10-31-separate-windows.md) |
+| 15 | C15 Info, settings and specialized screens | [2026-10-29-info-settings.md](2026-10-29-info-settings.md) |
+
+The user moved notifications forward on 2026-11-08: C19 Task 2 starts once
+C14 Tasks 1–3 are committed, because it needs only their
+`Ui::PopupPanelRadius()`, and it does not wait for C14's popup Acrylic.
 
 "Parallel" plans touch disjoint directories; they can run in separate
 sessions or worktrees, but each still lands as its own commits. C13 consumes

@@ -44,8 +44,8 @@ execution keeps its row; note the correction in the plan.
 | C11 | Conversation chrome | [plan](plans/2026-10-29-conversation-chrome.md) | [reference](component-references/c11-conversation-chrome/README.md) | 3 / 4 | In progress: header, bars and chat background built; automated checks pass, the user confirmed the chat background in a signed-in chat and shared one signed-in screenshot of the header and pinned pill; other modes, other bars and animations still need a signed-in check | [conversation checks](checks/conversation-chrome.md) |
 | C12 | Composer | [plan](plans/2026-10-29-composer.md) | [reference](component-references/c12-composer/README.md) | 3 / 4 | In progress: both composers and recording built; style and painting checks pass, and the user shared one signed-in screenshot of the empty composer; other states still need a signed-in check | [composer checks](checks/composer.md) |
 | C13 | Messages | [plan](plans/2026-10-29-messages.md) | [reference](component-references/c13-messages/README.md) | 1 / 3 | In progress: bubble radius, service and unread colors and scroll colors built; 256 native checks pass; the message survey needs a signed-in window | [conversation checks](checks/conversation-chrome.md), [messages checks](checks/messages.md) |
-| C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 0 / 5 | Not started | `checks/transient-surfaces.md`, `decisions/popup-acrylic.md` |
-| C19 | Separate windows | [plan](plans/2026-10-31-separate-windows.md) | [reference](component-references/c19-separate-windows/README.md) | 0 / 4 | Not started | `checks/separate-windows.md` |
+| C14 | Transient surfaces | [plan](plans/2026-10-29-transient-surfaces.md) | [reference](component-references/c14-transient-surfaces/README.md) | 2 / 5 | In progress: the user approved the look in a real window on 2026-11-08; Tasks 1 and 2 committed; Task 3 (rounded menu rows) committed in the `lib_ui` fork locally, its tdesktop commit waiting for the fork push; 228 native checks pass; panels stay opaque, and boxes and inline results keep their radius; the popup Acrylic prototype is not started | [transient surfaces checks](checks/transient-surfaces.md), `decisions/popup-acrylic.md` |
+| C19 | Separate windows | [plan](plans/2026-10-31-separate-windows.md) | [reference](component-references/c19-separate-windows/README.md) | 1 / 4 | In progress: Task 2 (rounded notifications) committed, moved ahead of the rest of C14 by the user; the user approved the cards in a real window on 2026-11-08; scale, second-monitor and RTL checks not run | `checks/separate-windows.md` |
 | C15 | Info, settings and specialized screens | [plan](plans/2026-10-29-info-settings.md) | [reference](component-references/c15-info-settings/README.md) | 0 / 4 | Not started | `checks/final.md` |
 
 ## Open decisions
@@ -178,7 +178,9 @@ Each component has one responsibility, one owner directory and one plan.
 | C16 | Verification tooling | Backdrop, contrast and screenshot checks reused by every phase. | `docs/ui-modernization/tools/`, `tests/` | C1 | 1–9 | [verification tooling](plans/2026-10-29-verification-tooling.md) |
 
 Order: C1 → C2 → C3 → C4 → C5; C6 any time before C8; C7 → C8 → C17 → C18;
-then C9–C12 in parallel, with C13 after C11; C14; C19; C15. C16 grows alongside: its contrast tool is needed by C3
+then C9–C12 in parallel, with C13 after C11; C14 Tasks 1–3; C19 Task 2
+(notifications, moved forward by the user on 2026-11-08); the rest of C14;
+the rest of C19; C15. C16 grows alongside: its contrast tool is needed by C3
 and its screenshot matrix by C7.
 
 ## Coverage of the element map
@@ -510,6 +512,7 @@ behavior unchanged.
 | `RpWindow::setTitleBackgroundPainter(Fn<void(QPainter&, const QRect&)>)` | `MainWindow::initHook()` when `Capable()` | C8 |
 | `SideBarButton::setBackgroundPainter`, `setIconColors`, and the `pillMargins` and `pillRadius` style values of `SideBarButton` and `SettingsButton` | parallel styles and `FiltersMenu`, under `SoftPanels()` | C9 |
 | `Ui::SetMainMenuCornerRadius(int)` | startup, from `SoftPanels()` | C9 |
+| `Ui::Menu::PaintItemBackground`, `Ui::Menu::ItemRippleMask` | every menu item, read from `SoftControls()` | C14 |
 | `Ui::SetSoftMenus(bool)` / `Ui::SoftMenus()`, with `Ui::Menu::PaintItemBackground` for every item highlight, tdesktop's own items included | startup, from `SoftPanels()` | C14 |
 | `Ui::Platform::SetPopupBackdrop(bool)` | the popup option and `ActiveValue()` | C14 |
 | `Ui::SetSoftControls(bool)`, `Ui::SetSoftControlHover(QColor)`, `Ui::ControlFill(const style::color&)` | startup, from `SoftPanels()`; the hover on every palette change | C17 |
