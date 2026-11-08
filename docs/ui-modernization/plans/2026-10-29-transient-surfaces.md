@@ -14,6 +14,8 @@
 
 **Depends on:** [toolkit fork](2026-10-29-toolkit-fork.md), the element plans C9–C13 (so the surfaces are judged against the finished main window), and [shared controls](2026-10-30-shared-controls.md), which already maps the fills of buttons, fields and lists inside boxes.
 
+**Implementation note (2026-11-07):** Task 1 and Task 3 are built, and Task 2 is partial. Panels keep opaque fills, and boxes and inline results keep their radius, for the reasons in [transient surfaces checks](../checks/transient-surfaces.md#changes-from-the-plan). Task 4 is not started.
+
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules), including the `lib_ui` recheck rule.
