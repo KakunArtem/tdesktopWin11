@@ -22,8 +22,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_utilities.h"
 #include "ui/emoji_config.h"
 #include "ui/empty_userpic.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/painter.h"
 #include "ui/power_saving.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "data/data_premium_limits.h"
 #include "data/data_saved_sublist.h"
@@ -45,6 +47,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_window.h"
 
 #include <QtGui/QGuiApplication>
+#include <QtGui/QPainterPath>
 #include <QtGui/QScreen>
 
 namespace Window {
@@ -496,6 +499,40 @@ Manager::~Manager() {
 }
 
 namespace internal {
+namespace {
+
+void FinishCard(QPainter &p, QRect card) {
+	const auto shape = CardShape(card);
+	auto outside = QPainterPath();
+	outside.addRect(QRectF(card));
+	outside = outside.subtracted(shape);
+
+	auto hq = PainterHighQualityEnabler(p);
+	p.save();
+	p.setCompositionMode(QPainter::CompositionMode_Clear);
+	p.fillPath(outside, Qt::black);
+	p.restore();
+
+	const auto border = Ui::Material::Border(Ui::Material::Surface::Popup);
+	p.setPen(QPen(
+		border.isValid() ? border : st::notifyBorder->c,
+		st::lineWidth));
+	p.setBrush(Qt::NoBrush);
+	p.drawPath(shape);
+}
+
+} // namespace
+
+QPainterPath CardShape(QRect rect) {
+	const auto half = st::lineWidth / 2.;
+	const auto radius = Ui::PopupPanelRadius();
+	auto result = QPainterPath();
+	result.addRoundedRect(
+		QRectF(rect).marginsRemoved({ half, half, half, half }),
+		radius,
+		radius);
+	return result;
+}
 
 Widget::Widget(
 	not_null<Manager*> manager,
@@ -517,7 +554,11 @@ Widget::Widget(
 		| Qt::NoDropShadowWindowHint
 		| Qt::Tool);
 	setAttribute(Qt::WA_MacAlwaysShowToolWindow);
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	if (Ui::Material::SoftPanels()) {
+		setAttribute(Qt::WA_TranslucentBackground);
+	} else {
+		setAttribute(Qt::WA_OpaquePaintEvent);
+	}
 
 	Ui::Platform::InitOnTopPanel(this);
 
@@ -643,6 +684,10 @@ void Background::paintEvent(QPaintEvent *e) {
 	Painter p(this);
 
 	p.fillRect(rect(), st::notificationBg);
+	if (Ui::Material::SoftPanels()) {
+		FinishCard(p, QRect(QPoint(0, -y()), parentWidget()->size()));
+		return;
+	}
 	p.fillRect(0, 0, st::notifyBorderWidth, height(), st::notifyBorder);
 	p.fillRect(width() - st::notifyBorderWidth, 0, st::notifyBorderWidth, height(), st::notifyBorder);
 	p.fillRect(st::notifyBorderWidth, height() - st::notifyBorderWidth, width() - 2 * st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder);
@@ -816,6 +861,10 @@ void Notification::paintEvent(QPaintEvent *e) {
 	} else if (_actionsVisible) {
 		p.drawPixmapRight(st::notifyBorderWidth, buttonsTop, width(), _buttonsCache);
 	}
+	if (Ui::Material::SoftPanels()) {
+		p.setOpacity(1.);
+		FinishCard(p, rect());
+	}
 }
 
 void Notification::actionsOpacityCallback() {
@@ -901,10 +950,12 @@ void Notification::updateNotifyDisplay() {
 
 	{
 		Painter p(&img);
-		p.fillRect(0, 0, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder);
-		p.fillRect(w - st::notifyBorderWidth, 0, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder);
-		p.fillRect(st::notifyBorderWidth, h - st::notifyBorderWidth, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder);
-		p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder);
+		if (!Ui::Material::SoftPanels()) {
+			p.fillRect(0, 0, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder);
+			p.fillRect(w - st::notifyBorderWidth, 0, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder);
+			p.fillRect(st::notifyBorderWidth, h - st::notifyBorderWidth, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder);
+			p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder);
+		}
 
 		if (!options.hideNameAndPhoto) {
 			if (_fromScheduled && _history->peer->isSelf()) {
@@ -1125,7 +1176,9 @@ void Notification::showReplyField() {
 
 	_replyArea.create(
 		this,
-		st::notifyReplyArea,
+		(Ui::Material::SoftPanels()
+			? st::notifyReplyAreaSoftPanels
+			: st::notifyReplyArea),
 		Ui::InputField::Mode::MultiLine,
 		tr::lng_message_ph());
 	_replyArea->resize(width() - st::notifySendReply.width - 2 * st::notifyBorderWidth, st::notifySendReply.height);
@@ -1349,10 +1402,14 @@ void HideAllButton::paintEvent(QPaintEvent *e) {
 	p.setClipRect(e->rect());
 
 	p.fillRect(rect(), _mouseOver ? st::lightButtonBgOver : st::lightButtonBg);
-	p.fillRect(0, 0, width(), st::notifyBorderWidth, st::notifyBorder);
-	p.fillRect(0, height() - st::notifyBorderWidth, width(), st::notifyBorderWidth, st::notifyBorder);
-	p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, height() - 2 * st::notifyBorderWidth, st::notifyBorder);
-	p.fillRect(width() - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorderWidth, height() - 2 * st::notifyBorderWidth, st::notifyBorder);
+	if (Ui::Material::SoftPanels()) {
+		FinishCard(p, rect());
+	} else {
+		p.fillRect(0, 0, width(), st::notifyBorderWidth, st::notifyBorder);
+		p.fillRect(0, height() - st::notifyBorderWidth, width(), st::notifyBorderWidth, st::notifyBorder);
+		p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, height() - 2 * st::notifyBorderWidth, st::notifyBorder);
+		p.fillRect(width() - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorderWidth, height() - 2 * st::notifyBorderWidth, st::notifyBorder);
+	}
 
 	p.setFont(st::defaultLinkButton.font);
 	p.setPen(_mouseOver ? st::lightButtonFgOver : st::lightButtonFg);

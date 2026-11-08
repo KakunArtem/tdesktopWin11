@@ -18,6 +18,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtCore/QTimer>
 
+class QPainterPath;
+
 namespace Ui {
 class IconButton;
 class RoundButton;
@@ -132,6 +134,8 @@ private:
 };
 
 namespace internal {
+
+[[nodiscard]] QPainterPath CardShape(QRect rect);
 
 class Widget : public Ui::RpWidget {
 public:
