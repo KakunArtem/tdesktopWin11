@@ -39,6 +39,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/editor/iv_editor_session.h"
 #include "iv/iv_rich_message_html_export.h"
 #include "ui/effects/ripple_animation.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/widgets/menu/menu_action.h"
 #include "ui/widgets/menu/menu_add_action_callback_factory.h"
@@ -233,10 +234,11 @@ void RevertAction::resizeToMenuWidth(int width) {
 
 void RevertAction::paint(Painter &p) {
 	const auto selected = isSelected();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), _height, _st.itemBg);
-	}
-	p.fillRect(0, 0, width(), _height, selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), _height),
+		selected);
 	if (isEnabled()) {
 		paintRipple(p, 0, 0);
 	}
@@ -278,7 +280,7 @@ QPoint RevertAction::prepareRippleStartPosition() const {
 }
 
 QImage RevertAction::prepareRippleMask() const {
-	return Ui::RippleAnimation::RectMask(size());
+	return Ui::Menu::ItemRippleMask(size());
 }
 
 int RevertAction::contentHeight() const {

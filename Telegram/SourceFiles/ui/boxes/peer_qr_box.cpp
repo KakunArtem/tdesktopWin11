@@ -31,6 +31,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/layers/generic_box.h"
 #include "ui/layers/show.h"
 #include "ui/toast/toast.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/menu/menu_item_base.h"
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/labels.h"
@@ -333,10 +334,11 @@ void AboutAction::handleKeyPress(not_null<QKeyEvent*> e) {
 void AboutAction::paintEvent(QPaintEvent *e) {
 	auto p = Painter(this);
 	const auto selected = isSelected();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), _height, _st.itemBg);
-	}
-	p.fillRect(0, 0, width(), _height, selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), _height),
+		selected);
 	paintRipple(p, 0, 0);
 	if (_icon) {
 		_icon->paint(

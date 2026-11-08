@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/effects/ripple_animation.h"
 #include "ui/text/text_utilities.h"
 #include "ui/widgets/buttons.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/widgets/shadow.h"
 #include "ui/widgets/menu/menu_item_base.h"
@@ -132,11 +133,11 @@ void Action::resolveMinWidth() {
 void Action::paint(Painter &p) {
 	const auto enabled = isEnabled();
 	const auto selected = isSelected();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), _height, _st.itemBg);
-	}
-	const auto &bg = selected ? _st.itemBgOver : _st.itemBg;
-	p.fillRect(0, 0, width(), _height, bg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), _height),
+		selected);
 	if (enabled) {
 		paintRipple(p, 0, 0);
 	}
@@ -185,7 +186,7 @@ QPoint Action::prepareRippleStartPosition() const {
 }
 
 QImage Action::prepareRippleMask() const {
-	return Ui::RippleAnimation::RectMask(size());
+	return Ui::Menu::ItemRippleMask(size());
 }
 
 int Action::contentHeight() const {

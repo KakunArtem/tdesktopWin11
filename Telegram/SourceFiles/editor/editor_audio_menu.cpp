@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/effects/cross_line.h"
 #include "ui/paint/arcs.h"
 #include "ui/widgets/continuous_sliders.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/color_int_conversion.h"
 #include "ui/rect.h"
@@ -80,7 +81,7 @@ MenuVolumeItem::MenuVolumeItem(
 	) | rpl::on_next([=](const QRect &clip) {
 		auto p = QPainter(this);
 		const auto muteProgress = _crossLineAnimation.value(_muted ? 1. : 0.);
-		p.fillRect(clip, isSelected() ? _st.itemBgOver : _st.itemBg);
+		Ui::Menu::PaintItemBackground(p, _st, rect(), isSelected());
 		const auto mutePen = anim::color(
 			unmuteColor(),
 			muteColor(),

@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/painter.h"
 #include "ui/rect.h"
 #include "ui/toast/toast.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/menu/menu_multiline_action.h"
 #include "ui/widgets/popup_menu.h"
 #include "window/window_controller.h"
@@ -152,10 +153,11 @@ void ResolveBankCardAction::paintEvent(QPaintEvent *e) {
 
 	const auto selected = false;
 	const auto height = contentHeight();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), height, _st.itemBg);
-	}
-	p.fillRect(0, 0, width(), height, selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), height),
+		selected);
 
 	{
 		p.setPen(selected ? _st.itemFgShortcutOver : _st.itemFgShortcut);

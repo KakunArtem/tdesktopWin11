@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/checkbox.h"
 #include "ui/widgets/labels.h"
 #include "ui/widgets/menu/menu_action.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/menu/menu_multiline_action.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/widgets/tooltip.h"
@@ -113,7 +114,7 @@ int CheckAction::contentHeight() const {
 void CheckAction::paintEvent(QPaintEvent *e) {
 	auto p = QPainter(this);
 	const auto selected = isSelected();
-	p.fillRect(rect(), selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(p, _st, rect(), selected);
 	RippleButton::paintRipple(p, 0, 0);
 	const auto size = _check.getSize();
 	_check.paint(

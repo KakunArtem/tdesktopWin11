@@ -83,6 +83,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/checkbox.h"
 #include "ui/widgets/dropdown_menu.h"
 #include "ui/widgets/menu/menu_action.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/menu/menu_item_base.h"
 #include "ui/widgets/popup_menu.h"
 #include "wallet/wallet_panel.h"
@@ -745,10 +746,11 @@ BotAction::BotAction(
 
 void BotAction::paint(Painter &p) {
 	const auto selected = isSelected();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), _height, _st.itemBg);
-	}
-	p.fillRect(0, 0, width(), _height, selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), _height),
+		selected);
 	if (isEnabled()) {
 		paintRipple(p, 0, 0);
 	}
@@ -809,7 +811,7 @@ QPoint BotAction::prepareRippleStartPosition() const {
 }
 
 QImage BotAction::prepareRippleMask() const {
-	return Ui::RippleAnimation::RectMask(size());
+	return Ui::Menu::ItemRippleMask(size());
 }
 
 int BotAction::contentHeight() const {

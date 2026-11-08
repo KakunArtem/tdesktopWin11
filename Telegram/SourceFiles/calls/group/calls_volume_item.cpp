@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_calls.h"
 
 #include "ui/paint/arcs.h"
+#include "ui/widgets/menu/menu_item_background.h"
 
 namespace Calls {
 namespace {
@@ -100,7 +101,7 @@ MenuVolumeItem::MenuVolumeItem(
 			= _crossLineAnimation.value((!volume) ? 1. : 0.);
 
 		const auto selected = isSelected();
-		p.fillRect(clip, selected ? st.itemBgOver : st.itemBg);
+		Ui::Menu::PaintItemBackground(p, st, rect(), selected);
 
 		const auto mutePen = anim::color(
 			unmuteColor(),

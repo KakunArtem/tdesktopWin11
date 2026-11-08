@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "main/main_session.h"
 #include "settings/settings_credits_graphics.h" // CreditsEntryBoxStyleOverrides
 #include "ui/widgets/labels.h"
+#include "ui/widgets/menu/menu_item_background.h"
 #include "ui/widgets/shadow.h"
 #include "ui/effects/ripple_animation.h"
 #include "ui/boxes/choose_language_box.h" // EditSkipTranslationLanguages.
@@ -122,10 +123,11 @@ TwoTextAction::TwoTextAction(
 
 void TwoTextAction::paint(Painter &p) {
 	const auto selected = isSelected();
-	if (selected && _st.itemBgOver->c.alpha() < 255) {
-		p.fillRect(0, 0, width(), _height, _st.itemBg);
-	}
-	p.fillRect(0, 0, width(), _height, selected ? _st.itemBgOver : _st.itemBg);
+	Ui::Menu::PaintItemBackground(
+		p,
+		_st,
+		QRect(0, 0, width(), _height),
+		selected);
 	if (isEnabled()) {
 		paintRipple(p, 0, 0);
 	}
@@ -201,7 +203,7 @@ QPoint TwoTextAction::prepareRippleStartPosition() const {
 }
 
 QImage TwoTextAction::prepareRippleMask() const {
-	return Ui::RippleAnimation::RectMask(size());
+	return Ui::Menu::ItemRippleMask(size());
 }
 
 int TwoTextAction::contentHeight() const {
