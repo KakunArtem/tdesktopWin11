@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "apiwrap.h"
 #include "base/unixtime.h"
 #include "ui/boxes/confirm_box.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/controls/tabbed_search.h"
 #include "ui/text/format_values.h"
 #include "ui/text/text_entity.h"
@@ -159,7 +160,7 @@ EmojiColorPicker::EmojiColorPicker(
 	const style::EmojiPan &st)
 : RpWidget(parent)
 , _st(st)
-, _backgroundRect(st::emojiPanRadius, _st.bg)
+, _backgroundRect(Ui::PopupPanelRadius(), _st.bg)
 , _overBg(st::emojiPanRadius, _st.overBg)
 , _shadow(_st.showAnimation.shadow) {
 	setMouseTracking(true);
@@ -244,7 +245,7 @@ void EmojiColorPicker::paintEvent(QPaintEvent *e) {
 		p.drawPixmap(0, 0, _cache);
 		return;
 	}
-	_shadow.paint(p, inner, st::emojiPanRadius);
+	_shadow.paint(p, inner, Ui::PopupPanelRadius());
 	_backgroundRect.paint(p, inner);
 
 	const auto skip = topColorAllSkip();

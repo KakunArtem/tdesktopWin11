@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "styles/style_chat.h"
+#include "styles/style_chat_helpers.h"
 
 namespace Ui {
 namespace {
@@ -54,6 +55,12 @@ int BubbleCornerRadius(BubbleCornerRounding corner) {
 	case BubbleCornerRounding::Large: return BubbleRadiusLarge();
 	}
 	Unexpected("Corner in BubbleCornerRadius.");
+}
+
+int PopupPanelRadius() {
+	return Material::SoftPanels()
+		? st::softPanelsPopupRadius
+		: st::emojiPanRadius;
 }
 
 int MsgFileThumbRadiusSmall() {

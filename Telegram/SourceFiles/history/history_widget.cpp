@@ -8360,7 +8360,9 @@ void HistoryWidget::updateControlsGeometry() {
 	if (_scroll->y() != scrollAreaTop || _scroll->x() != tabsLeftSkip) {
 		_scroll->moveToLeft(tabsLeftSkip, scrollAreaTop);
 		if (_autocomplete) {
-			_autocomplete->setBoundings(_scroll->geometry());
+			_autocomplete->setComposerBoundings(
+				_scroll->geometry(),
+				composerMargins());
 		}
 		if (_supportAutocomplete) {
 			_supportAutocomplete->setBoundings(_scroll->geometry());
@@ -8691,7 +8693,9 @@ void HistoryWidget::updateHistoryGeometry(
 	}
 	if (needResize || initial) {
 		if (_autocomplete) {
-			_autocomplete->setBoundings(_scroll->geometry());
+			_autocomplete->setComposerBoundings(
+				_scroll->geometry(),
+				composerMargins());
 		}
 		if (_supportAutocomplete) {
 			_supportAutocomplete->setBoundings(_scroll->geometry());

@@ -7,8 +7,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "chat_helpers/tabbed_panel.h"
 
+#include "ui/chat/chat_style_radius.h"
 #include "ui/widgets/shadow.h"
 #include "ui/image/image_prepare.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "chat_helpers/tabbed_selector.h"
 #include "window/window_session_controller.h"
@@ -75,7 +78,7 @@ TabbedPanel::TabbedPanel(
 	Expects(_selector != nullptr);
 
 	_selector->setParent(this);
-	_selector->setRoundRadius(st::emojiPanRadius);
+	_selector->setRoundRadius(Ui::PopupPanelRadius());
 	_selector->setAfterShownCallback([=](SelectorTab tab) {
 		if (_regularWindow) {
 			_regularWindow->enableGifPauseReason(_selector->level());
@@ -248,7 +251,15 @@ void TabbedPanel::paintEvent(QPaintEvent *e) {
 		hideFinished();
 	} else {
 		if (!_cache.isNull()) _cache = QPixmap();
-		_shadow.paint(p, innerRect(), st::emojiPanRadius);
+		const auto radius = Ui::PopupPanelRadius();
+		_shadow.paint(p, innerRect(), radius);
+		if (Ui::Material::SoftPanels()) {
+			Ui::Material::PaintSurfaceOutline(
+				p,
+				innerRect().marginsAdded(QMargins(1, 1, 1, 1)),
+				radius + 1,
+				Ui::Material::Surface::Popup);
+		}
 	}
 }
 
@@ -386,8 +397,9 @@ void TabbedPanel::startShowAnimation() {
 			QRect(
 				inner.topLeft() * style::DevicePixelRatio(),
 				inner.size() * style::DevicePixelRatio()),
-			st::emojiPanRadius);
-		_showAnimation->setCornerMasks(Images::CornersMask(st::emojiPanRadius));
+			Ui::PopupPanelRadius());
+		_showAnimation->setCornerMasks(
+			Images::CornersMask(Ui::PopupPanelRadius()));
 		_showAnimation->start();
 	}
 	hideChildren();
@@ -511,7 +523,7 @@ bool TabbedPanel::overlaps(const QRect &globalRect) const {
 
 	auto testRect = QRect(mapFromGlobal(globalRect.topLeft()), globalRect.size());
 	auto inner = rect().marginsRemoved(st::emojiPanMargins);
-	const auto radius = st::emojiPanRadius;
+	const auto radius = Ui::PopupPanelRadius();
 	return inner.marginsRemoved(QMargins(radius, 0, radius, 0)).contains(testRect)
 		|| inner.marginsRemoved(QMargins(0, radius, 0, radius)).contains(testRect);
 }

@@ -44,14 +44,18 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/image/image.h"
 #include "ui/text/text_options.h"
 #include "ui/text/text_utilities.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/popup_menu.h"
 #include "ui/widgets/scroll_area.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/widgets/tooltip.h"
 #include "ui/wrap/padding_wrap.h"
 #include "ui/painter.h"
 #include "ui/rect.h"
 #include "ui/round_rect.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "styles/style_chat.h"
 #include "styles/style_chat_helpers.h"
@@ -375,7 +379,16 @@ void FieldAutocomplete::paintEvent(QPaintEvent *e) {
 		return;
 	}
 
-	p.fillRect(rect(), _st.bg);
+	if (Ui::Material::SoftPanels()) {
+		Ui::Material::PaintRoundedSurface(
+			p,
+			rect(),
+			Ui::PopupPanelRadius(),
+			Ui::Material::Surface::Popup,
+			_st.bg);
+	} else {
+		p.fillRect(rect(), _st.bg);
+	}
 }
 
 void FieldAutocomplete::showFiltered(
@@ -899,6 +912,18 @@ void FieldAutocomplete::setBoundings(QRect boundings) {
 	recount();
 }
 
+void FieldAutocomplete::setComposerBoundings(
+		QRect boundings,
+		QMargins composerMargins) {
+	setBoundings(composerMargins.isNull()
+		? boundings
+		: boundings.marginsRemoved(QMargins(
+			composerMargins.left(),
+			0,
+			composerMargins.right(),
+			st::softPanelsAutocompleteSkip)));
+}
+
 void FieldAutocomplete::recount(bool resetScroll) {
 	const auto oldScrollTop = _scroll->scrollTop();
 	const auto maxHeight = int(4.5 * st::mentionHeight);
@@ -1130,6 +1155,9 @@ void FieldAutocomplete::Inner::paintEvent(QPaintEvent *e) {
 }
 
 void FieldAutocomplete::Inner::paintShadow(QPainter &p, int top) {
+	if (Ui::Material::SoftPanels()) {
+		return;
+	}
 	const auto left = _adjustShadowLeft ? st::lineWidth : 0;
 	p.fillRect(left, top, width() - left, st::lineWidth, st::shadowFg);
 }
@@ -1267,12 +1295,30 @@ void FieldAutocomplete::Inner::paintRows(Painter &p, QRect clip) {
 		const auto textTop = top + st::mentionTop;
 		const auto selected = (i == _sel);
 		if (selected) {
-			p.fillRect(
-				0,
-				top,
-				width(),
-				st::mentionHeight,
-				st::mentionBgOver);
+			if (Ui::Material::SoftPanels()) {
+				const auto margin = st::softPanelsAutocompleteRowMargin;
+				const auto radius = st::softPanelsAutocompleteRowRadius;
+				p.save();
+				p.setRenderHint(QPainter::Antialiasing);
+				p.setPen(Qt::NoPen);
+				p.setBrush(Ui::ControlFill(st::mentionBgOver));
+				p.drawRoundedRect(
+					QRect(
+						margin,
+						top,
+						width() - 2 * margin,
+						st::mentionHeight),
+					radius,
+					radius);
+				p.restore();
+			} else {
+				p.fillRect(
+					0,
+					top,
+					width(),
+					st::mentionHeight,
+					st::mentionBgOver);
+			}
 			if (!_hrows->empty() || isRemovableMentionRow(i)) {
 				const auto &icon = st::smallCloseIconOver;
 				const auto skip = (st::mentionHeight - icon.height()) / 2;

@@ -7,9 +7,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "ui/filter_icon_panel.h"
 
+#include "ui/chat/chat_style_radius.h"
 #include "ui/widgets/shadow.h"
 #include "ui/image/image_prepare.h"
 #include "ui/effects/panel_animation.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/ui_utility.h"
 #include "ui/filter_icons.h"
 #include "ui/painter.h"
@@ -71,7 +74,7 @@ constexpr auto kIcons = std::array{
 FilterIconPanel::FilterIconPanel(QWidget *parent)
 : RpWidget(parent)
 , _inner(Ui::CreateChild<Ui::RpWidget>(this))
-, _innerBg(st::emojiPanRadius, st::dialogsBg)
+, _innerBg(PopupPanelRadius(), st::dialogsBg)
 , _shadow(st::emojiPanAnimation.shadow) {
 	setup();
 }
@@ -280,7 +283,15 @@ void FilterIconPanel::paintEvent(QPaintEvent *e) {
 		hideFinished();
 	} else {
 		if (!_cache.isNull()) _cache = QPixmap();
-		_shadow.paint(p, innerRect(), st::emojiPanRadius);
+		const auto radius = PopupPanelRadius();
+		_shadow.paint(p, innerRect(), radius);
+		if (Material::SoftPanels()) {
+			Material::PaintSurfaceOutline(
+				p,
+				innerRect().marginsAdded(QMargins(1, 1, 1, 1)),
+				radius + 1,
+				Material::Surface::Popup);
+		}
 	}
 }
 
@@ -382,8 +393,9 @@ void FilterIconPanel::startShowAnimation() {
 			QRect(
 				inner.topLeft() * style::DevicePixelRatio(),
 				inner.size() * style::DevicePixelRatio()),
-			st::emojiPanRadius);
-		_showAnimation->setCornerMasks(Images::CornersMask(st::emojiPanRadius));
+			PopupPanelRadius());
+		_showAnimation->setCornerMasks(
+			Images::CornersMask(PopupPanelRadius()));
 		_showAnimation->start();
 	}
 	hideChildren();

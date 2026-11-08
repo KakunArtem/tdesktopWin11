@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "chat_helpers/stickers_list_widget.h"
 #include "chat_helpers/gifs_list_widget.h"
 #include "menu/menu_send.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/controls/swipe_handler.h"
 #include "ui/controls/tabbed_search.h"
 #include "ui/text/text_utilities.h"
@@ -382,9 +383,9 @@ TabbedSelector::TabbedSelector(
 , _customTextColor(std::move(descriptor.customTextColor))
 , _excludeStickerSetId(descriptor.excludeStickerSetId)
 , _mode(descriptor.mode)
-, _panelRounding(Ui::PrepareCornerPixmaps(st::emojiPanRadius, _st.bg))
+, _panelRounding(Ui::PrepareCornerPixmaps(Ui::PopupPanelRadius(), _st.bg))
 , _categoriesRounding(
-	Ui::PrepareCornerPixmaps(st::emojiPanRadius, _st.categoriesBg))
+	Ui::PrepareCornerPixmaps(Ui::PopupPanelRadius(), _st.categoriesBg))
 , _topShadow(full() ? object_ptr<Ui::PlainShadow>(this) : nullptr)
 , _bottomShadow(this)
 , _scroll(this, _st.scroll)
@@ -898,7 +899,7 @@ void TabbedSelector::paintEvent(QPaintEvent *e) {
 }
 
 void TabbedSelector::refreshRounding() {
-	const auto radius = _roundRadius ? _roundRadius : st::emojiPanRadius;
+	const auto radius = _roundRadius ? _roundRadius : Ui::PopupPanelRadius();
 	_panelRounding = Ui::PrepareCornerPixmaps(radius, _st.bg);
 	_categoriesRounding = Ui::PrepareCornerPixmaps(radius, _st.categoriesBg);
 }
@@ -1393,7 +1394,7 @@ void TabbedSelector::switchTab() {
 		slidingRect,
 		wasSectionIcons);
 	_slideAnimation->setCornerMasks(
-		Images::CornersMask(st::emojiPanRadius));
+		Images::CornersMask(Ui::PopupPanelRadius()));
 	_slideAnimation->start();
 
 	hideForSliding();

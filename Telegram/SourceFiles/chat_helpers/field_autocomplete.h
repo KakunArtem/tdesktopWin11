@@ -63,6 +63,7 @@ public:
 	[[nodiscard]] EmojiPtr stickersEmoji() const;
 
 	void setBoundings(QRect boundings);
+	void setComposerBoundings(QRect boundings, QMargins composerMargins);
 
 	[[nodiscard]] const QString &filter() const;
 	[[nodiscard]] ChatData *chat() const;

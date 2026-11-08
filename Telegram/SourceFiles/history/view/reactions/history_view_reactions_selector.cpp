@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "history/view/reactions/history_view_reactions_selector.h"
 
+#include "ui/chat/chat_style_radius.h"
 #include "ui/widgets/labels.h"
 #include "ui/widgets/scroll_area.h"
 #include "ui/widgets/popup_menu.h"
@@ -699,7 +700,7 @@ Selector::ExpandingRects Selector::updateExpandingRects(float64 progress) {
 	constexpr auto kFramesCount = Ui::RoundAreaWithShadow::kFramesCount;
 	const auto frame = int(base::SafeRound(progress * (kFramesCount - 1)));
 	const auto radiusStart = st::reactStripHeight / 2.;
-	const auto radiusEnd = st::emojiPanRadius;
+	const auto radiusEnd = Ui::PopupPanelRadius();
 	const auto radius = _reactions.customAllowed
 		? (radiusStart + progress * (radiusEnd - radiusStart))
 		: radiusStart;
@@ -815,7 +816,7 @@ void Selector::finishExpand() {
 		const auto pattern = _cachedRound.validateFrame(
 			kFramesCount - 1,
 			1.,
-			st::emojiPanRadius);
+			Ui::PopupPanelRadius());
 		const auto fill = _cachedRound.FillWithImage(q, rect(), pattern);
 		if (!fill.isEmpty()) {
 			q.fillRect(fill, _st.bg);

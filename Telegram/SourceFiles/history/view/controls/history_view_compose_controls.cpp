@@ -1761,7 +1761,7 @@ QMargins ComposeControls::outerMargins() const {
 
 void ComposeControls::setAutocompleteBoundingRect(QRect rect) {
 	if (_autocomplete) {
-		_autocomplete->setBoundings(rect);
+		_autocomplete->setComposerBoundings(rect, _st.outerMargins);
 	}
 }
 

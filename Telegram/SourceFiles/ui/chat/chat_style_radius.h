@@ -15,6 +15,8 @@ enum class BubbleCornerRounding : uchar;
 [[nodiscard]] int BubbleRadiusLarge();
 [[nodiscard]] int BubbleCornerRadius(BubbleCornerRounding corner);
 
+[[nodiscard]] int PopupPanelRadius();
+
 [[nodiscard]] int MsgFileThumbRadiusSmall();
 [[nodiscard]] int MsgFileThumbRadiusLarge();
 
