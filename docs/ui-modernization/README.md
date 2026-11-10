@@ -46,6 +46,11 @@ Windows 11 as the design target.
 - Kept as Telegram has them (2026-10-31): night theme unread badge fills,
   text fields with a bottom line, filled buttons 34 px high, and today's field
   bottom lines and slider tracks.
+- Popup Acrylic (2026-11-08): go, with popup menus filled at 80 % instead of
+  the Popup role's 97 %; the option stays experimental until C15. Menus that
+  host the reaction strip keep the drawn look (2026-11-09).
+- Order (2026-11-08): Telegram's notifications (C19 Task 2) moved ahead of the
+  rest of C14.
 
 The approved reference remains the earlier baseline; the readable mockup
 refines it. Detailed element states, the final native material and
@@ -110,6 +115,7 @@ This brief is the entry point for the redesign documentation. Current documents:
 - [Toolkit fork](toolkit-fork.md): the `lib_ui` and `lib_base` forks, the
   branch rule and how to land changes and take upstream updates.
 - [Native backdrop prototype results](decisions/2026-10-native-backdrop.md).
+- [Popup Acrylic prototype results](decisions/popup-acrylic.md).
 - [Surface roles evidence](checks/surface-roles.md) and
   [opaque paint ownership](checks/opaque-paint-audit.md).
 

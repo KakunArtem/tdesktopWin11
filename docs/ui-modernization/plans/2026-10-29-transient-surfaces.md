@@ -16,6 +16,8 @@
 
 **Implementation note (2026-11-07):** Task 1 and Task 3 are built, and Task 2 is partial. Panels keep opaque fills, and boxes and inline results keep their radius, for the reasons in [transient surfaces checks](../checks/transient-surfaces.md#changes-from-the-plan). Task 4 is not started.
 
+**Implementation note (2026-11-10):** Task 4 is done with a go at an 80 % fill, the user's choice over the Popup floor of 97 %; see the [popup Acrylic record](../decisions/popup-acrylic.md). Popups prime the QRhi backing store so that they are not layered windows, which DWM would not give a backdrop. Menus that reserve space for the reaction strip keep the drawn look. The hook lives in a new `ui/platform/ui_popup_backdrop.*` rather than `ui_utility_win.cpp`, so other platforms get a no-op from one file.
+
 ## Global Constraints
 
 - All [ground rules](README.md#ground-rules), including the `lib_ui` recheck rule.

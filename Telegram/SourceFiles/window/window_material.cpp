@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_material.h"
 
 #include "base/flat_set.h"
+#include "base/options.h"
 #include "core/application.h"
 #include "core/core_settings.h"
 #include "rpl/variable.h"
@@ -15,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_theme_readability.h"
 #include "ui/style/style_core_palette.h"
 #include "ui/color_contrast.h"
+#include "ui/platform/ui_popup_backdrop.h"
 #include "ui/ui_material.h"
 #include "window/window_material_fills.h"
 #include "window/window_soft_panels.h"
@@ -28,6 +30,17 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 namespace Window::Material {
 namespace {
+
+constexpr auto kPopupBackdropFillOpacity = 0.80;
+
+base::options::toggle PopupMaterialOption({
+	.id = kOptionPopupMaterialPrototype,
+	.name = "Popup material prototype",
+	.description = "Show the Windows 11 Acrylic backdrop behind popup menus"
+		" while window transparency is active. For testing the redesign.",
+	.scope = base::options::windows,
+	.restartRequired = true,
+});
 
 auto StartupCapability = std::optional<bool>();
 auto ActiveState = rpl::variable<bool>(false);
@@ -297,9 +310,14 @@ void RecomputeFills(bool active) {
 	}
 	PaletteSnapshot = style::main_palette::save();
 	Ui::Material::SetFills(std::move(fills), std::move(borders));
+	Ui::Platform::SetPopupBackdrop(
+		active && PopupMaterialOption.value(),
+		kPopupBackdropFillOpacity);
 }
 
 } // namespace
+
+const char kOptionPopupMaterialPrototype[] = "popup-material-prototype";
 
 bool SettingAvailable() {
 #ifdef Q_OS_WIN

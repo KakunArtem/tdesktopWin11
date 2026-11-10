@@ -13,6 +13,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 namespace Window::Material {
 
+extern const char kOptionPopupMaterialPrototype[];
+
 [[nodiscard]] bool SettingAvailable();
 [[nodiscard]] bool SettingEnabled();
 void SetSettingEnabled(bool enabled);
