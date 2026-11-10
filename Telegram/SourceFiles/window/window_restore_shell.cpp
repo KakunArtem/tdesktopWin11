@@ -13,10 +13,16 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings.h"
 #include "ui/effects/radial_animation.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/widgets/labels.h"
 #include "ui/widgets/rp_window.h"
 #include "window/main_window.h"
+#include "window/window_material.h"
 #include "styles/style_window.h"
+
+#ifdef Q_OS_WIN
+#include "platform/win/window_material_win.h"
+#endif // Q_OS_WIN
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QScreen>
@@ -27,7 +33,10 @@ namespace Window {
 RestoreShell::RestoreShell(
 	const QString &title,
 	Core::WindowPosition position)
-: _window(base::make_unique_q<Ui::RpWindow>()) {
+: _window(base::make_unique_q<Ui::RpWindow>(Material::Capable())) {
+#ifdef Q_OS_WIN
+	Platform::Material::SetupWindowMaterial(_window.get());
+#endif // Q_OS_WIN
 	_window->setTitle(title.isEmpty() ? u"Telegram"_q : title);
 	_window->setMinimumSize(
 		QSize(st::windowShellMinWidth, st::windowShellMinHeight));
@@ -53,9 +62,17 @@ void RestoreShell::setupBody() {
 	_loading = std::make_unique<Ui::InfiniteRadialAnimation>(
 		[=] { _content->update(); },
 		st::windowShellLoading);
+	Ui::Material::RepaintOnFillsChanged(_content);
+	Ui::Material::ActiveValue() | rpl::on_next([=] {
+		_content->update();
+	}, _content->lifetime());
 	_content->paintRequest() | rpl::on_next([=](QRect clip) {
 		auto p = QPainter(_content);
-		p.fillRect(clip, st::windowBg);
+		Ui::Material::PaintSurface(
+			p,
+			clip,
+			Ui::Material::Surface::Window,
+			st::windowBg);
 		if (_loading) {
 			const auto size = st::windowShellLoading.size;
 			const auto position = QPoint(

@@ -9,7 +9,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "ui/chat/chat_theme_readability.h"
+#include "ui/style/style_core_palette.h"
+#include "ui/ui_material.h"
+#include "ui/widgets/rp_window.h"
 #include "window/window_material.h"
+#include "styles/style_widgets.h"
+#include "styles/style_window_soft_panels.h"
 
 #include <QtCore/QOperatingSystemVersion>
 
@@ -46,7 +52,79 @@ constexpr auto kDWMSBT_TRANSIENTWINDOW = DWORD(3);
 	return QString::number(quint32(result), 16);
 }
 
+[[nodiscard]] style::WindowTitle MakeSoftPanelsTitleStyle(bool material) {
+	auto result = st::defaultWindowTitle;
+	result.shadow = false;
+	if (material) {
+		result.minimize.icon = st::materialTitleMinimize;
+		result.minimizeIconActive = st::materialTitleMinimizeActive;
+		result.maximize.icon = st::materialTitleMaximize;
+		result.maximizeIconActive = st::materialTitleMaximizeActive;
+		result.restoreIcon = st::materialTitleRestore;
+		result.restoreIconActive = st::materialTitleRestoreActive;
+		result.close.icon = st::materialTitleClose;
+		result.closeIconActive = st::materialTitleCloseActive;
+	}
+	return result;
+}
+
 } // namespace
+
+bool BackdropDark() {
+	return Ui::IsDarkPalette(*style::main_palette::get());
+}
+
+const style::WindowTitle &TitleStyle(bool material, bool softPanels) {
+	static const auto softPanelsTitle = MakeSoftPanelsTitleStyle(false);
+	static const auto materialTitle = MakeSoftPanelsTitleStyle(true);
+	return material
+		? materialTitle
+		: softPanels
+		? softPanelsTitle
+		: st::defaultWindowTitle;
+}
+
+void SetupWindowMaterial(not_null<Ui::RpWindow*> window) {
+	rpl::combine(
+		Ui::Material::ActiveValue(),
+		Ui::Material::SoftPanelsValue()
+	) | rpl::on_next([=](bool material, bool softPanels) {
+		window->setTitleStyle(TitleStyle(material, softPanels));
+	}, window->lifetime());
+	if (!Window::Material::Capable()
+		|| Core::App().settings().nativeWindowFrame()) {
+		return;
+	}
+	window->setTitleBackgroundPainter([=](QPainter &p, const QRect &rect) {
+		Ui::Material::PaintSurface(
+			p,
+			rect,
+			Ui::Material::Surface::Window,
+			window->isActiveWindow() ? st::titleBgActive : st::titleBg);
+	});
+	if (const auto title = window->titleWidget()) {
+		Ui::Material::RepaintOnFillsChanged(title);
+	}
+	const auto apply = [=](bool dark) {
+		if (!window->testAttribute(Qt::WA_WState_Created)) {
+			return;
+		}
+		const auto handle = reinterpret_cast<HWND>(window->winId());
+		if (handle && !ApplyBackdrop(handle, dark)) {
+			Window::Material::ReportBackdropFailure();
+		}
+	};
+	window->winIdValue() | rpl::filter([](WId id) {
+		return id != 0;
+	}) | rpl::on_next([=] {
+		apply(BackdropDark());
+	}, window->lifetime());
+	Ui::Material::FillsChanged(
+	) | rpl::map(
+		BackdropDark
+	) | rpl::distinct_until_changed(
+	) | rpl::on_next(apply, window->lifetime());
+}
 
 bool Supported() {
 	return QOperatingSystemVersion::current().microVersion()

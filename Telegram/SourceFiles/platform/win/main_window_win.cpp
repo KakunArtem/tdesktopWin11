@@ -62,25 +62,7 @@ namespace ViewManagement = ABI::Windows::UI::ViewManagement;
 namespace Platform {
 namespace {
 
-[[nodiscard]] bool BackdropDark() {
-	return Ui::IsDarkPalette(*style::main_palette::get());
-}
-
-[[nodiscard]] style::WindowTitle MakeSoftPanelsTitleStyle(bool material) {
-	auto result = st::defaultWindowTitle;
-	result.shadow = false;
-	if (material) {
-		result.minimize.icon = st::materialTitleMinimize;
-		result.minimizeIconActive = st::materialTitleMinimizeActive;
-		result.maximize.icon = st::materialTitleMaximize;
-		result.maximizeIconActive = st::materialTitleMaximizeActive;
-		result.restoreIcon = st::materialTitleRestore;
-		result.restoreIconActive = st::materialTitleRestoreActive;
-		result.close.icon = st::materialTitleClose;
-		result.closeIconActive = st::materialTitleCloseActive;
-	}
-	return result;
-}
+using Material::BackdropDark;
 
 // Mouse down on tray icon deactivates the application.
 // So there is no way to know for sure if the tray icon was clicked from
@@ -719,17 +701,11 @@ void MainWindow::initHook() {
 	validateWindowTheme(
 		Core::App().settings().nativeWindowFrame(),
 		Window::Theme::IsNightMode());
-	static const auto softPanelsTitle = MakeSoftPanelsTitleStyle(false);
-	static const auto materialTitle = MakeSoftPanelsTitleStyle(true);
 	rpl::combine(
 		Ui::Material::ActiveValue(),
 		Ui::Material::SoftPanelsValue()
 	) | rpl::on_next([=](bool material, bool softPanels) {
-		setTitleStyle(material
-			? materialTitle
-			: softPanels
-			? softPanelsTitle
-			: st::defaultWindowTitle);
+		setTitleStyle(Material::TitleStyle(material, softPanels));
 	}, lifetime());
 	if (Window::Material::Capable()
 		&& !Core::App().settings().nativeWindowFrame()) {

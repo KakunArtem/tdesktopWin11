@@ -11,9 +11,22 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <windows.h>
 
+namespace style {
+struct WindowTitle;
+} // namespace style
+
+namespace Ui {
+class RpWindow;
+} // namespace Ui
+
 namespace Platform::Material {
 
 [[nodiscard]] bool Supported();
+[[nodiscard]] bool BackdropDark();
+[[nodiscard]] const style::WindowTitle &TitleStyle(
+	bool material,
+	bool softPanels);
+void SetupWindowMaterial(not_null<Ui::RpWindow*> window);
 [[nodiscard]] Window::Material::Environment ReadEnvironment();
 [[nodiscard]] Window::Material::Decision Decide();
 bool ApplyBackdrop(HWND handle, bool dark);
