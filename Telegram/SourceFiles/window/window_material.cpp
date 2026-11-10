@@ -62,6 +62,7 @@ struct AdjustmentRule {
 	const style::color *entry = nullptr;
 	std::vector<Surface> roles;
 	float64 target = 4.5;
+	const style::color *under = nullptr;
 };
 
 [[nodiscard]] const std::vector<AdjustmentRule> &AdjustmentRules() {
@@ -125,6 +126,8 @@ struct AdjustmentRule {
 		{ &st::dialogsTextFgOver, { Surface::Navigation }, 5.4 },
 		{ &st::dialogsDateFgOver, { Surface::Navigation }, 5.4 },
 		{ &st::dialogsTextFgServiceOver, { Surface::Navigation }, 5.4 },
+		{ &st::dialogsUnreadBgMuted, {}, 4.5, &st::dialogsUnreadFg },
+		{ &st::dialogsUnreadBgMutedOver, {}, 4.5, &st::dialogsUnreadFgOver },
 	};
 	return result;
 }
@@ -211,6 +214,9 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 				fill.setAlphaF(coverage[role] / 100.);
 				backgrounds.push_back(Composite(fill, range.darkest));
 				backgrounds.push_back(Composite(fill, range.brightest));
+			}
+			if (rule.under) {
+				backgrounds.push_back((*rule.under)->c);
 			}
 			const auto adjusted = Ui::EnsureTextContrast(
 				original,
