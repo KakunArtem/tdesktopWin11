@@ -40,8 +40,9 @@ Plan: [separate windows](../plans/2026-10-31-separate-windows.md). Reference:
   entry is read by `media_view_overlay_widget.cpp`, `calls_group_common.cpp`,
   `iv_editor_box.cpp`, `iv_editor_math_box.cpp` and 26 style entries in `media/view/`,
   `calls/` and `iv/`. In light themes that text is darker than upstream, so these
-  windows are not pixel-identical with material on. It reads better, not worse. Scoping
-  the adjustment to the main window would need per-window palettes. Not decided.
+  windows are not pixel-identical with material on. It reads better, not worse. The user
+  chose on 2026-11-12 to keep it rather than scope the adjustment to the main window,
+  which would need per-window palettes.
 - **Panels inset their content.** The location picker filled down to the bottom
   corners, so with a radius above 6 px a panel without a bottom bar ends its content
   12 px above the edge. The user chose this over keeping 6 px on 2026-11-12. Panel
