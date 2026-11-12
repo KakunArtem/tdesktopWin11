@@ -111,6 +111,7 @@ public:
 	bool hasTopBarShadow() const override;
 	QPixmap grabForShowAnimation(
 		const Window::SectionSlideParams &params) override;
+	void paintAnimationBackground(QPainter &p) override;
 
 	void forceContentRepaint();
 

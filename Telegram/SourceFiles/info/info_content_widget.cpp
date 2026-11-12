@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/fields/input_field.h"
 #include "ui/wrap/padding_wrap.h"
 #include "ui/search_field_controller.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_peer_menu.h"
 #include "window/window_session_controller.h"
@@ -83,7 +84,8 @@ ContentWidget::ContentWidget(
 		: st::defaultScrollArea)) {
 	using namespace rpl::mappers;
 
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	Ui::Material::SetOpaquePaint(this, true);
+	Ui::Material::RepaintOnFillsChanged(this);
 	_controller->wrapValue(
 	) | rpl::on_next([this](Wrap value) {
 		if (value != Wrap::Layer) {
@@ -159,8 +161,11 @@ bool ContentWidget::isStackBottom() const {
 
 void ContentWidget::paintEvent(QPaintEvent *e) {
 	auto p = QPainter(this);
+	const auto surface = (_controller->wrap() == Wrap::Layer)
+		? Ui::Material::Surface::Popup
+		: Ui::Material::Surface::Conversation;
 	if (_paintPadding.isNull()) {
-		p.fillRect(e->rect(), _bg);
+		Ui::Material::PaintSurface(p, e->rect(), surface, _bg);
 	} else {
 		const auto &r = e->rect();
 		const auto padding = QMargins(
@@ -168,7 +173,7 @@ void ContentWidget::paintEvent(QPaintEvent *e) {
 			std::min(0, (r.top() - _paintPadding.top())),
 			0,
 			std::min(0, (r.bottom() - _paintPadding.bottom())));
-		p.fillRect(r + padding, _bg);
+		Ui::Material::PaintSurface(p, r + padding, surface, _bg);
 	}
 }
 

@@ -28,6 +28,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/scroll_area.h"
 #include "ui/effects/slide_animation.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_session_controller.h"
 #include "styles/style_basic.h"
@@ -664,7 +665,7 @@ void TabsHost::activateTab(const QString &id, bool animated) {
 			const auto part = bodyVisibleRect().intersected(
 				previous->widget()->rect());
 			if (!part.isEmpty()) {
-				wasCache = Ui::GrabWidget(previous->widget(), part);
+				wasCache = Ui::Material::Grab(previous->widget(), part);
 			}
 		}
 		if (_visibleTop >= 0) {
@@ -715,7 +716,7 @@ void TabsHost::startSlideAnimation(
 	const auto part = rect.intersected(now->widget()->rect());
 	auto nowCache = part.isEmpty()
 		? QPixmap()
-		: Ui::GrabWidget(now->widget(), part);
+		: Ui::Material::Grab(now->widget(), part);
 	if (wasCache.isNull() || nowCache.isNull()) {
 		return;
 	}
@@ -752,7 +753,11 @@ void TabsHost::paintEvent(QPaintEvent *e) {
 	if (!_slideAnimation) {
 		return;
 	}
-	p.fillRect(_slideRect, st::windowBg);
+	Ui::Material::PaintAnimationBackground(
+		p,
+		_slideRect,
+		Ui::Material::Surface::Conversation,
+		st::windowBg);
 	_slideAnimation->paintFrame(
 		p,
 		_slideRect.x(),

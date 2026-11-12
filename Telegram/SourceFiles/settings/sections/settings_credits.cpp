@@ -30,6 +30,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "info/channel_statistics/earn/earn_icons.h"
 #include "info/channel_statistics/earn/info_channel_earn_list.h"
 #include "info/info_memento.h"
+#include "info/info_top_bar.h"
 #include "info/settings/info_settings_widget.h"
 #include "info/statistics/info_statistics_list_controllers.h"
 #include "lang/lang_keys.h"
@@ -776,7 +777,7 @@ base::weak_qptr<Ui::RpWidget> Credits::createPinnedToTop(
 		});
 		_back->toggledValue(
 		) | rpl::on_next([=](bool toggled) {
-			const auto &st = isLayer ? st::infoLayerTopBar : st::infoTopBar;
+			const auto &st = isLayer ? st::infoLayerTopBar : Info::TopBarStyle();
 			content->setTextPosition(
 				toggled ? st.back.width : st.titlePosition.x(),
 				st.titlePosition.y());

@@ -20,6 +20,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "info/profile/info_profile_icon.h"
 #include "info/info_controller.h"
 #include "info/info_memento.h"
+#include "info/info_top_bar.h"
 #include "lang/lang_keys.h"
 #include "lottie/lottie_icon.h"
 #include "main/main_app_config.h"
@@ -1053,7 +1054,7 @@ std::unique_ptr<Ui::Premium::TopBarAbstract> Widget::setupTop() {
 				raw,
 				(isLayer
 					? st::infoLayerTopBar.back
-					: st::infoTopBar.back)),
+					: Info::TopBarStyle().back)),
 			st::infoTopBarScale);
 		_back->setDuration(0);
 		_back->toggleOn(isLayer
@@ -1066,7 +1067,7 @@ std::unique_ptr<Ui::Premium::TopBarAbstract> Widget::setupTop() {
 			&st::universalRippleAnimation.color);
 		_back->toggledValue(
 		) | rpl::on_next([=](bool toggled) {
-			const auto &st = isLayer ? st::infoLayerTopBar : st::infoTopBar;
+			const auto &st = isLayer ? st::infoLayerTopBar : Info::TopBarStyle();
 			raw->setTextPosition(
 				toggled ? st.back.width : st.titlePosition.x(),
 				st.titlePosition.y());

@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "info/media/info_media_list_section.h"
 #include "core/application.h"
 #include "core/core_settings.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "styles/style_info.h"
 #include "styles/style_overview.h"
@@ -130,10 +131,10 @@ QPixmap ListZoom::grabViewport(int height) {
 	if (width <= 0 || height <= 0) {
 		return QPixmap();
 	}
-	return Ui::GrabWidget(
-		_list.get(),
-		QRect(0, _list->_visibleTop, width, height),
-		st::boxBg->c);
+	const auto rect = QRect(0, _list->_visibleTop, width, height);
+	return Ui::Material::Active()
+		? Ui::Material::Grab(_list.get(), rect)
+		: Ui::GrabWidget(_list.get(), rect, st::boxBg->c);
 }
 
 void ListZoom::apply(int step, QPoint anchor) {

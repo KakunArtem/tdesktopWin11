@@ -41,6 +41,8 @@ namespace Info {
 class Key;
 class Section;
 
+[[nodiscard]] const style::InfoTopBar &TopBarStyle();
+
 struct TitleDescriptor {
 	rpl::producer<QString> title;
 	rpl::producer<QString> subtitle;

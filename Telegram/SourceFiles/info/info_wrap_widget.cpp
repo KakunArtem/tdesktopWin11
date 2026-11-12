@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/popup_menu.h"
 #include "ui/wrap/fade_wrap.h"
 #include "ui/search_field_controller.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "core/application.h"
 #include "calls/calls_instance.h"
@@ -64,7 +65,7 @@ namespace {
 const style::InfoTopBar &TopBarStyle(Wrap wrap) {
 	return (wrap == Wrap::Layer)
 		? st::infoLayerTopBar
-		: st::infoTopBar;
+		: Info::TopBarStyle();
 }
 
 [[nodiscard]] bool HasCustomTopBar(not_null<const Controller*> controller) {
@@ -836,7 +837,7 @@ QPixmap WrapWidget::grabForShowAnimation(
 	if (expanding) {
 		_grabbingForExpanding = true;
 	}
-	auto result = Ui::GrabWidget(this);
+	auto result = Ui::Material::Grab(this);
 	if (expanding) {
 		_grabbingForExpanding = false;
 	}
@@ -844,6 +845,16 @@ QPixmap WrapWidget::grabForShowAnimation(
 		_topShadow->setVisible(true);
 	}
 	return result;
+}
+
+void WrapWidget::paintAnimationBackground(QPainter &p) {
+	using Ui::Material::Surface;
+	const auto layer = (wrap() == Wrap::Layer);
+	Ui::Material::PaintAnimationBackground(
+		p,
+		rect(),
+		layer ? Surface::Popup : Surface::Conversation,
+		layer ? st::boxBg : st::windowBg);
 }
 
 void WrapWidget::showAnimatedHook(

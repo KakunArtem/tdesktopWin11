@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/fade_wrap.h"
 #include "ui/wrap/padding_wrap.h"
 #include "ui/search_field_controller.h"
+#include "ui/ui_material.h"
 #include "data/data_session.h"
 #include "data/data_channel.h"
 #include "data/data_user.h"
@@ -30,6 +31,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_info.h"
 
 namespace Info {
+
+const style::InfoTopBar &TopBarStyle() {
+	return Ui::Material::SoftPanels()
+		? st::infoTopBarSoftPanels
+		: st::infoTopBar;
+}
 
 TopBar::TopBar(
 	QWidget *parent,
@@ -43,7 +50,8 @@ TopBar::TopBar(
 	if (_st.radius) {
 		_roundRect.emplace(_st.radius, _st.bg);
 	}
-	setAttribute(Qt::WA_OpaquePaintEvent, !_roundRect);
+	Ui::Material::SetOpaquePaint(this, !_roundRect);
+	Ui::Material::RepaintOnFillsChanged(this);
 	setSelectedItems(std::move(selectedItems));
 	updateControlsVisibility(anim::type::instant);
 }
@@ -345,7 +353,7 @@ void TopBar::createSearchView(
 			: _st.titlePosition.x();
 		wrap->setGeometryToLeft(
 			left,
-			0,
+			_st.controlsTop,
 			newWidth - left,
 			wrap->height(),
 			newWidth);
@@ -398,7 +406,7 @@ void TopBar::updateDefaultControlsGeometry(int newWidth) {
 		if (!button) {
 			continue;
 		}
-		button->moveToRight(right, 0, newWidth);
+		button->moveToRight(right, _st.controlsTop, newWidth);
 		right += button->width();
 	}
 	if (_badge) {
@@ -412,7 +420,7 @@ void TopBar::updateDefaultControlsGeometry(int newWidth) {
 	if (_back) {
 		_back->setGeometryToLeft(
 			0,
-			0,
+			_st.controlsTop,
 			newWidth - right,
 			_back->height(),
 			newWidth);
@@ -450,25 +458,25 @@ void TopBar::updateSelectionControlsGeometry(int newWidth) {
 
 	auto right = _st.mediaActionsSkip;
 	if (_canDelete) {
-		_delete->moveToRight(right, 0, newWidth);
+		_delete->moveToRight(right, _st.controlsTop, newWidth);
 		right += _delete->width();
 	}
 	if (_canToggleStoryPin) {
-		_toggleStoryInProfile->moveToRight(right, 0, newWidth);
+		_toggleStoryInProfile->moveToRight(right, _st.controlsTop, newWidth);
 		right += _toggleStoryInProfile->width();
-		_toggleStoryPin->moveToRight(right, 0, newWidth);
+		_toggleStoryPin->moveToRight(right, _st.controlsTop, newWidth);
 		right += _toggleStoryPin->width();
 	}
 	if (_canForward) {
-		_forward->moveToRight(right, 0, newWidth);
+		_forward->moveToRight(right, _st.controlsTop, newWidth);
 		right += _forward->width();
 	}
 
 	auto left = 0;
-	_cancelSelection->moveToLeft(left, 0);
+	_cancelSelection->moveToLeft(left, _st.controlsTop);
 	left += _cancelSelection->width();
 
-	const auto top = 0;
+	const auto top = _st.controlsTop;
 	const auto availableWidth = newWidth - left - right;
 	_selectionText->resizeToNaturalWidth(availableWidth);
 	_selectionText->moveToLeft(
@@ -487,7 +495,7 @@ void TopBar::updateStoriesGeometry(int newWidth) {
 		if (!button) {
 			continue;
 		}
-		button->moveToRight(right, 0, newWidth);
+		button->moveToRight(right, _st.controlsTop, newWidth);
 		right += button->width();
 	}
 	const auto &small = st::dialogsStories;
@@ -510,7 +518,18 @@ void TopBar::paintEvent(QPaintEvent *e) {
 		_highlight = false;
 		startHighlightAnimation();
 	}
-	if (!_roundRect) {
+	if (!_roundRect && Ui::Material::Active()) {
+		Ui::Material::PaintSurface(
+			p,
+			e->rect(),
+			Ui::Material::Surface::Conversation,
+			_st.bg);
+		if (highlight > 0.) {
+			p.setOpacity(highlight);
+			p.fillRect(e->rect(), _st.highlightBg);
+			p.setOpacity(1.);
+		}
+	} else if (!_roundRect) {
 		const auto brush = anim::brush(_st.bg, _st.highlightBg, highlight);
 		p.fillRect(e->rect(), brush);
 	} else if (highlight > 0.) {

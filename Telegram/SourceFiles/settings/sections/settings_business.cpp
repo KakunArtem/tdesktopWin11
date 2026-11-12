@@ -22,6 +22,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_session.h"
 #include "data/data_user.h"
 #include "data/stickers/data_custom_emoji.h"
+#include "info/info_top_bar.h"
 #include "info/info_wrap_widget.h"
 #include "info/settings/info_settings_widget.h"
 #include "lang/lang_keys.h"
@@ -844,7 +845,7 @@ base::weak_qptr<Ui::RpWidget> Business::createPinnedToTop(
 		});
 		_back->toggledValue(
 		) | rpl::on_next([=](bool toggled) {
-			const auto &st = isLayer ? st::infoLayerTopBar : st::infoTopBar;
+			const auto &st = isLayer ? st::infoLayerTopBar : Info::TopBarStyle();
 			content->setTextPosition(
 				toggled ? st.back.width : st.titlePosition.x(),
 				st.titlePosition.y());

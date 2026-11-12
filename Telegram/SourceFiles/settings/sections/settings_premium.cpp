@@ -23,6 +23,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/stickers/data_stickers.h"
 #include "history/view/media/history_view_sticker.h" // EmojiSize.
 #include "history/view/media/history_view_sticker_player.h"
+#include "info/info_top_bar.h"
 #include "info/info_wrap_widget.h" // Info::Wrap.
 #include "info/profile/info_profile_values.h"
 #include "info/settings/info_settings_widget.h" // SectionCustomTopBarData.
@@ -1626,7 +1627,7 @@ base::weak_qptr<Ui::RpWidget> Premium::createPinnedToTop(
 		});
 		_back->toggledValue(
 		) | rpl::on_next([=](bool toggled) {
-			const auto &st = isLayer ? st::infoLayerTopBar : st::infoTopBar;
+			const auto &st = isLayer ? st::infoLayerTopBar : Info::TopBarStyle();
 			content->setTextPosition(
 				toggled ? st.back.width : st.titlePosition.x(),
 				st.titlePosition.y());

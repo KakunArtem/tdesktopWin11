@@ -13,6 +13,7 @@ using "ui/widgets/widgets.style";
 using "ui/chat/chat.style"; // GroupCallUserpics.
 using "chat_helpers/chat_helpers.style"; // EmojiPan.
 using "dialogs/dialogs.style"; // dialogsDateFont.
+using "window/window_soft_panels.style";
 
 InfoToggle {
 	color: color;
@@ -57,6 +58,7 @@ InfoTopBar {
 	highlightBg: color;
 	highlightDuration: int;
 	radius: pixels;
+	controlsTop: pixels;
 }
 
 SubTabs {
@@ -264,6 +266,14 @@ infoTopBar: InfoTopBar {
 	highlightBg: windowBgOver;
 	highlightDuration: 240;
 	radius: 0px;
+	controlsTop: 0px;
+}
+infoTopBarSoftPanels: InfoTopBar(infoTopBar) {
+	height: softPanelsTopBarHeight;
+	titlePosition: point(24px, 18px);
+	titleWithSubtitlePosition: point(16px, 9px);
+	subtitlePosition: point(16px, 29px);
+	controlsTop: 1px;
 }
 infoTopBarScale: 0.7;
 infoTopBarDuration: 150;

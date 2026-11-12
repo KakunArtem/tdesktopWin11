@@ -49,6 +49,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "editor/video/video_editor_layer.h"
 #include "history/history.h"
 #include "info/info_memento.h"
+#include "info/info_top_bar.h"
 #include "info/profile/info_profile_badge.h"
 #include "info/profile/info_profile_balance_pill.h"
 #include "info/profile/info_profile_birthday_effect.h"
@@ -343,7 +344,7 @@ TopBar::TopBar(
 , _topic(descriptor.key.topic())
 , _key(descriptor.key)
 , _wrap(std::move(descriptor.wrap))
-, _st(st::infoTopBar)
+, _st(Info::TopBarStyle())
 , _source(descriptor.source)
 , _savedMessages(_key.savedMessages() != nullptr)
 , _badgeTooltipHide(
