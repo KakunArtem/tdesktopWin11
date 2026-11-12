@@ -48,6 +48,13 @@ Go, decided by the user on 2026-11-08 after comparing 97 % and 80 % fills in
 a real window, with the fill at 80 %. The option stays experimental and off
 by default; whether it becomes a setting is decided in C15 Task 3.
 
+On 2026-11-12 the user found the tray menu glitchy. With the backdrop the
+window is frosted at full size at once, so the panel animation showed an
+empty frosted box and a second shadow; such menus now show and hide without
+it. The menu's top and bottom scroll padding was still filled opaque and
+showed as darker bands; it now uses the backdrop fill. The user approved both
+in a real window.
+
 What the native backdrop contributes at this fill is Windows' rounded corners
 and shadow, not a frost the desktop shows through, as the backdrop row
 measures. A thinner fill would let more of it through, at the cost of the
