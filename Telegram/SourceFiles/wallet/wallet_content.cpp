@@ -14111,10 +14111,11 @@ void PaintBottomRoundedPlate(
 	auto hq = PainterHighQualityEnabler(p);
 	p.setPen(Qt::NoPen);
 	p.setBrush(bg);
+	const auto radius = Ui::SeparatePanelRadius();
 	p.drawRoundedRect(
-		rect.marginsAdded({ 0, 2 * st::callRadius, 0, 0 }),
-		st::callRadius,
-		st::callRadius);
+		rect.marginsAdded({ 0, 2 * radius, 0, 0 }),
+		radius,
+		radius);
 }
 
 // The three faces the area under the card can show once the lists are known

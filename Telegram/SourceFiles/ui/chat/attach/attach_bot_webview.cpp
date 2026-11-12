@@ -3564,10 +3564,11 @@ void Panel::createButton(std::unique_ptr<Button> &button) {
 			auto hq = PainterHighQualityEnabler(p);
 			p.setPen(Qt::NoPen);
 			p.setBrush(_bottomBarColor.value_or(st::windowBg->c));
+			const auto radius = SeparatePanelRadius();
 			p.drawRoundedRect(
-				raw->rect().marginsAdded({ 0, 2 * st::callRadius, 0, 0 }),
-				st::callRadius,
-				st::callRadius);
+				raw->rect().marginsAdded({ 0, 2 * radius, 0, 0 }),
+				radius,
+				radius);
 		}, raw->lifetime());
 	}
 	button = std::make_unique<Button>(

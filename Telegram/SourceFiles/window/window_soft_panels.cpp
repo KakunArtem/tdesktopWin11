@@ -10,9 +10,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/options.h"
 #include "styles/palette.h"
 #include "ui/style/style_core_palette.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/chat/chat_theme_readability.h"
 #include "ui/layers/layer_widget.h"
 #include "ui/ui_material.h"
+#include "ui/widgets/separate_panel.h"
 #include "ui/widgets/soft_controls.h"
 
 #include <QtGui/QPaintEvent>
@@ -56,6 +58,9 @@ void RefreshSoftControls() {
 	Ui::SetSoftControls(Ui::Material::SoftPanels());
 	Ui::SetMainMenuCornerRadius(Ui::Material::SoftPanels()
 		? st::mainMenuSoftPanelsRadius
+		: 0);
+	Ui::SetSeparatePanelRadius(Ui::Material::SoftPanels()
+		? Ui::PopupPanelRadius()
 		: 0);
 	if (Ui::SoftControls()) {
 		auto hover = st::windowFg->c;
