@@ -135,6 +135,7 @@ private:
 	void backRequested();
 
 	void updateControlsGeometry();
+	[[nodiscard]] QRect cardRect() const;
 	[[nodiscard]] not_null<details::Data*> getData() {
 		return &_data;
 	}

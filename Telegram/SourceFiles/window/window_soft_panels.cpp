@@ -13,6 +13,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_style_radius.h"
 #include "ui/chat/chat_theme_readability.h"
 #include "ui/layers/layer_widget.h"
+#include "ui/painter.h"
 #include "ui/ui_material.h"
 #include "ui/widgets/separate_panel.h"
 #include "ui/widgets/soft_controls.h"
@@ -91,6 +92,28 @@ int TopBarShift() {
 
 int TopBarShadowHeight() {
 	return Ui::Material::SoftPanels() ? 0 : st::lineWidth;
+}
+
+void PaintCard(QPainter &p, QRect card) {
+	using Ui::Material::Surface;
+	const auto radius = Ui::PopupPanelRadius();
+	auto shape = QPainterPath();
+	shape.addRoundedRect(QRectF(card), radius, radius);
+	auto hq = PainterHighQualityEnabler(p);
+	Ui::Material::PaintSurface(p, shape, Surface::Popup, st::windowBg);
+	const auto inset = st::lineWidth / 2.;
+	auto outline = QPainterPath();
+	outline.addRoundedRect(
+		QRectF(card).adjusted(inset, inset, -inset, -inset),
+		radius - inset,
+		radius - inset);
+	p.setPen(QPen(
+		(Ui::Material::Active()
+			? Ui::Material::Border(Surface::Popup)
+			: st::shadowFg->c),
+		st::lineWidth));
+	p.setBrush(Qt::NoBrush);
+	p.drawPath(outline);
 }
 
 PanelFrame::PanelFrame(not_null<QWidget*> parent, Corners corners)

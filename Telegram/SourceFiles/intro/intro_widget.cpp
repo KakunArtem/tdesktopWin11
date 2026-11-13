@@ -32,6 +32,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/buttons.h"
 #include "ui/widgets/labels.h"
 #include "ui/wrap/fade_wrap.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "boxes/abstract_box.h"
 #include "core/update_checker.h"
@@ -42,6 +43,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_controller.h"
 #include "window/window_session_controller.h"
 #include "window/section_widget.h"
+#include "window/window_soft_panels.h"
 #include "base/platform/base_platform_info.h"
 #include "api/api_text_entities.h"
 #include "styles/style_layers.h"
@@ -811,7 +813,39 @@ void Widget::paintEvent(QPaintEvent *e) {
 		_showAnimation->paintContents(p);
 		return;
 	}
-	p.fillRect(e->rect(), st::windowBg);
+	Ui::Material::PaintSurface(
+		p,
+		e->rect(),
+		Ui::Material::Surface::Window,
+		st::windowBg);
+	const auto card = cardRect();
+	if (!card.isEmpty()) {
+		Window::SoftPanels::PaintCard(p, card);
+	}
+}
+
+QRect Widget::cardRect() const {
+	const auto step = _stepHistory.empty() ? nullptr : getStep();
+	if (!Ui::Material::SoftPanels() || !step) {
+		return QRect();
+	}
+	const auto top = step->contentTop() + (step->hasCover()
+		? st::introCoverTitleTop
+		: st::introTitleTop);
+	auto bottom = top;
+	const auto include = [&](QWidget *widget) {
+		if (widget && !widget->isHidden()) {
+			bottom = std::max(bottom, widget->y() + widget->height());
+		}
+	};
+	for (const auto child : step->children()) {
+		include(qobject_cast<QWidget*>(child));
+	}
+	include(_next);
+	include(_changeLanguage);
+	const auto left = (width() - st::introStepWidth) / 2;
+	return QRect(left, top, st::introStepWidth, bottom - top).marginsAdded(
+		st::introSoftPanelsCard);
 }
 
 void Widget::resizeEvent(QResizeEvent *e) {
@@ -857,6 +891,7 @@ void Widget::updateControlsGeometry() {
 		nextTop,
 		shownAmount);
 	_next->moveToLeft((width() - _next->width()) / 2, realNextTop);
+	update();
 	getStep()->setShowAnimationClipping(shownAmount > 0
 		? QRect(0, 0, width(), realNextTop)
 		: QRect());

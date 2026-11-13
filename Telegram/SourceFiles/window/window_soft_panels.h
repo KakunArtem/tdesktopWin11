@@ -22,6 +22,7 @@ void RefreshSoftControls();
 [[nodiscard]] int TopBarHeight();
 [[nodiscard]] int TopBarShift();
 [[nodiscard]] int TopBarShadowHeight();
+void PaintCard(QPainter &p, QRect card);
 
 class PanelFrame final : public Ui::RpWidget {
 public:

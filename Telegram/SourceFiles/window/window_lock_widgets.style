@@ -16,6 +16,7 @@ passcodeSubmit: RoundButton(introNextButton) {
 	width: 225px;
 }
 passcodeSubmitSkip: 40px;
+lockSoftPanelsCard: margins(24px, 22px, 24px, 20px);
 passcodeSystemUnlock: IconButton(defaultIconButton) {
 	width: 32px;
 	height: 36px;

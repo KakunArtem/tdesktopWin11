@@ -71,6 +71,7 @@ introStepWidth: 380px;
 introNextTop: 266px;
 introNextSlide: 200px;
 introStepHeight: 384px;
+introSoftPanelsCard: margins(24px, 22px, 24px, 20px);
 introContentTopAdd: 30px;
 introStepHeightFull: 590px;
 introSlideDuration: 200;

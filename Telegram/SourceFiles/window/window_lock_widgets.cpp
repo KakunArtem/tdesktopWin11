@@ -23,8 +23,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/labels.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/toast/toast.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "window/window_controller.h"
+#include "window/window_soft_panels.h"
 #include "window/window_slide_animation.h"
 #include "window/window_session_controller.h"
 #include "main/main_domain.h"
@@ -66,6 +68,7 @@ PasscodeAttempt TryPasscode(
 LockWidget::LockWidget(QWidget *parent, not_null<Controller*> window)
 : RpWidget(parent)
 , _window(window) {
+	Ui::Material::RepaintOnFillsChanged(this);
 	show();
 }
 
@@ -116,7 +119,16 @@ void LockWidget::paintEvent(QPaintEvent *e) {
 }
 
 void LockWidget::paintContent(QPainter &p) {
-	p.fillRect(rect(), st::windowBg);
+	using Ui::Material::Surface;
+	Ui::Material::PaintSurface(p, rect(), Surface::Window, st::windowBg);
+	const auto card = cardRect();
+	if (Ui::Material::SoftPanels() && !card.isEmpty()) {
+		SoftPanels::PaintCard(p, card);
+	}
+}
+
+QRect LockWidget::cardRect() const {
+	return QRect();
 }
 
 PasscodeLockWidget::PasscodeLockWidget(
@@ -184,6 +196,13 @@ void PasscodeLockWidget::setupSystemUnlockInfo() {
 	}, info->lifetime());
 	info->showOn(_systemUnlockAvailable.value(
 	) | rpl::map(rpl::mappers::_1 != SystemUnlockType::None));
+	_systemUnlockInfo = info;
+	rpl::merge(
+		info->geometryValue() | rpl::to_empty,
+		info->shownValue() | rpl::to_empty
+	) | rpl::on_next([=] {
+		update();
+	}, info->lifetime());
 }
 
 void PasscodeLockWidget::setupSystemUnlock() {
@@ -280,6 +299,25 @@ void PasscodeLockWidget::paintContent(QPainter &p) {
 		p.setPen(st::boxTextFgError);
 		p.drawText(QRect(0, _passcode->y() + _passcode->height(), width(), st::passcodeSubmitSkip), _error, style::al_center);
 	}
+}
+
+QRect PasscodeLockWidget::cardRect() const {
+	const auto header = st::passcodeHeaderFont->height;
+	const auto top = _passcode->y()
+		- st::passcodeHeaderHeight
+		+ (st::passcodeHeaderHeight - header) / 2;
+	auto left = _passcode->x();
+	auto right = _passcode->x() + _passcode->width();
+	auto bottom = _logout->y() + _logout->height();
+	const auto info = _systemUnlockInfo.data();
+	if (info && !info->isHidden()) {
+		const auto text = std::min(info->naturalWidth(), info->width());
+		left = std::min(left, info->x() + (info->width() - text) / 2);
+		right = std::max(right, info->x() + (info->width() + text) / 2);
+		bottom = info->y() + info->height();
+	}
+	return QRect(left, top, right - left, bottom - top).marginsAdded(
+		st::lockSoftPanelsCard);
 }
 
 void PasscodeLockWidget::submit() {

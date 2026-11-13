@@ -22,6 +22,7 @@ class PasswordInput;
 class LinkButton;
 class RoundButton;
 class CheckView;
+class FlatLabel;
 } // namespace Ui
 
 namespace Main {
@@ -65,6 +66,7 @@ public:
 protected:
 	void paintEvent(QPaintEvent *e) override;
 	virtual void paintContent(QPainter &p);
+	[[nodiscard]] virtual QRect cardRect() const;
 
 private:
 	const not_null<Controller*> _window;
@@ -90,6 +92,7 @@ private:
 	};
 
 	void paintContent(QPainter &p) override;
+	[[nodiscard]] QRect cardRect() const override;
 
 	void setupSystemUnlockInfo();
 	void setupSystemUnlock();
@@ -105,6 +108,7 @@ private:
 	object_ptr<Ui::PasswordInput> _passcode;
 	object_ptr<Ui::RoundButton> _submit;
 	object_ptr<Ui::LinkButton> _logout;
+	QPointer<Ui::FlatLabel> _systemUnlockInfo;
 	QString _error;
 
 	rpl::lifetime _systemUnlockSuggested;
