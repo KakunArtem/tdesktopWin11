@@ -28,8 +28,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_options.h"
 #include "ui/text/text_utilities.h"
 #include "ui/toast/toast.h"
+#include "ui/abstract_button.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
+#include "ui/widgets/soft_controls.h"
+#include "window/window_soft_panels.h"
 #include "chat_helpers/message_field.h"
 #include "menu/menu_check_item.h"
 #include "menu/menu_send.h"
@@ -70,6 +74,43 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include <QtGui/QGuiApplication>
 #include <QtGui/QClipboard>
+
+namespace {
+
+// WHY: the dark media viewer passes its own styles; only the default
+// box follows Soft Panels.
+[[nodiscard]] bool UseSoftStyle(const ShareBox::Descriptor &descriptor) {
+	return Ui::Material::SoftPanels() && !descriptor.st.multiSelect;
+}
+
+} // namespace
+
+not_null<Ui::AbstractButton*> CreateSoftSendButton(
+		not_null<QWidget*> parent,
+		Fn<void()> send,
+		Fn<void(not_null<Ui::RpWidget*>)> showMenu) {
+	const auto result = Ui::CreateChild<Ui::AbstractButton>(parent.get());
+	result->resize(st::shareSoftSendSize, st::shareSoftSendSize);
+	result->paintRequest(
+	) | rpl::on_next([=] {
+		auto p = QPainter(result);
+		auto hq = PainterHighQualityEnabler(p);
+		p.setPen(Qt::NoPen);
+		p.setBrush(st::activeButtonBg);
+		p.drawEllipse(result->rect());
+		st::shareSoftSendIcon.paintInCenter(p, result->rect());
+	}, result->lifetime());
+	result->setAcceptBoth();
+	result->clicks(
+	) | rpl::on_next([=](Qt::MouseButton button) {
+		if (button == Qt::RightButton) {
+			showMenu(result);
+		} else if (button == Qt::LeftButton) {
+			send();
+		}
+	}, result->lifetime());
+	return result;
+}
 
 class ShareBox::Inner final : public Ui::RpWidget {
 public:
@@ -175,6 +216,7 @@ private:
 	const Descriptor &_descriptor;
 	const std::shared_ptr<Ui::Show> _show;
 	const style::PeerList &_st;
+	const bool _soft = false;
 
 	float64 _columnSkip = 0.;
 	float64 _rowWidthReal = 0.;
@@ -210,11 +252,14 @@ private:
 
 ShareBox::ShareBox(QWidget*, Descriptor &&descriptor)
 : _descriptor(std::move(descriptor))
+, _soft(UseSoftStyle(_descriptor))
 , _api(&_descriptor.session->mtp())
 , _select(
 	this,
 	(_descriptor.st.multiSelect
 		? *_descriptor.st.multiSelect
+		: _soft
+		? st::shareSoftSearch
 		: st::defaultMultiSelect),
 	tr::lng_participant_filter())
 , _comment(
@@ -223,10 +268,12 @@ ShareBox::ShareBox(QWidget*, Descriptor &&descriptor)
 		this,
 		(_descriptor.st.comment
 			? *_descriptor.st.comment
+			: _soft
+			? st::shareSoftComment
 			: st::shareComment),
 		Ui::InputField::Mode::MultiLine,
 		tr::lng_photos_comment()),
-	st::shareCommentPadding)
+	(_soft ? st::shareSoftCommentPadding : st::shareCommentPadding))
 , _bottomWidget(std::move(_descriptor.bottomWidget))
 , _copyLinkText(_descriptor.copyLinkText
 	? std::move(_descriptor.copyLinkText)
@@ -247,11 +294,17 @@ void ShareBox::prepareCommentField() {
 		_comment->heightValue(),
 		(_bottomWidget
 			? _bottomWidget->heightValue()
+			: (rpl::single(0) | rpl::type_erased)),
+		(_softFooter
+			? _softFooter->heightValue()
 			: (rpl::single(0) | rpl::type_erased))
-	) | rpl::on_next([=](int height, int comment, int bottom) {
-		_comment->moveToLeft(0, height - bottom - comment);
+	) | rpl::on_next([=](int height, int comment, int bottom, int footer) {
+		_comment->moveToLeft(0, height - footer - bottom - comment);
 		if (_bottomWidget) {
-			_bottomWidget->moveToLeft(0, height - bottom);
+			_bottomWidget->moveToLeft(0, height - footer - bottom);
+		}
+		if (_softFooter) {
+			_softFooter->moveToLeft(0, height - footer);
 		}
 	}, _comment->lifetime());
 
@@ -287,6 +340,9 @@ void ShareBox::prepareCommentField() {
 }
 
 void ShareBox::prepare() {
+	if (_soft) {
+		setupSoft();
+	}
 	prepareCommentField();
 
 	_select->resizeToWidth(st::boxWideWidth);
@@ -332,6 +388,9 @@ void ShareBox::prepare() {
 		_comment->heightValue(),
 		(_bottomWidget
 			? _bottomWidget->heightValue()
+			: rpl::single(0) | rpl::type_erased),
+		(_softFooter
+			? _softFooter->heightValue()
 			: rpl::single(0) | rpl::type_erased)
 	) | rpl::on_next([=] {
 		updateScrollSkips();
@@ -401,7 +460,8 @@ int ShareBox::getTopScrollSkip() const {
 
 int ShareBox::getBottomScrollSkip() const {
 	return (_comment->isHidden() ? 0 : _comment->height())
-		+ (_bottomWidget ? _bottomWidget->height() : 0);
+		+ (_bottomWidget ? _bottomWidget->height() : 0)
+		+ (_softFooter ? _softFooter->height() : 0);
 }
 
 int ShareBox::contentHeight() const {
@@ -621,8 +681,118 @@ void ShareBox::showMenu(not_null<Ui::RpWidget*> parent) {
 	}
 }
 
+void ShareBox::setupSoft() {
+	setStyle(st::shareBoxSoft);
+
+	const auto searchBg = Ui::CreateChild<Ui::RpWidget>(this);
+	searchBg->setAttribute(Qt::WA_TransparentForMouseEvents);
+	_select->geometryValue(
+	) | rpl::on_next([=](QRect geometry) {
+		searchBg->setGeometry(geometry);
+	}, searchBg->lifetime());
+	searchBg->paintRequest(
+	) | rpl::on_next([=] {
+		auto p = QPainter(searchBg);
+		auto hq = PainterHighQualityEnabler(p);
+		const auto pill = searchBg->rect().marginsRemoved(
+			st::shareSoftSearchMargins);
+		const auto radius = std::min(
+			st::shareSoftSearchRadius,
+			pill.height() / 2);
+		p.setPen(Qt::NoPen);
+		p.setBrush(Ui::ControlFill(st::windowBgOver));
+		p.drawRoundedRect(pill, radius, radius);
+	}, searchBg->lifetime());
+	searchBg->show();
+	searchBg->stackUnder(_select);
+
+	const auto send = CreateSoftSendButton(
+		this,
+		[=] { submit({}); },
+		[=](not_null<Ui::RpWidget*> button) { showMenu(button); });
+	_softSend = send;
+	_comment->geometryValue(
+	) | rpl::on_next([=](QRect geometry) {
+		const auto &padding = st::shareSoftCommentPadding;
+		send->moveToLeft(
+			(geometry.x()
+				+ geometry.width()
+				- st::shareSoftInsetRight
+				- send->width()),
+			geometry.y() + geometry.height() - padding.bottom() - send->height());
+		updateSoftFooter();
+	}, send->lifetime());
+	send->hide();
+
+	_softFooter = Ui::CreateChild<Ui::RpWidget>(this);
+	widthValue(
+	) | rpl::on_next([=](int width) {
+		_softFooter->resize(width, _softFooter->height());
+	}, _softFooter->lifetime());
+	if (_descriptor.copyCallback) {
+		const auto copy = Ui::CreateChild<Ui::AbstractButton>(_softFooter);
+		_softCopy = copy;
+		copy->setClickedCallback([=] { copyLink(); });
+		_copyLinkText.value(
+		) | rpl::on_next([=](const QString &text) {
+			copy->resize(
+				(st::shareSoftCopyTextLeft
+					+ st::semiboldFont->width(text)
+					+ st::shareSoftCopyLeft),
+				st::shareSoftFooterHeight);
+			copy->update();
+		}, copy->lifetime());
+		copy->paintRequest(
+		) | rpl::on_next([=] {
+			auto p = QPainter(copy);
+			const auto &icon = st::shareSoftCopyIcon;
+			icon.paint(
+				p,
+				st::shareSoftCopyLeft,
+				(copy->height() - icon.height()) / 2,
+				copy->width());
+			p.setFont(st::semiboldFont);
+			p.setPen(st::windowActiveTextFg);
+			p.drawText(
+				st::shareSoftCopyTextLeft,
+				((copy->height() - st::semiboldFont->height) / 2
+					+ st::semiboldFont->ascent),
+				_copyLinkText.current());
+		}, copy->lifetime());
+		copy->moveToLeft(0, 0);
+	}
+	_softFooter->show();
+}
+
+void ShareBox::updateSoftFooter() {
+	if (!_soft) {
+		return;
+	}
+	const auto showCopy = (_softCopy != nullptr) && !_hasSelected;
+	if (_softCopy) {
+		_softCopy->setVisible(showCopy);
+	}
+	const auto height = showCopy ? st::shareSoftFooterHeight : 0;
+	if (_softFooter && _softFooter->height() != height) {
+		_softFooter->resize(_softFooter->width(), height);
+	}
+	if (_softSend) {
+		const auto &padding = st::shareSoftCommentPadding;
+		_softSend->setVisible(_hasSelected
+			&& (_comment->height() >= padding.top()
+				+ padding.bottom()
+				+ _softSend->height()));
+		_softSend->raise();
+	}
+}
+
 void ShareBox::createButtons() {
 	clearButtons();
+	if (_soft) {
+		addTopButton(st::boxTitleClose, [=] { closeBox(); });
+		updateSoftFooter();
+		return;
+	}
 	if (_hasSelected) {
 		const auto send = addButton(tr::lng_share_confirm(), [=] {
 			submit({});
@@ -833,6 +1003,7 @@ ShareBox::Inner::Inner(
 , _st(_descriptor.st.peerList
 	? *_descriptor.st.peerList
 	: st::shareBoxList)
+, _soft(UseSoftStyle(descriptor))
 , _defaultChatsIndexed(
 	std::make_unique<Dialogs::IndexedList>(
 		Dialogs::SortMode::Add))
@@ -1222,6 +1393,15 @@ void ShareBox::Inner::paintChat(
 
 	auto outerWidth = width();
 	auto photoLeft = (_rowWidth - (_st.item.checkbox.imageRadius * 2)) / 2;
+	if (_soft) {
+		// WHY: flooring each column drifts the grid right by a few pixels,
+		// which shows against the card edges, so place photos exactly.
+		const auto column = index % _columnCount;
+		const auto size = _st.item.checkbox.imageRadius * 2;
+		x = st::shareSoftInset
+			+ int(std::round(_columnSkip * (column + 1) + size * column))
+			- photoLeft;
+	}
 	auto photoTop = st::sharePhotoTop;
 	chat->checkbox.paint(p, x + photoLeft, y + photoTop, outerWidth);
 
@@ -1238,6 +1418,9 @@ void ShareBox::Inner::paintChat(
 	}
 
 	auto nameActive = chat->nameActive.value((index == _active) ? 1. : 0.);
+	if (_soft && chat->checkbox.checked()) {
+		nameActive = 1.;
+	}
 	p.setPen(anim::pen(_st.item.nameFg, _st.item.nameFgChecked, nameActive));
 
 	auto nameWidth = (_rowWidth - st::shareColumnSkip);
@@ -1273,6 +1456,13 @@ void ShareBox::Inner::paintEvent(QPaintEvent *e) {
 	auto r = e->rect();
 	p.setClipRect(r);
 	p.fillRect(r, _st.bg);
+	if (_soft) {
+		Window::SoftPanels::PaintListCard(p, QRectF(
+			st::shareSoftInset,
+			st::shareSoftCardTop,
+			width() - st::shareSoftInset - st::shareSoftInsetRight,
+			height() - st::shareSoftCardTop - st::shareSoftCardBottom));
+	}
 	auto yFrom = r.y(), yTo = r.y() + r.height();
 	auto rowFrom = yFrom / _rowHeight;
 	auto rowTo = (yTo + _rowHeight - 1) / _rowHeight;
@@ -1386,9 +1576,13 @@ void ShareBox::Inner::selectActive() {
 }
 
 void ShareBox::Inner::resizeEvent(QResizeEvent *e) {
-	_columnSkip = (width() - _columnCount * _st.item.checkbox.imageRadius * 2) / float64(_columnCount + 1);
+	const auto inset = _soft ? st::shareSoftInset : 0;
+	const auto available = width()
+		- inset
+		- (_soft ? st::shareSoftInsetRight : 0);
+	_columnSkip = (available - _columnCount * _st.item.checkbox.imageRadius * 2) / float64(_columnCount + 1);
 	_rowWidthReal = _st.item.checkbox.imageRadius * 2 + _columnSkip;
-	_rowsLeft = int(std::floor(_columnSkip / 2));
+	_rowsLeft = inset + int(std::floor(_columnSkip / 2));
 	_rowWidth = int(std::floor(_rowWidthReal));
 	update();
 }

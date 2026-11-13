@@ -229,30 +229,36 @@ void SetupCards(
 	cards->paintRequest(
 	) | rpl::on_next([=] {
 		auto p = QPainter(cards);
-		auto hq = PainterHighQualityEnabler(p);
-		auto fill = st::windowFg->c;
-		fill.setAlphaF(kCardFillAlpha);
-		auto border = st::windowFg->c;
-		border.setAlphaF(kCardBorderAlpha);
-		p.setPen(QPen(border, st::lineWidth));
-		p.setBrush(fill);
-		const auto radius = float64(Ui::PopupPanelRadius());
-		const auto half = st::lineWidth / 2.;
 		const auto shift = (content.get() == host.get())
 			? QPoint()
 			: content->mapTo(host, QPoint());
 		const auto margins = QMarginsF(
-			args.inset + half,
-			args.shrink + half,
-			args.inset + half,
-			args.shrink + half);
+			args.inset,
+			args.shrink,
+			args.inset,
+			args.shrink);
 		for (const auto &card : CollectCards(content)) {
-			p.drawRoundedRect(
-				QRectF(card.translated(shift)).marginsRemoved(margins),
-				radius,
-				radius);
+			PaintListCard(
+				p,
+				QRectF(card.translated(shift)).marginsRemoved(margins));
 		}
 	}, cards->lifetime());
+}
+
+void PaintListCard(QPainter &p, const QRectF &rect) {
+	auto hq = PainterHighQualityEnabler(p);
+	auto fill = st::windowFg->c;
+	fill.setAlphaF(kCardFillAlpha);
+	auto border = st::windowFg->c;
+	border.setAlphaF(kCardBorderAlpha);
+	p.setPen(QPen(border, st::lineWidth));
+	p.setBrush(fill);
+	const auto half = st::lineWidth / 2.;
+	const auto radius = float64(Ui::PopupPanelRadius());
+	p.drawRoundedRect(
+		rect.marginsRemoved({ half, half, half, half }),
+		radius,
+		radius);
 }
 
 PanelFrame::PanelFrame(not_null<QWidget*> parent, Corners corners)

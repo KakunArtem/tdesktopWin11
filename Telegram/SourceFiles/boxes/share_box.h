@@ -51,6 +51,7 @@ class Thread;
 } // namespace Data
 
 namespace Ui {
+class AbstractButton;
 class MultiSelect;
 class InputField;
 struct ScrollToRequest;
@@ -94,6 +95,12 @@ void FastShareLink(
 	std::shared_ptr<Main::SessionShow> show,
 	QImage image,
 	const QString &caption);
+
+// Round accent send button used by the Soft Panels share and forward boxes.
+[[nodiscard]] not_null<Ui::AbstractButton*> CreateSoftSendButton(
+	not_null<QWidget*> parent,
+	Fn<void()> send,
+	Fn<void(not_null<Ui::RpWidget*>)> showMenu);
 
 struct RecipientMoneyRestrictionError;
 [[nodiscard]] auto ShareMessageMoneyRestrictionError()
@@ -181,7 +188,11 @@ private:
 
 	void showMenu(not_null<Ui::RpWidget*> parent);
 
+	void setupSoft();
+	void updateSoftFooter();
+
 	Descriptor _descriptor;
+	const bool _soft = false;
 	MTP::Sender _api;
 
 	object_ptr<Ui::MultiSelect> _select;
@@ -204,6 +215,9 @@ private:
 	mtpRequestId _peopleRequest = 0;
 
 	RpWidget *_chatsFilters = nullptr;
+	Ui::AbstractButton *_softSend = nullptr;
+	Ui::RpWidget *_softFooter = nullptr;
+	Ui::AbstractButton *_softCopy = nullptr;
 
 	using PeopleCache = QMap<QString, MTPcontacts_Found>;
 	PeopleCache _peopleCache;

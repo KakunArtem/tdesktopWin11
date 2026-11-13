@@ -33,3 +33,36 @@ shareComment: InputField(defaultInputField) {
 	borderActive: 0px;
 }
 shareCommentPadding: margins(5px, 5px, 5px, 5px);
+
+shareBoxSoft: Box(defaultBox) {
+	buttonPadding: margins(0px, 0px, 0px, 0px);
+	buttonHeight: 0px;
+	margin: margins(0px, 10px, 0px, 6px);
+}
+shareSoftInset: 12px;
+// boxScroll keeps its bar 9px from the right, so the right side adds it.
+shareSoftInsetRight: 21px;
+shareSoftCardTop: 4px;
+shareSoftCardBottom: 6px;
+shareSoftSearch: MultiSelect(defaultMultiSelect) {
+	bg: transparent;
+	padding: margins(14px, 6px, 23px, 6px);
+	item: MultiSelectItem(defaultMultiSelectItem) {
+		textBg: lightButtonBgOver;
+	}
+}
+shareSoftSearchMargins: margins(12px, 4px, 21px, 4px);
+shareSoftSearchRadius: 18px;
+shareSoftComment: InputField(shareComment) {
+	textBg: windowBgOver;
+	textBgActive: windowBgOver;
+	borderRadius: 18px;
+	textMargins: margins(14px, 8px, 14px, 6px);
+}
+shareSoftCommentPadding: margins(12px, 6px, 65px, 6px);
+shareSoftSendSize: 36px;
+shareSoftSendIcon: icon {{ "chat/input_send", activeButtonFg }};
+shareSoftFooterHeight: 40px;
+shareSoftCopyIcon: icon {{ "menu/link", windowActiveTextFg }};
+shareSoftCopyLeft: 18px;
+shareSoftCopyTextLeft: 46px;
