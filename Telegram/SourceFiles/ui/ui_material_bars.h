@@ -47,4 +47,7 @@ void PaintRoundedSurface(
 	Surface surface,
 	const style::color &solid);
 
+// A soft translucent card; a negative radius uses the popup panel radius.
+void PaintListCard(QPainter &p, const QRectF &rect, float64 radius = -1.);
+
 } // namespace Ui::Material

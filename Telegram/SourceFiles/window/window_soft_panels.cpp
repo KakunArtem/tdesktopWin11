@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/layers/layer_widget.h"
 #include "ui/painter.h"
 #include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/box_content_divider.h"
 #include "ui/widgets/separate_panel.h"
@@ -52,9 +53,6 @@ base::options::toggle LayoutOption({
 	.scope = base::options::windows,
 	.restartRequired = true,
 });
-
-constexpr auto kCardFillAlpha = 0.045;
-constexpr auto kCardBorderAlpha = 0.08;
 
 [[nodiscard]] QRect VisibleRect(
 		not_null<QWidget*> widget,
@@ -245,20 +243,8 @@ void SetupCards(
 	}, cards->lifetime());
 }
 
-void PaintListCard(QPainter &p, const QRectF &rect) {
-	auto hq = PainterHighQualityEnabler(p);
-	auto fill = st::windowFg->c;
-	fill.setAlphaF(kCardFillAlpha);
-	auto border = st::windowFg->c;
-	border.setAlphaF(kCardBorderAlpha);
-	p.setPen(QPen(border, st::lineWidth));
-	p.setBrush(fill);
-	const auto half = st::lineWidth / 2.;
-	const auto radius = float64(Ui::PopupPanelRadius());
-	p.drawRoundedRect(
-		rect.marginsRemoved({ half, half, half, half }),
-		radius,
-		radius);
+void PaintListCard(QPainter &p, const QRectF &rect, float64 radius) {
+	Ui::Material::PaintListCard(p, rect, radius);
 }
 
 PanelFrame::PanelFrame(not_null<QWidget*> parent, Corners corners)

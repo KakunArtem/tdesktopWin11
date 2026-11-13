@@ -34,7 +34,7 @@ struct CardsArgs {
 	int shrink = 0;
 };
 
-void PaintListCard(QPainter &p, const QRectF &rect);
+void PaintListCard(QPainter &p, const QRectF &rect, float64 radius = -1.);
 
 // Draws rounded cards behind runs of rows in content, under its widgets.
 void SetupCards(

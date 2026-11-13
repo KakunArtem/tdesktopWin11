@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "ui/widgets/shadow.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "styles/style_basic.h"
 
 namespace Dialogs {
@@ -18,6 +20,12 @@ void PaintPillBackground(
 		const Ui::BoxShadow &shadow,
 		const QRect &pill,
 		int radius) {
+	if (Ui::Material::Active()) {
+		// WHY: the opaque list colour reads as a black block on the
+		// translucent panel, so the pill becomes a soft card instead.
+		Ui::Material::PaintListCard(p, QRectF(pill), radius);
+		return;
+	}
 	shadow.paint(p, pill, radius);
 	{
 		auto hq = PainterHighQualityEnabler(p);

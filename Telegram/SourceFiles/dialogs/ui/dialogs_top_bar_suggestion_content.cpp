@@ -115,9 +115,11 @@ int PaintSuggestionBubbleBackground(
 	const auto &margins = st::dialogsTopBarSuggestionMargins;
 	const auto pill = outer - margins;
 	if (Ui::Material::Active()) {
+		// WHY: below the pill the list paints a different fill than the
+		// material panel, so painting only the top half left a band.
 		Ui::Material::PaintSurface(
 			p,
-			QRect(0, 0, outer.width(), margins.top() + pill.height() / 2),
+			QRect(QPoint(), outer.size()),
 			Ui::Material::Surface::Navigation,
 			st::dialogsBg);
 	} else {

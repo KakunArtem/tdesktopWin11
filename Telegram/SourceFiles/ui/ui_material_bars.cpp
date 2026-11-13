@@ -7,9 +7,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 */
 #include "ui/ui_material_bars.h"
 
+#include "ui/chat/chat_style_radius.h"
+#include "ui/painter.h"
 #include "ui/rp_widget.h"
 #include "ui/ui_utility.h"
 #include "styles/palette.h"
+#include "styles/style_basic.h"
 #include "styles/style_window_soft_panels.h"
 
 #include <QtGui/QPainter>
@@ -189,6 +192,26 @@ void PaintRoundedSurface(
 	if (!Grabbing()) {
 		PaintSurfaceOutline(p, rect, radius, surface);
 	}
+}
+
+void PaintListCard(QPainter &p, const QRectF &rect, float64 radius) {
+	constexpr auto kFillAlpha = 0.045;
+	constexpr auto kBorderAlpha = 0.08;
+	auto hq = PainterHighQualityEnabler(p);
+	auto fill = st::windowFg->c;
+	fill.setAlphaF(kFillAlpha);
+	auto border = st::windowFg->c;
+	border.setAlphaF(kBorderAlpha);
+	p.setPen(QPen(border, st::lineWidth));
+	p.setBrush(fill);
+	const auto half = st::lineWidth / 2.;
+	const auto corner = (radius < 0.)
+		? float64(PopupPanelRadius())
+		: radius;
+	p.drawRoundedRect(
+		rect.marginsRemoved({ half, half, half, half }),
+		corner,
+		corner);
 }
 
 } // namespace Ui::Material
