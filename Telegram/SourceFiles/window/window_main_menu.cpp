@@ -19,6 +19,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "calls/calls_instance.h"
 #include "core/application.h"
 #include "core/click_handler_types.h"
+#include "core/version.h"
 #include "data/data_changes.h"
 #include "data/data_document_media.h"
 #include "data/data_folder.h"
@@ -72,6 +73,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_main_menu_helpers.h"
 #include "window/window_peer_menu.h"
 #include "window/window_session_controller.h"
+#include "window/window_soft_panels.h"
 #include "window/window_soft_panels_layout.h"
 #include "styles/style_chat.h" // popupMenuExpandedSeparator
 #include "styles/style_menu_icons.h"
@@ -90,6 +92,28 @@ namespace Window {
 namespace {
 
 constexpr auto kPlayStatusLimit = 2;
+
+[[nodiscard]] style::margins MenuMargins() {
+	return Ui::Material::SoftPanels()
+		? style::margins(0, st::mainMenuCardSkip, 0, st::mainMenuCardSkip)
+		: style::margins(0, st::mainMenuSkip, 0, 0);
+}
+
+void MarkCardGap(not_null<QWidget*> widget) {
+	widget->setProperty(SoftPanels::kCardGapProperty, true);
+}
+
+void AddSeparator(not_null<Ui::VerticalLayout*> container) {
+	if (Ui::Material::SoftPanels()) {
+		MarkCardGap(container->add(
+			object_ptr<Ui::FixedHeightWidget>(container, st::lineWidth),
+			{ 0, st::mainMenuCardSkip, 0, st::mainMenuCardSkip }));
+	} else {
+		container->add(
+			object_ptr<Ui::PlainShadow>(container),
+			{ 0, st::mainMenuSkip, 0, st::mainMenuSkip });
+	}
+}
 
 [[nodiscard]] bool CanCheckSpecialEvent() {
 	static const auto result = [] {
@@ -355,7 +379,7 @@ MainMenu::MainMenu(
 	object_ptr<Ui::PlainShadow>(_inner.get()))))
 , _menu(_inner->add(
 	object_ptr<Ui::VerticalLayout>(_inner.get()),
-	{ 0, st::mainMenuSkip, 0, 0 }))
+	MenuMargins()))
 , _footer(_inner->add(object_ptr<Ui::RpWidget>(_inner.get())))
 , _telegram(
 	Ui::CreateChild<Ui::FlatLabel>(_footer.get(), st::mainMenuTelegramLabel))
@@ -373,7 +397,19 @@ MainMenu::MainMenu(
 	setupArchive();
 	setupMenu();
 
+	if (Ui::Material::SoftPanels()) {
+		MarkCardGap(_topShadowSkip);
+		MarkCardGap(_shadow);
+		MarkCardGap(_footer);
+		_shadow->entity()->hide();
+		SoftPanels::SetupCards(_inner, _inner, {
+			.inset = st::mainMenuCardInset,
+			.shrink = st::mainMenuCardShrink,
+		});
+	}
+
 	const auto shadow = Ui::CreateChild<Ui::PlainShadow>(this);
+	shadow->setVisible(!Ui::Material::SoftPanels());
 	widthValue(
 	) | rpl::on_next([=](int width) {
 		const auto line = st::lineWidth;
@@ -405,10 +441,7 @@ MainMenu::MainMenu(
 
 	parentResized();
 
-	_telegram->setMarkedText(tr::link(
-		u"Telegram Desktop"_q,
-		u"https://desktop.telegram.org"_q));
-	_telegram->setLinksTrusted();
+	_telegram->setText(AppName.utf16());
 	// The canary version is too long for the "Version {version}" form.
 	_version->setMarkedText(
 		tr::link(
@@ -549,9 +582,7 @@ void MainMenu::setupArchive() {
 		tr::lng_archived_name(),
 		MainMenuButtonStyle(),
 		{ &st::menuIconArchiveOpen });
-	inner->add(
-		object_ptr<Ui::PlainShadow>(inner),
-		{ 0, st::mainMenuSkip, 0, st::mainMenuSkip });
+	AddSeparator(inner);
 	button->setAcceptBoth(true);
 	button->clicks(
 	) | rpl::on_next([=](Qt::MouseButton which) {
@@ -703,9 +734,7 @@ void MainMenu::setupMenu() {
 
 		SetupMenuBots(_menu, controller);
 
-		_menu->add(
-			object_ptr<Ui::PlainShadow>(_menu),
-			{ 0, st::mainMenuSkip, 0, st::mainMenuSkip });
+		AddSeparator(_menu);
 
 		AddMyChannelsBox(addAction(
 			tr::lng_create_group_title(),
@@ -789,6 +818,9 @@ void MainMenu::setupMenu() {
 			_controller->session().supportTemplates().reload();
 		});
 	}
+	if (Ui::Material::SoftPanels()) {
+		AddSeparator(_menu);
+	}
 	addAction(
 		tr::lng_menu_settings(),
 		{ &st::menuIconSettings }
@@ -864,10 +896,12 @@ void MainMenu::updateControlsGeometry() {
 }
 
 void MainMenu::updateInnerControlsGeometry() {
+	const auto margins = MenuMargins();
 	const auto contentHeight = _accounts->height()
 		+ _shadow->height()
-		+ st::mainMenuSkip
-		+ _menu->height();
+		+ margins.top()
+		+ _menu->height()
+		+ margins.bottom();
 	const auto available = height() - st::mainMenuCoverHeight - contentHeight;
 	const auto footerHeight = std::max(
 		available,

@@ -119,7 +119,7 @@ mainMenuButton: SettingsButton(defaultSettingsButton) {
 	toggleSkip: 19px;
 	iconLeft: 21px;
 }
-mainMenuSoftPanelsRowMargins: margins(8px, 0px, 8px, 0px);
+mainMenuSoftPanelsRowMargins: margins(12px, 0px, 12px, 0px);
 mainMenuSoftPanelsRowRadius: 8px;
 mainMenuButtonSoftPanels: SettingsButton(mainMenuButton) {
 	pillMargins: mainMenuSoftPanelsRowMargins;

@@ -12,121 +12,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_information.h"
 #include "settings/settings_common_session.h"
 #include "menu/menu_send.h"
-#include "ui/chat/chat_style_radius.h"
-#include "ui/widgets/box_content_divider.h"
-#include "ui/widgets/labels.h"
-#include "ui/painter.h"
 #include "ui/ui_material.h"
 #include "ui/ui_utility.h"
-#include "ui/vertical_list.h"
+#include "window/window_soft_panels.h"
 #include "styles/style_info.h"
-#include "styles/style_layers.h"
 
 namespace Info {
 namespace Settings {
-namespace {
-
-constexpr auto kCardFillAlpha = 0.045;
-constexpr auto kCardBorderAlpha = 0.08;
-
-[[nodiscard]] QRect VisibleRect(
-		not_null<QWidget*> widget,
-		not_null<QWidget*> root) {
-	auto result = widget->rect();
-	for (auto w = widget.get(); w != root; w = w->parentWidget()) {
-		const auto parent = w->parentWidget();
-		if (!parent || w->isHidden()) {
-			return QRect();
-		}
-		result = result.translated(w->pos()).intersected(parent->rect());
-		if (result.isEmpty()) {
-			return QRect();
-		}
-	}
-	return result;
-}
-
-[[nodiscard]] std::vector<QRect> CollectCards(not_null<QWidget*> content) {
-	struct Cut {
-		int top = 0;
-		int bottom = 0;
-	};
-	auto cuts = std::vector<Cut>();
-	const auto &padding = st::defaultSubsectionTitlePadding;
-	for (const auto child : content->findChildren<QWidget*>()) {
-		if (dynamic_cast<Ui::BoxContentDivider*>(child)) {
-			const auto r = VisibleRect(child, content);
-			if (!r.isEmpty()) {
-				cuts.push_back({ r.y(), r.y() + r.height() });
-			}
-		} else if (child->property(Ui::kCardTitleProperty).toBool()) {
-			const auto r = VisibleRect(child, content);
-			if (!r.isEmpty()) {
-				cuts.push_back({
-					r.y() - padding.top(),
-					r.y() + r.height() + st::settingsCardTitleSkip,
-				});
-			}
-		}
-	}
-	ranges::sort(cuts, ranges::less(), &Cut::top);
-
-	auto result = std::vector<QRect>();
-	auto top = 0;
-	const auto add = [&](int bottom) {
-		if (bottom - top >= st::settingsCardMinHeight) {
-			result.push_back(QRect(0, top, content->width(), bottom - top));
-		}
-	};
-	for (const auto &cut : cuts) {
-		if (cut.top > top) {
-			add(cut.top);
-		}
-		top = std::max(top, cut.bottom);
-	}
-	add(content->height());
-	return result;
-}
-
-void SetupCards(not_null<QWidget*> wrap, not_null<Ui::RpWidget*> content) {
-	content->setProperty(Ui::kCardsProperty, true);
-
-	const auto cards = Ui::CreateChild<Ui::RpWidget>(wrap.get());
-	cards->setAttribute(Qt::WA_TransparentForMouseEvents);
-	cards->setGeometry(wrap->rect());
-	cards->lower();
-	cards->show();
-
-	content->geometryValue(
-	) | rpl::on_next([=] {
-		cards->setGeometry(wrap->rect());
-		cards->update();
-	}, cards->lifetime());
-
-	cards->paintRequest(
-	) | rpl::on_next([=] {
-		auto p = QPainter(cards);
-		auto hq = PainterHighQualityEnabler(p);
-		auto fill = st::windowFg->c;
-		fill.setAlphaF(kCardFillAlpha);
-		auto border = st::windowFg->c;
-		border.setAlphaF(kCardBorderAlpha);
-		p.setPen(QPen(border, st::lineWidth));
-		p.setBrush(fill);
-		const auto radius = float64(Ui::PopupPanelRadius());
-		const auto half = st::lineWidth / 2.;
-		const auto shift = content->pos();
-		for (const auto &card : CollectCards(content)) {
-			p.drawRoundedRect(
-				QRectF(card.translated(shift)).marginsRemoved(
-					{ half, half, half, half }),
-				radius,
-				radius);
-		}
-	}, cards->lifetime());
-}
-
-} // namespace
 
 Memento::Memento(not_null<UserData*> self, Type type)
 : ContentMemento(Tag{ self })
@@ -176,7 +68,7 @@ Widget::Widget(
 , _pinnedToBottom(_inner->createPinnedToBottom(this)) {
 	if (Ui::Material::SoftPanels() && !_inner->hasFlexibleTopBar()) {
 		setInnerSideInset(st::settingsCardInset);
-		SetupCards(innerWrap(), _inner);
+		Window::SoftPanels::SetupCards(innerWrap(), _inner);
 	}
 
 	_inner->sectionShowOther(

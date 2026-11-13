@@ -26,6 +26,20 @@ void RefreshSoftControls();
 [[nodiscard]] int TopBarShadowHeight();
 void PaintCard(QPainter &p, QRect card);
 
+// Widgets with this property split a card layout like a divider does.
+inline constexpr auto kCardGapProperty = "softCardGap";
+
+struct CardsArgs {
+	int inset = 0;
+	int shrink = 0;
+};
+
+// Draws rounded cards behind runs of rows in content, under its widgets.
+void SetupCards(
+	not_null<QWidget*> host,
+	not_null<Ui::RpWidget*> content,
+	CardsArgs args = {});
+
 class PanelFrame final : public Ui::RpWidget {
 public:
 	PanelFrame(not_null<QWidget*> parent, Corners corners);
