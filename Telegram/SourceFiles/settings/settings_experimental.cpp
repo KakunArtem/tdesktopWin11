@@ -54,8 +54,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_peer_menu.h"
 #include "window/window_session_controller.h"
 #include "window/window_controller.h"
-#include "window/window_material.h"
-#include "window/window_soft_panels.h"
 #include "window/notifications_manager.h"
 #include "info/info_flexible_scroll.h"
 #include "chat_helpers/stickers_list_widget.h"
@@ -455,8 +453,6 @@ void SetupExperimental(
 #endif
 				Window::kOptionDisableTouchbar,
 				Window::kOptionNewWindowsSizeAsFirst,
-				Window::SoftPanels::kOptionLayout,
-				Window::Material::kOptionPopupMaterialPrototype,
 			}
 		},
 		{

@@ -8,6 +8,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_soft_panels.h"
 
 #include "base/options.h"
+#include "core/application.h"
+#include "core/core_settings.h"
 #include "styles/palette.h"
 #include "ui/style/style_core_palette.h"
 #include "ui/chat/chat_style_radius.h"
@@ -35,10 +37,15 @@ constexpr auto kSoftControlHoverDark = 0.07;
 auto ContentGrabDepth = 0;
 auto SoftControlsLifetime = rpl::lifetime();
 
+constexpr auto kLayoutPref = std::string_view("soft_panels_layout");
+
+// WHY: the experimental option is no longer listed; it stays registered so
+// a value stored by an older build is read once into the setting.
 base::options::toggle LayoutOption({
 	.id = kOptionLayout,
 	.name = "Soft Panels layout",
 	.description = "Rounded panels and gaps in the main window.",
+	.defaultValue = true,
 	.scope = base::options::windows,
 	.restartRequired = true,
 });
@@ -47,8 +54,27 @@ base::options::toggle LayoutOption({
 
 const char kOptionLayout[] = "soft-panels-layout";
 
+bool LayoutEnabled() {
+	auto &settings = Core::App().settings();
+	const auto stored = settings.readPref<bool>(kLayoutPref, false);
+	if (stored != settings.readPref<bool>(kLayoutPref, true)) {
+		const auto migrated = LayoutOption.value();
+		LOG(("Soft Panels: migrated layout setting %1."
+			).arg(Logs::b(migrated)));
+		settings.writePref<bool>(kLayoutPref, migrated);
+		Core::App().saveSettingsDelayed();
+		return migrated;
+	}
+	return stored;
+}
+
+void SetLayoutEnabled(bool enabled) {
+	Core::App().settings().writePref<bool>(kLayoutPref, enabled);
+	Core::App().saveSettingsDelayed();
+}
+
 void Initialize() {
-	Ui::Material::SetSoftPanels(LayoutOption.value());
+	Ui::Material::SetSoftPanels(LayoutEnabled());
 	RefreshSoftControls();
 	style::PaletteChanged() | rpl::on_next([] {
 		RefreshSoftControls();

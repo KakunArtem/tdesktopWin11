@@ -51,6 +51,11 @@ Windows 11 as the design target.
   host the reaction strip keep the drawn look (2026-11-09).
 - Order (2026-11-08): Telegram's notifications (C19 Task 2) moved ahead of the
   rest of C14.
+- Defaults (2026-11-13): window transparency is on by default, and with it the
+  chat area shows the frosted material instead of the wallpaper. Soft Panels is
+  a regular setting, "Use Soft Panels layout", on by default. Popup Acrylic is
+  a regular setting, "Use transparency in menus", shown where transparency can
+  run, on by default. Values stored by earlier builds are kept.
 
 The approved reference remains the earlier baseline; the readable mockup
 refines it. Detailed element states, the final native material and

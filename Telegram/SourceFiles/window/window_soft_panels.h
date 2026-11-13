@@ -17,6 +17,8 @@ namespace Window::SoftPanels {
 extern const char kOptionLayout[];
 
 void Initialize();
+[[nodiscard]] bool LayoutEnabled();
+void SetLayoutEnabled(bool enabled);
 void RefreshSoftControls();
 [[nodiscard]] QPixmap GrabContent(not_null<QWidget*> widget, QRect rect);
 [[nodiscard]] int TopBarHeight();

@@ -33,11 +33,16 @@ namespace {
 
 constexpr auto kPopupBackdropFillOpacity = 0.80;
 
+constexpr auto kPopupMaterialPref = std::string_view("popup_material");
+
+// WHY: the experimental option is no longer listed; it stays registered so
+// a value stored by an older build is read once into the setting.
 base::options::toggle PopupMaterialOption({
 	.id = kOptionPopupMaterialPrototype,
 	.name = "Popup material prototype",
 	.description = "Show the Windows 11 Acrylic backdrop behind popup menus"
 		" while window transparency is active. For testing the redesign.",
+	.defaultValue = true,
 	.scope = base::options::windows,
 	.restartRequired = true,
 });
@@ -317,7 +322,7 @@ void RecomputeFills(bool active) {
 	PaletteSnapshot = style::main_palette::save();
 	Ui::Material::SetFills(std::move(fills), std::move(borders));
 	Ui::Platform::SetPopupBackdrop(
-		active && PopupMaterialOption.value(),
+		active && PopupMaterialEnabled(),
 		kPopupBackdropFillOpacity);
 }
 
@@ -334,7 +339,7 @@ bool SettingAvailable() {
 }
 
 bool SettingEnabled() {
-	return Core::App().settings().readPref<bool>("window_material", false);
+	return Core::App().settings().readPref<bool>("window_material", true);
 }
 
 void SetSettingEnabled(bool enabled) {
@@ -345,7 +350,26 @@ void SetSettingEnabled(bool enabled) {
 bool ChatBackgroundEnabled() {
 	return Core::App().settings().readPref<bool>(
 		"window_material_chat_background",
-		false);
+		true);
+}
+
+bool PopupMaterialEnabled() {
+	auto &settings = Core::App().settings();
+	const auto stored = settings.readPref<bool>(kPopupMaterialPref, false);
+	if (stored != settings.readPref<bool>(kPopupMaterialPref, true)) {
+		const auto migrated = PopupMaterialOption.value();
+		LOG(("Material: migrated popup setting %1."
+			).arg(Logs::b(migrated)));
+		settings.writePref<bool>(kPopupMaterialPref, migrated);
+		Core::App().saveSettingsDelayed();
+		return migrated;
+	}
+	return stored;
+}
+
+void SetPopupMaterialEnabled(bool enabled) {
+	Core::App().settings().writePref<bool>(kPopupMaterialPref, enabled);
+	Core::App().saveSettingsDelayed();
 }
 
 void SetChatBackgroundEnabled(bool enabled) {

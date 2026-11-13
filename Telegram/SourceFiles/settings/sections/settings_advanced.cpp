@@ -67,6 +67,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/vertical_layout.h"
 #include "window/window_controller.h"
 #include "window/window_material.h"
+#include "window/window_soft_panels.h"
 #include "window/window_saved_windows.h"
 #include "window/window_session_controller.h"
 #include "styles/style_layers.h"
@@ -306,14 +307,16 @@ void BuildAutoDownloadSection(SectionBuilder &builder) {
 	builder.addSkip(st::settingsCheckboxesSkip);
 }
 
-void SetupWindowMaterialCheckbox(
+void SetupRestartCheckbox(
 		not_null<Ui::Checkbox*> checkbox,
-		Window::SessionController *controller) {
+		Window::SessionController *controller,
+		Fn<bool()> current,
+		Fn<void(bool)> save) {
 	checkbox->checkedChanges(
-	) | rpl::filter([](bool checked) {
-		return checked != Window::Material::SettingEnabled();
+	) | rpl::filter([=](bool checked) {
+		return checked != current();
 	}) | rpl::on_next([=](bool checked) {
-		Window::Material::SetSettingEnabled(checked);
+		save(checked);
 		if (controller) {
 			controller->show(Ui::MakeConfirmBox({
 				.text = tr::lng_settings_need_restart(),
@@ -322,6 +325,36 @@ void SetupWindowMaterialCheckbox(
 			}));
 		}
 	}, checkbox->lifetime());
+}
+
+void SetupWindowMaterialCheckbox(
+		not_null<Ui::Checkbox*> checkbox,
+		Window::SessionController *controller) {
+	SetupRestartCheckbox(
+		checkbox,
+		controller,
+		Window::Material::SettingEnabled,
+		Window::Material::SetSettingEnabled);
+}
+
+void SetupSoftPanelsCheckbox(
+		not_null<Ui::Checkbox*> checkbox,
+		Window::SessionController *controller) {
+	SetupRestartCheckbox(
+		checkbox,
+		controller,
+		Window::SoftPanels::LayoutEnabled,
+		Window::SoftPanels::SetLayoutEnabled);
+}
+
+void SetupPopupMaterialCheckbox(
+		not_null<Ui::Checkbox*> checkbox,
+		Window::SessionController *controller) {
+	SetupRestartCheckbox(
+		checkbox,
+		controller,
+		Window::Material::PopupMaterialEnabled,
+		Window::Material::SetPopupMaterialEnabled);
 }
 
 void BuildWindowTitleSection(SectionBuilder &builder) {
@@ -424,6 +457,28 @@ void BuildWindowTitleSection(SectionBuilder &builder) {
 		});
 		if (material) {
 			SetupWindowMaterialCheckbox(material, builder.controller());
+		}
+	}
+	if (Platform::IsWindows()) {
+		const auto softPanels = builder.addCheckbox({
+			.id = u"advanced/soft_panels"_q,
+			.title = tr::lng_settings_soft_panels(),
+			.checked = Window::SoftPanels::LayoutEnabled(),
+			.keywords = { u"panels"_q, u"rounded"_q, u"layout"_q },
+		});
+		if (softPanels) {
+			SetupSoftPanelsCheckbox(softPanels, builder.controller());
+		}
+	}
+	if (Window::Material::Capable()) {
+		const auto popup = builder.addCheckbox({
+			.id = u"advanced/popup_material"_q,
+			.title = tr::lng_settings_popup_material(),
+			.checked = Window::Material::PopupMaterialEnabled(),
+			.keywords = { u"transparency"_q, u"menu"_q, u"acrylic"_q },
+		});
+		if (popup) {
+			SetupPopupMaterialCheckbox(popup, builder.controller());
 		}
 	}
 
@@ -1732,6 +1787,16 @@ void SetupWindowTitleContent(
 		SetupWindowMaterialCheckbox(addCheckbox(
 			tr::lng_settings_window_material(),
 			Window::Material::SettingEnabled()), controller);
+	}
+	if (Platform::IsWindows()) {
+		SetupSoftPanelsCheckbox(addCheckbox(
+			tr::lng_settings_soft_panels(),
+			Window::SoftPanels::LayoutEnabled()), controller);
+	}
+	if (Window::Material::Capable()) {
+		SetupPopupMaterialCheckbox(addCheckbox(
+			tr::lng_settings_popup_material(),
+			Window::Material::PopupMaterialEnabled()), controller);
 	}
 }
 

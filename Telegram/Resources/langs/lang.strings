@@ -687,6 +687,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 "lng_settings_title_total_count" = "Total unread count";
 "lng_settings_native_frame" = "Use system window frame";
 "lng_settings_window_material" = "Use window transparency";
+"lng_settings_soft_panels" = "Use Soft Panels layout";
+"lng_settings_popup_material" = "Use transparency in menus";
 "lng_settings_qt_frame" = "Use Qt window frame";
 "lng_settings_auto_start" = "Launch Telegram when system starts";
 "lng_settings_start_min" = "Launch minimized";

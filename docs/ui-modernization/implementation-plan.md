@@ -222,9 +222,8 @@ The roadmap's decisions:
 1. Decided on 2026-10-31: material needs Windows 11 22H2 (22621) or later.
 2. Decided on 2026-10-31: `lib_ui` and `lib_base` are forked as
    `KakunArtem/lib_ui` and `KakunArtem/lib_base` before Phase 3.
-3. Still needed: whether transparency is on by default, and the default chat
-   background in material mode. Tracked, with the plan it blocks, in
-   [Open decisions](architecture.md#open-decisions).
+3. Decided on 2026-11-13: transparency is on by default, and the chat
+   background in material mode defaults to the frosted material.
 4. Decided on 2026-10-30: Windows first. The Soft Panels layout and material
    are Windows-only for now; macOS and Linux keep the upstream look.
 5. Decided on 2026-10-31: material is refused while the native window frame

@@ -21,6 +21,8 @@ void SetSettingEnabled(bool enabled);
 
 [[nodiscard]] bool ChatBackgroundEnabled();
 void SetChatBackgroundEnabled(bool enabled);
+[[nodiscard]] bool PopupMaterialEnabled();
+void SetPopupMaterialEnabled(bool enabled);
 [[nodiscard]] bool ChatBackgroundActive();
 [[nodiscard]] rpl::producer<bool> ChatBackgroundActiveValue();
 
