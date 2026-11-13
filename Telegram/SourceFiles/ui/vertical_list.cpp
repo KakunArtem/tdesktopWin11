@@ -72,12 +72,14 @@ not_null<Ui::FlatLabel*> AddSubsectionTitle(
 		rpl::producer<QString> text,
 		style::margins addPadding,
 		const style::FlatLabel *st) {
-	return container->add(
+	const auto result = container->add(
 		object_ptr<Ui::FlatLabel>(
 			container,
 			std::move(text),
 			st ? *st : st::defaultSubsectionTitle),
 		st::defaultSubsectionTitlePadding + addPadding);
+	result->setProperty(kCardTitleProperty, true);
+	return result;
 }
 
 } // namespace Ui

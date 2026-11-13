@@ -499,7 +499,6 @@ Manager::~Manager() {
 }
 
 namespace internal {
-namespace {
 
 void FinishCard(QPainter &p, QRect card) {
 	const auto shape = CardShape(card);
@@ -520,8 +519,6 @@ void FinishCard(QPainter &p, QRect card) {
 	p.setBrush(Qt::NoBrush);
 	p.drawPath(shape);
 }
-
-} // namespace
 
 QPainterPath CardShape(QRect rect) {
 	const auto half = st::lineWidth / 2.;

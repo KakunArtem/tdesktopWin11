@@ -26,6 +26,10 @@ namespace Ui {
 class FlatLabel;
 class VerticalLayout;
 
+// WHY: subsection titles carry this property, so a card layout keeps
+// them above the card instead of inside it.
+inline constexpr auto kCardTitleProperty = "softCardTitle";
+
 void AddSkip(not_null<Ui::VerticalLayout*> container);
 void AddSkip(not_null<Ui::VerticalLayout*> container, int skip);
 void AddDivider(

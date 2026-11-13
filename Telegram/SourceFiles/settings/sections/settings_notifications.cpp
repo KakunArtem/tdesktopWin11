@@ -34,10 +34,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_notifications_reactions.h"
 #include "settings/sections/settings_notifications_type.h"
 #include "ui/boxes/confirm_box.h"
+#include "ui/chat/chat_style_radius.h"
 #include "ui/chat/chat_theme.h"
 #include "ui/controls/chat_service_checkbox.h"
 #include "ui/effects/animations.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "ui/vertical_list.h"
 #include "ui/widgets/buttons.h"
@@ -47,6 +49,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/wrap/slide_wrap.h"
 #include "ui/wrap/vertical_layout.h"
 #include "window/notifications_manager.h"
+#include "window/notifications_manager_default.h"
 #include "window/section_widget.h"
 #include "window/themes/window_theme.h"
 #include "window/window_session_controller.h"
@@ -67,6 +70,55 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Settings {
 
 using ChangeType = Window::Notifications::ChangeType;
+
+namespace {
+
+void PaintSoftMonitor(QPainter &p, QRect screen, int height) {
+	auto hq = PainterHighQualityEnabler(p);
+	const auto bezel = st::notificationsSoftBezel;
+	const auto frame = screen.marginsAdded({ bezel, bezel, bezel, bezel });
+	const auto radius = float64(Ui::PopupPanelRadius());
+	const auto border = Ui::Material::Border(Ui::Material::Surface::Popup);
+	const auto line = QPen(
+		border.isValid() ? border : st::notifyBorder->c,
+		st::lineWidth);
+
+	const auto footHeight = st::notificationsSoftFootHeight;
+	const auto footWidth = frame.width() / 3;
+	const auto foot = QRect(
+		frame.x() + (frame.width() - footWidth) / 2,
+		height - footHeight - st::lineWidth,
+		footWidth,
+		footHeight);
+	const auto neckWidth = frame.width() / 8;
+	const auto neck = QRect(
+		frame.x() + (frame.width() - neckWidth) / 2,
+		frame.y() + frame.height(),
+		neckWidth,
+		foot.y() - frame.y() - frame.height());
+
+	p.setPen(line);
+	p.setBrush(st::windowBgOver);
+	p.drawRect(neck);
+	p.drawRoundedRect(foot, footHeight / 2., footHeight / 2.);
+	p.drawRoundedRect(frame, radius, radius);
+
+	// WHY: a soft accent wash reads as a desktop wallpaper in both
+	// themes, so the rounded sample cards stand out the way real ones do.
+	auto wallpaper = QLinearGradient(screen.topLeft(), screen.bottomRight());
+	wallpaper.setColorAt(
+		0.,
+		anim::color(st::windowBg, st::windowBgActive, 0.35));
+	wallpaper.setColorAt(
+		1.,
+		anim::color(st::windowBg, st::windowBgActive, 0.75));
+	p.setPen(Qt::NoPen);
+	p.setBrush(wallpaper);
+	const auto inner = float64(st::notificationsSoftScreenRadius);
+	p.drawRoundedRect(screen, inner, inner);
+}
+
+} // namespace
 
 int CurrentNotificationsCount() {
 	return std::clamp(
@@ -342,15 +394,19 @@ void NotificationsCount::paintEvent(QPaintEvent *e) {
 	auto contentLeft = getContentLeft();
 
 	auto screenRect = getScreenRect();
-	p.fillRect(
-		screenRect.x(),
-		screenRect.y(),
-		st::notificationsBoxScreenSize.width(),
-		st::notificationsBoxScreenSize.height(),
-		st::notificationsBoxScreenBg);
+	if (Ui::Material::SoftPanels()) {
+		PaintSoftMonitor(p, screenRect, st::notificationsBoxMonitor.height());
+	} else {
+		p.fillRect(
+			screenRect.x(),
+			screenRect.y(),
+			st::notificationsBoxScreenSize.width(),
+			st::notificationsBoxScreenSize.height(),
+			st::notificationsBoxScreenBg);
 
-	auto monitorTop = 0;
-	st::notificationsBoxMonitor.paint(p, contentLeft, monitorTop, width());
+		auto monitorTop = 0;
+		st::notificationsBoxMonitor.paint(p, contentLeft, monitorTop, width());
+	}
 
 	for (int corner = 0; corner != 4; ++corner) {
 		auto screenCorner = static_cast<ScreenCorner>(corner);
@@ -419,12 +475,22 @@ void NotificationsCount::prepareNotificationSampleSmall() {
 		QSize(width, height) * style::DevicePixelRatio(),
 		QImage::Format_ARGB32_Premultiplied);
 	sampleImage.setDevicePixelRatio(style::DevicePixelRatio());
-	sampleImage.fill(st::notificationBg->c);
+	const auto soft = Ui::Material::SoftPanels();
+	sampleImage.fill(soft ? Qt::transparent : st::notificationBg->c);
 	{
 		Painter p(&sampleImage);
 		PainterHighQualityEnabler hq(p);
 
 		p.setPen(Qt::NoPen);
+
+		if (soft) {
+			// WHY: the real cards are rounded, so the monitor
+			// miniatures scale the same radius down to their size.
+			const auto radius = Ui::PopupPanelRadius()
+				* float64(width) / st::notifyWidth;
+			p.setBrush(st::notificationBg);
+			p.drawRoundedRect(QRect(0, 0, width, height), radius, radius);
+		}
 
 		auto padding = height / 8;
 		auto userpicSize = height - 2 * padding;
@@ -473,12 +539,15 @@ void NotificationsCount::prepareNotificationSampleLarge() {
 		QImage::Format_ARGB32_Premultiplied);
 	sampleImage.setDevicePixelRatio(style::DevicePixelRatio());
 	sampleImage.fill(st::notificationBg->c);
+	const auto soft = Ui::Material::SoftPanels();
 	{
 		Painter p(&sampleImage);
-		p.fillRect(0, 0, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder->b);
-		p.fillRect(w - st::notifyBorderWidth, 0, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder->b);
-		p.fillRect(st::notifyBorderWidth, h - st::notifyBorderWidth, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder->b);
-		p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder->b);
+		if (!soft) {
+			p.fillRect(0, 0, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder->b);
+			p.fillRect(w - st::notifyBorderWidth, 0, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder->b);
+			p.fillRect(st::notifyBorderWidth, h - st::notifyBorderWidth, w - st::notifyBorderWidth, st::notifyBorderWidth, st::notifyBorder->b);
+			p.fillRect(0, st::notifyBorderWidth, st::notifyBorderWidth, h - st::notifyBorderWidth, st::notifyBorder->b);
+		}
 
 		prepareNotificationSampleUserpic();
 		p.drawPixmap(st::notifyPhotoPos.x(), st::notifyPhotoPos.y(), _notificationSampleUserpic);
@@ -499,6 +568,12 @@ void NotificationsCount::prepareNotificationSampleLarge() {
 		p.drawText(rectForName.left(), rectForName.top() + st::msgNameFont->ascent, notifyTitle);
 
 		st::notifyClose.icon.paint(p, w - st::notifyClosePos.x() - st::notifyClose.width + st::notifyClose.iconPosition.x(), st::notifyClosePos.y() + st::notifyClose.iconPosition.y(), w);
+
+		if (soft) {
+			Window::Notifications::Default::internal::FinishCard(
+				p,
+				QRect(0, 0, w, h));
+		}
 	}
 
 	_notificationSampleLarge = Ui::PixmapFromImage(std::move(sampleImage));
@@ -650,7 +725,11 @@ NotificationsCount::SampleWidget::SampleWidget(
 		| Qt::Tool);
 	setAttribute(Qt::WA_MacAlwaysShowToolWindow);
 	setAttribute(Qt::WA_TransparentForMouseEvents);
-	setAttribute(Qt::WA_OpaquePaintEvent);
+	if (Ui::Material::SoftPanels()) {
+		setAttribute(Qt::WA_TranslucentBackground);
+	} else {
+		setAttribute(Qt::WA_OpaquePaintEvent);
+	}
 
 	setWindowOpacity(0.);
 	show();

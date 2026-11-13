@@ -299,7 +299,25 @@ void ContentWidget::applyAdditionalScroll(int additionalScroll) {
 
 void ContentWidget::updateInnerPadding() {
 	const auto addedToBottom = std::max(_additionalScroll, _addedHeight);
-	_innerWrap->setPadding({ 0, _innerTopReserve, 0, addedToBottom });
+	_innerWrap->setPadding({
+		_innerSideInset,
+		_innerTopReserve,
+		_innerSideInset,
+		addedToBottom,
+	});
+}
+
+void ContentWidget::setInnerSideInset(int inset) {
+	if (_innerSideInset != inset) {
+		_innerSideInset = inset;
+		if (_innerWrap) {
+			updateInnerPadding();
+		}
+	}
+}
+
+Ui::RpWidget *ContentWidget::innerWrap() const {
+	return _innerWrap;
 }
 
 void ContentWidget::setInnerTopReserve(int reserve) {

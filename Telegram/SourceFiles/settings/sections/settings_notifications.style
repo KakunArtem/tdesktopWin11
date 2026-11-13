@@ -16,3 +16,6 @@ notificationsSampleBottomSkip: 5px;
 notificationsSampleMargin: 2px;
 notificationSampleOpacity: 0.5;
 notificationSampleSize: size(64px, 16px);
+notificationsSoftBezel: 8px;
+notificationsSoftScreenRadius: 6px;
+notificationsSoftFootHeight: 8px;
