@@ -761,6 +761,7 @@ public:
 	bool trackRowPressFromGlobal(QPoint globalPosition);
 
 	void setSearchMode(PeerListSearchMode mode);
+	void setSoftCard(bool enabled);
 	void changeCheckState(
 		not_null<PeerListRow*> row,
 		bool checked,
@@ -939,6 +940,7 @@ private:
 
 	Mode _mode = Mode::Default;
 	int _rowHeight = 0;
+	bool _softCard = false;
 	int _visibleTop = 0;
 	int _visibleBottom = 0;
 
@@ -1229,6 +1231,9 @@ public:
 
 	void appendQueryChangedCallback(Fn<void(QString)>);
 
+	// Soft Panels look: search pill, carded list and no button row.
+	void setSoftStyle();
+
 protected:
 	void prepare() override;
 	void setInnerFocus() override;
@@ -1275,6 +1280,7 @@ private:
 	Fn<void(PeerListBox*)> _init;
 	bool _scrollBottomFixed = false;
 	bool _addedTopScrollAboveSearch = false;
+	bool _soft = false;
 	int _addedTopScrollSkip = 0;
 
 };

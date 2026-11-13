@@ -62,6 +62,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/delayed_activation.h"
 #include "ui/vertical_list.h"
 #include "ui/controls/feature_list.h"
+#include "ui/abstract_button.h"
+#include "ui/ui_material.h"
 #include "ui/ui_utility.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
@@ -3141,6 +3143,7 @@ base::weak_qptr<Ui::BoxContent> ShowForwardMessagesBox(
 		const auto peer = itemsList.front()->history()->peer;
 		return peer->amMonoforumAdmin() ? peer->monoforumBroadcast() : nullptr;
 	}();
+	const auto soft = Ui::Material::SoftPanels();
 
 	class ListBox final : public PeerListBox {
 	public:
@@ -3479,7 +3482,15 @@ base::weak_qptr<Ui::BoxContent> ShowForwardMessagesBox(
 			session,
 			suggestedChannel);
 		const auto controllerRaw = controller.get();
+		if (soft) {
+			controllerRaw->setStyleOverrides(
+				&st::peerListSoftBox,
+				&st::shareSoftSearch);
+		}
 		auto init = [=](not_null<ListBox*> box) {
+			if (soft) {
+				box->setSoftStyle();
+			}
 			controllerRaw->setSearchNoResultsText(
 				tr::lng_bot_chats_not_found(tr::now));
 			const auto lastFilterId = box->lifetime().make_state<FilterId>(0);
@@ -3582,10 +3593,10 @@ base::weak_qptr<Ui::BoxContent> ShowForwardMessagesBox(
 		state->box.get(),
 		object_ptr<Ui::InputField>(
 			state->box,
-			st::shareComment,
+			soft ? st::shareSoftComment : st::shareComment,
 			Ui::InputField::Mode::MultiLine,
 			tr::lng_photos_comment()),
-		st::shareCommentPadding);
+		soft ? st::shareSoftCommentPadding : st::shareCommentPadding);
 
 	const auto history = session->data().message(msgIds.front())->history();
 	const auto send = ShareBox::DefaultForwardCallback(
@@ -3802,12 +3813,50 @@ base::weak_qptr<Ui::BoxContent> ShowForwardMessagesBox(
 		}
 	}, comment->lifetime());
 
+	if (soft) {
+		const auto sendButton = CreateSoftSendButton(
+			state->box,
+			[=] {
+				if (const auto onstack = state->submit) {
+					onstack({});
+				}
+			},
+			showMenu);
+		sendButton->hide();
+		const auto &padding = st::shareSoftCommentPadding;
+		rpl::combine(
+			comment->geometryValue(),
+			state->controller->selectionChanges()
+		) | rpl::on_next([=](QRect geometry, auto) {
+			sendButton->moveToLeft(
+				(geometry.x()
+					+ geometry.width()
+					- st::shareSoftInsetRight
+					- sendButton->width()),
+				(geometry.y()
+					+ geometry.height()
+					- padding.bottom()
+					- sendButton->height()));
+			sendButton->setVisible(state->controller->hasSelected()
+				&& (geometry.height() >= padding.top()
+					+ padding.bottom()
+					+ sendButton->height()));
+			sendButton->raise();
+		}, sendButton->lifetime());
+	}
+
 	state->controller->selectionChanges(
 	) | rpl::on_next([=] {
 		const auto shown = state->controller->hasSelected();
 
 		state->box->clearButtons();
 		state->refreshStarsToSend();
+		if (soft) {
+			state->box->addTopButton(st::boxTitleClose, [=] {
+				state->box->closeBox();
+			});
+			return;
+		}
 		if (shown) {
 			const auto send = state->box->addButton(
 				tr::lng_send_button(),

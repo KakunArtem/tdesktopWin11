@@ -27,6 +27,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/text/text_options.h"
 #include "ui/painter.h"
 #include "ui/ui_utility.h"
+#include "window/window_soft_panels.h"
 #include "lang/lang_keys.h"
 #include "storage/file_download.h"
 #include "data/data_peer_values.h"
@@ -40,6 +41,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "styles/style_layers.h"
 #include "styles/style_boxes.h"
 #include "styles/style_dialogs.h"
+#include "styles/style_share_box.h"
 #include "styles/style_widgets.h"
 
 #include <xxhash.h> // XXH64.
@@ -338,21 +340,47 @@ void PeerListBox::resizeEvent(QResizeEvent *e) {
 }
 
 void PeerListBox::paintEvent(QPaintEvent *e) {
-	auto p = QPainter(this);
-
 	const auto bg = Ui::ControlFill(_controller->computeListSt().bg);
 	if (!bg.alpha()) {
-		return;
-	}
-	const auto fill = QRect(
-		0,
-		_addedTopScrollSkip,
-		width(),
-		height() - _addedTopScrollSkip);
-	for (const auto &rect : e->region()) {
-		if (const auto part = rect.intersected(fill); !part.isEmpty()) {
-			p.fillRect(part, bg);
+		// WHY: the box is opaque, so its layer never paints below it, and
+		// skipping the fill left stale frames under the search and list.
+		BoxContent::paintEvent(e);
+	} else {
+		auto p = QPainter(this);
+		const auto fill = QRect(
+			0,
+			_addedTopScrollSkip,
+			width(),
+			height() - _addedTopScrollSkip);
+		for (const auto &rect : e->region()) {
+			if (const auto part = rect.intersected(fill); !part.isEmpty()) {
+				p.fillRect(part, bg);
+			}
 		}
+	}
+	if (_soft && _select && !_select->isHidden()) {
+		auto p = QPainter(this);
+		auto hq = PainterHighQualityEnabler(p);
+		const auto pill = _select->geometry().marginsRemoved(
+			st::shareSoftSearchMargins);
+		const auto radius = std::min(
+			st::shareSoftSearchRadius,
+			pill.height() / 2);
+		p.setPen(Qt::NoPen);
+		p.setBrush(Ui::ControlFill(st::windowBgOver));
+		p.drawRoundedRect(pill, radius, radius);
+	}
+}
+
+void PeerListBox::setSoftStyle() {
+	_soft = true;
+	setStyle(st::shareBoxSoft);
+	content()->setSoftCard(true);
+	if (_select) {
+		_select->geometryValue(
+		) | rpl::on_next([=] {
+			update();
+		}, _select->lifetime());
 	}
 }
 
@@ -1640,6 +1668,13 @@ void PeerListContent::refreshRows() {
 	update();
 }
 
+void PeerListContent::setSoftCard(bool enabled) {
+	if (_softCard != enabled) {
+		_softCard = enabled;
+		update();
+	}
+}
+
 void PeerListContent::setSearchMode(PeerListSearchMode mode) {
 	if (_searchMode != mode) {
 		if (!addingToSearchIndex()) {
@@ -1713,6 +1748,11 @@ void PeerListContent::paintEvent(QPaintEvent *e) {
 				p.fillRect(rect, bg);
 			}
 		}
+	}
+	if (_softCard) {
+		Window::SoftPanels::PaintListCard(
+			p,
+			QRectF(rect().marginsRemoved(st::peerListSoftCardMargins)));
 	}
 	p.translate(0, rowsTopCached);
 	const auto handleRepaintAfter = [&](crl::time repaintAfter) {
@@ -2134,10 +2174,26 @@ void PeerListContent::paintRowContent(
 		}
 	});
 
-	if (bg.alpha() > 0) {
-		p.fillRect(0, 0, outerWidth, _rowHeight, bg);
+	if (_softCard) {
+		const auto pill = QRect(0, 0, outerWidth, _rowHeight).marginsRemoved(
+			st::peerListSoftPillMargins);
+		const auto radius = st::peerListSoftPillRadius;
+		auto shape = QPainterPath();
+		shape.addRoundedRect(QRectF(pill), radius, radius);
+		auto hq = PainterHighQualityEnabler(p);
+		if (bg.alpha() > 0) {
+			p.fillPath(shape, bg);
+		}
+		p.save();
+		p.setClipPath(shape, Qt::IntersectClip);
+		row->paintRipple(p, st, 0, 0, outerWidth);
+		p.restore();
+	} else {
+		if (bg.alpha() > 0) {
+			p.fillRect(0, 0, outerWidth, _rowHeight, bg);
+		}
+		row->paintRipple(p, st, 0, 0, outerWidth);
 	}
-	row->paintRipple(p, st, 0, 0, outerWidth);
 	row->paintUserpic(
 		p,
 		st,

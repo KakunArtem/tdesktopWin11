@@ -93,6 +93,18 @@ peerListBox: PeerList(defaultPeerList) {
 		membersMarginBottom);
 	item: peerListBoxItem;
 }
+peerListSoftBoxItem: PeerListItem(peerListBoxItem) {
+	photoPosition: point(26px, 7px);
+	namePosition: point(84px, 9px);
+	statusPosition: point(84px, 30px);
+}
+peerListSoftBox: PeerList(peerListBox) {
+	padding: margins(0px, 10px, 0px, 12px);
+	item: peerListSoftBoxItem;
+}
+peerListSoftCardMargins: margins(12px, 4px, 21px, 4px);
+peerListSoftPillMargins: margins(16px, 2px, 25px, 2px);
+peerListSoftPillRadius: 8px;
 
 localStorageRowTitle: FlatLabel(defaultFlatLabel) {
 	textFg: windowBoldFg;
