@@ -54,7 +54,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File docs\ui-modernization\tools\
 powershell -NoProfile -ExecutionPolicy Bypass -File docs\ui-modernization\tools\Measure-Contrast.ps1 -Samples docs\ui-modernization\checks\samples\shell-layout.json
 ```
 
-The default target is this checkout's exact `out\Debug\Telegram.exe`.
+The default target is this checkout's exact `out\Debug\Lumigram.exe`.
 `-WindowHandle` selects an isolated native test window. `Test-Backdrop -Window
 Popup` selects the topmost visible top-level window other than the largest
 window in that process; close unrelated separate windows before checking a

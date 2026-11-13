@@ -342,20 +342,20 @@ not-yet-rewritten `test_gram_account.txt`, which the flow never deletes (the fun
 above): stop and report instead. Never delete or alter `test_...` or `real_...` under any
 circumstances.
 
-**Serialize app runs.** Never have two `Telegram.exe` instances alive against this account at once —
+**Serialize app runs.** Never have two `Lumigram.exe` instances alive against this account at once —
 concurrent reuse of one auth key can trigger a server-side session reset. Before SETUP, launching, or
 rebuilding, kill any straggler **of THIS checkout's binary only** — the one whose full executable
-path is `EXE` (`out/Debug/Telegram.exe` in this checkout). Match on the full path; do NOT blanket-kill
-every `Telegram.exe` on the machine. The user may be running a system-installed client or another
+path is `EXE` (`out/Debug/Lumigram.exe` in this checkout). Match on the full path; do NOT blanket-kill
+every `Lumigram.exe` on the machine. The user may be running a system-installed client or another
 checkout's build against unrelated accounts — those use different auth keys, never conflict with this
 account, and MUST be left alive. On Windows, scope the kill by path:
 
     $exe = (Resolve-Path "$EXE").Path
-    Get-CimInstance Win32_Process -Filter "Name = 'Telegram.exe'" |
+    Get-CimInstance Win32_Process -Filter "Name = 'Lumigram.exe'" |
       Where-Object { $_.ExecutablePath -eq $exe } |
       ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
-`taskkill /IM Telegram.exe /F` is forbidden here and anywhere else in this loop — it is image-name-wide
+`taskkill /IM Lumigram.exe /F` is forbidden here and anywhere else in this loop — it is image-name-wide
 and takes down the user's unrelated clients. Every "kill stragglers" / "taskkill" step below means
 this path-scoped kill. The workspace helper's `test-run` and `test-cleanup` commands implement it
 on every platform; prefer them over hand-written kill shell.
@@ -1003,7 +1003,7 @@ the directness ladder above; the same timeout signature alone never blocks the t
 
 ### Leave no test binary behind
 
-The on-disk `EXE` (`out/Debug/Telegram.exe`) always contains the compiled overlay after a test run.
+The on-disk `EXE` (`out/Debug/Lumigram.exe`) always contains the compiled overlay after a test run.
 Restoring source does not rewrite the binary. When the loop reaches a TERMINAL verdict (APPROVED,
 BLOCKED, UNRECOVERABLE, or attempt cap), after the final path-scoped kill and exact-path source
 restore, **delete the built `EXE`** so no overlay-laden test binary is left for

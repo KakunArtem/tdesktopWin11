@@ -59,6 +59,7 @@ WSL/Linux:      Telegram/build/docker/centos_env/build_debug.sh
 macOS/other:    AGENTS.md and the configured Debug tree
 
 EXE candidates:
+out/Debug/Lumigram.exe
 out/Debug/Telegram.exe
 out/Debug/Telegram
 out/Debug/Telegram.app/Contents/MacOS/Telegram

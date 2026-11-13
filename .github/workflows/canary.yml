@@ -663,12 +663,12 @@ jobs:
           # the account exists. The signing itself is:
           echo "$SM_CLIENT_CERT_FILE_B64" | base64 -d > /tmp/keylocker.p12
           export SM_CLIENT_CERT_FILE=/tmp/keylocker.p12
-          smctl sign --keypair-alias "$SM_KEYPAIR_ALIAS" --input Telegram.exe
+          smctl sign --keypair-alias "$SM_KEYPAIR_ALIAS" --input Lumigram.exe
           smctl sign --keypair-alias "$SM_KEYPAIR_ALIAS" --input Updater.exe
           # Both binaries are verified here, on the exact bytes that get
           # packed: Updater.exe travels only inside the update envelope,
-          # the publish job can re-check just the portable's Telegram.exe.
-          signtool verify /pa /all Telegram.exe
+          # the publish job can re-check just the portable's Lumigram.exe.
+          signtool verify /pa /all Lumigram.exe
           signtool verify /pa /all Updater.exe
           echo "signed=true" >> $GITHUB_OUTPUT
 
@@ -689,7 +689,7 @@ jobs:
           # the release copy is a pinned known-good build for Windows 7,
           # while CI would grab whatever the runner's SDK ships. Canary
           # machines use the system compiler dll.
-          ./Packer.exe -path Telegram.exe -path Updater.exe \
+          ./Packer.exe -path Lumigram.exe -path Updater.exe \
             -target win64 \
             -version $BASE \
             -channel canary-${{ needs.version.outputs.channel }} \
@@ -722,7 +722,7 @@ jobs:
           rm -rf portable
           mkdir -p portable/$CANARY_FOLDER/TelegramForcePortable
           touch portable/$CANARY_FOLDER/TelegramForcePortable/.keep
-          cp Telegram.exe portable/$CANARY_FOLDER/
+          cp Lumigram.exe portable/$CANARY_FOLDER/
           (cd portable && 7z a -mx9 ../$PORTABLE $CANARY_FOLDER/)
 
           mkdir -p artifact/update artifact/portable
@@ -1511,12 +1511,12 @@ jobs:
           # Publishing unsigned binaries is never allowed: this is a hard
           # gate, not a warning. Both binaries inside the update envelope
           # were verified with signtool right after signing in the build
-          # job; here the portable's Telegram.exe is re-checked as the
+          # job; here the portable's Lumigram.exe is re-checked as the
           # publish-side witness.
           sudo apt-get update && sudo apt-get install -y osslsigncode
           unzip -q artifacts/portable/td-portable-win-x64-*.zip -d /tmp/winapp
-          if ! osslsigncode verify /tmp/winapp/${{ needs.version.outputs.folder }}/Telegram.exe; then
-            echo "::error::The portable Telegram.exe is not Authenticode-signed."
+          if ! osslsigncode verify /tmp/winapp/${{ needs.version.outputs.folder }}/Lumigram.exe; then
+            echo "::error::The portable Lumigram.exe is not Authenticode-signed."
             exit 1
           fi
 

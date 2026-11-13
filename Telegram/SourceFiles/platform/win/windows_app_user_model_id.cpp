@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "platform/win/windows_toast_activator.h"
 #include "base/platform/win/base_windows_winrt.h"
 #include "core/launcher.h"
+#include "core/version.h"
 
 #include <propvarutil.h>
 #include <propkey.h>
@@ -28,7 +29,7 @@ const PROPERTYKEY pkey_AppUserModel_ToastActivator = { { 0x9F4C2855, 0x9F79, 0x4
 #ifdef OS_WIN_STORE
 const WCHAR AppUserModelIdBase[] = L"Telegram.TelegramDesktop.Store";
 #else // OS_WIN_STORE
-const WCHAR AppUserModelIdBase[] = L"Telegram.TelegramDesktop";
+const WCHAR AppUserModelIdBase[] = L"Lumigram.Lumigram";
 #endif // OS_WIN_STORE
 
 [[nodiscard]] QString PinnedIconsPath() {
@@ -345,7 +346,7 @@ bool checkInstalled(QString path = {}) {
 		}
 	}
 
-	const auto installed = u"Telegram Desktop/Telegram.lnk"_q;
+	const auto installed = AppName.utf16() + '/' + AppFile.utf16() + u".lnk"_q;
 	const auto old = u"Telegram Win (Unofficial)/Telegram.lnk"_q;
 	return validateShortcutAt(path + installed)
 		|| validateShortcutAt(path + old);

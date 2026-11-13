@@ -29,9 +29,9 @@ function Get-CheckWindow {
     $handle = [IntPtr]$WindowHandle
   } else {
     $checkout = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
-    $executable = Join-Path $checkout 'out/Debug/Telegram.exe'
-    $processes = @(Get-Process Telegram -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $executable })
-    if ($processes.Count -ne 1) { throw 'Start exactly one checkout out\Debug\Telegram.exe, or specify -WindowHandle.' }
+    $executable = Join-Path $checkout 'out/Debug/Lumigram.exe'
+    $processes = @(Get-Process Lumigram -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $executable })
+    if ($processes.Count -ne 1) { throw 'Start exactly one checkout out\Debug\Lumigram.exe, or specify -WindowHandle.' }
     $handle = [UiChecks.Native]::SelectWindow([uint32]$processes[0].Id, ($Window -eq 'Popup'))
   }
   if (-not $handle -or -not [UiChecks.Native]::Visible($handle)) { throw "No visible $Window target window found." }

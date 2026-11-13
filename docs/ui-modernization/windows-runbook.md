@@ -90,7 +90,7 @@ Build Debug only, never Release, from the checkout root:
 cmake --build out --config Debug --target Telegram
 ```
 
-Run `out\Debug\Telegram.exe`, sign in to a test account, and check that it
+Run `out\Debug\Lumigram.exe`, sign in to a test account, and check that it
 looks exactly like upstream. This is the baseline every solid-parity check
 compares with.
 
@@ -118,5 +118,5 @@ as tasks commit.
 - Libraries not found: the checkout must sit next to `win64\Libraries` and
   `ThirdParty`, in the folder the prepare script ran from.
 - Wrong command prompt: use the x64 terminal from step 4.
-- A locked `Telegram.exe` or `.pdb`: close the running Debug Telegram, or
+- A locked `Lumigram.exe` or `.pdb`: close the running Debug Telegram, or
   ask before stopping it.
