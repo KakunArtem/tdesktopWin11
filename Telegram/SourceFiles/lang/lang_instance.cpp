@@ -8,6 +8,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "lang/lang_instance.h"
 
 #include "core/application.h"
+#include "core/version.h"
+#include "base/flat_set.h"
 #include "storage/serialize_common.h"
 #include "storage/localstorage.h"
 #include "ui/boxes/confirm_box.h"
@@ -197,16 +199,66 @@ QString PluralCodeForCustom(
 	return DefaultLanguageId();
 }
 
+// WHY: cloud language packs, English included, override the bundled strings,
+// so the app's own name is substituted in every pack where it names the app.
+[[nodiscard]] QString Rebrand(ushort key, QString value) {
+	static const auto desktopOnly = base::flat_set<ushort>{
+		tr::lng_error_start_minimized_passcoded.base,
+		tr::lng_proxy_unsupported.base,
+		tr::lng_settings_auto_start_disabled_uwp.base,
+		tr::lng_passcode_about.base,
+		tr::lng_passcode_about2.base,
+		tr::lng_passcode_about3.base,
+		tr::lng_bot_share_location_unavailable.base,
+		tr::lng_new_version_wrap.base,
+		tr::lng_terms_delete_warning.base,
+		tr::lng_outdated_soon.base,
+		tr::lng_outdated_now.base,
+		tr::lng_wallet_protection_open_warning_lock.base,
+	};
+	static const auto appName = base::flat_set<ushort>{
+		tr::lng_open_from_tray.base,
+		tr::lng_quit_from_tray.base,
+		tr::lng_tray_icon_text.base,
+		tr::lng_update_telegram.base,
+		tr::lng_unsupported_message_text.base,
+		tr::lng_unsupported_block_text.base,
+		tr::lng_sure_save_language.base,
+		tr::lng_export_progress.base,
+		tr::lng_screen_reader_bar_text.base,
+		tr::lng_no_mic_permission.base,
+		tr::lng_passport_app_out_of_date.base,
+		tr::lng_settings_auto_start.base,
+		tr::lng_settings_add_sendto.base,
+	};
+	const auto name = AppName.utf16();
+	if (desktopOnly.contains(key) || appName.contains(key)) {
+		value.replace(u"Telegram Desktop"_q, name);
+	}
+	if (appName.contains(key)) {
+		value.replace(u"Telegram"_q, name);
+	}
+	return value;
+}
+
+// WHY: these packs call the app official, so the bundled text always wins.
+[[nodiscard]] bool KeepBundled(ushort key) {
+	return (key == tr::lng_intro_about.base)
+		|| (key == tr::lng_about_text1.base);
+}
+
 template <typename Save>
 void ParseKeyValue(
 		const QByteArray &key,
 		const QByteArray &value,
 		Save &&save) {
 	const auto index = GetKeyIndex(QLatin1String(key));
-	if (index != kKeysCount) {
+	if (index != kKeysCount && KeepBundled(index)) {
+		return;
+	} else if (index != kKeysCount) {
 		ValueParser parser(key, index, value);
 		if (parser.parse()) {
-			save(index, parser.takeResult());
+			save(index, Rebrand(index, parser.takeResult()));
 		}
 	} else if (!key.startsWith("cloud_")) {
 		DEBUG_LOG(("Lang Warning: Unknown key '%1'"
