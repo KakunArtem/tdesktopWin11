@@ -33,6 +33,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/checkbox.h"
 #include "ui/widgets/color_editor.h"
 #include "ui/widgets/labels.h"
+#include "ui/widgets/continuous_sliders.h"
 #include "ui/chat/attach/attach_extensions.h"
 #include "ui/chat/chat_style.h"
 #include "ui/chat/chat_theme.h"
@@ -1879,6 +1880,42 @@ void SetupChatBackground(
 				{ .radius = st::boxRadius },
 			} });
 		}
+		inner->add(
+			object_ptr<Ui::FlatLabel>(
+				inner,
+				tr::lng_settings_window_transparency(),
+				st::settingsTransparencyTitle),
+			st::settingsTransparencyTitlePadding);
+		auto transparency = MakeSliderWithLabel(
+			inner,
+			st::settingsScale,
+			st::settingsScaleLabel,
+			st::normalFont->spacew * 2,
+			st::settingsScaleLabel.style.font->width(u"100%"_q));
+		inner->add(
+			std::move(transparency.widget),
+			st::settingsTransparencyPadding);
+		const auto slider = transparency.slider;
+		const auto label = transparency.label;
+		const auto updateLabel = [=](int value) {
+			label->setText(QString::number(value) + '%');
+		};
+		const auto current = Window::Material::WindowTransparency();
+		updateLabel(current);
+		slider->setAccessibleName(
+			tr::lng_settings_window_transparency(tr::now));
+		const auto apply = [=](int percent) {
+			updateLabel(percent);
+			Window::Material::SetWindowTransparency(percent);
+		};
+		// WHY: 5% steps make the 50% default easy to land on again.
+		constexpr auto kSteps = 21;
+		slider->setPseudoDiscrete(
+			kSteps,
+			[](int index) { return index * 5; },
+			current,
+			apply,
+			apply);
 	}
 }
 

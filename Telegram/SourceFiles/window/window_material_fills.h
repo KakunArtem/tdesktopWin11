@@ -51,7 +51,15 @@ struct ChatColors {
 	QColor unreadFg;
 };
 
+inline constexpr auto kDefaultTransparency = 0.5;
+
 [[nodiscard]] float64 Floor(Surface surface, bool dark);
+
+// WHY: 0 is solid, kDefaultTransparency keeps Floor() as is, 1 halves it.
+// Popups keep their own floor so menus stay readable over anything.
+void SetTransparency(float64 value);
+[[nodiscard]] float64 Transparency();
+[[nodiscard]] float64 EffectiveFloor(Surface surface, bool dark);
 [[nodiscard]] BackdropRange AcrylicRange(bool dark);
 [[nodiscard]] QColor Composite(const QColor &over, const QColor &under);
 [[nodiscard]] QColor ComputeFill(Surface surface, const FillInputs &inputs);

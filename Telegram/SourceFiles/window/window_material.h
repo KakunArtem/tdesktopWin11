@@ -21,6 +21,8 @@ void SetSettingEnabled(bool enabled);
 
 [[nodiscard]] bool ChatBackgroundEnabled();
 void SetChatBackgroundEnabled(bool enabled);
+[[nodiscard]] int WindowTransparency();
+void SetWindowTransparency(int value);
 [[nodiscard]] bool PopupMaterialEnabled();
 void SetPopupMaterialEnabled(bool enabled);
 [[nodiscard]] bool ChatBackgroundActive();

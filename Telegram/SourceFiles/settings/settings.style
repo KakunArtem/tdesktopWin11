@@ -100,6 +100,11 @@ settingsScale: MediaSlider(defaultContinuousSlider) {
 settingsScaleLabel: FlatLabel(defaultFlatLabel) {
 	textFg: windowActiveTextFg;
 }
+settingsTransparencyTitle: FlatLabel(defaultFlatLabel) {
+	textFg: windowFg;
+}
+settingsTransparencyTitlePadding: margins(22px, 10px, 22px, 0px);
+settingsTransparencyPadding: margins(22px, 8px, 22px, 8px);
 settingsUpdateToggle: SettingsButton(settingsButtonNoIcon) {
 	height: 40px;
 	padding: margins(22px, 8px, 22px, 8px);

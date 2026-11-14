@@ -21,6 +21,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "window/window_material_fills.h"
 #include "window/window_soft_panels.h"
 
+#include <algorithm>
 #include <cmath>
 #include <optional>
 
@@ -34,6 +35,8 @@ namespace {
 constexpr auto kPopupBackdropFillOpacity = 0.80;
 
 constexpr auto kPopupMaterialPref = std::string_view("popup_material");
+constexpr auto kTransparencyPref = std::string_view(
+	"window_material_transparency");
 
 // WHY: the experimental option is no longer listed; it stays registered so
 // a value stored by an older build is read once into the setting.
@@ -196,7 +199,7 @@ bool SetPaletteEntry(const style::color &entry, const QColor &color) {
 			|| ContrastOver(inputs.secondaryText, opaque) <= 1.;
 		coverage[role] = unreadable
 			? 100
-			: int(std::lround(Floor(role, dark) * 100));
+			: int(std::lround(EffectiveFloor(role, dark) * 100));
 	}
 	const auto range = AcrylicRange(dark);
 	auto blocked = base::flat_set<const style::color*>();
@@ -380,6 +383,28 @@ void SetChatBackgroundEnabled(bool enabled) {
 	ChatBackgroundState = enabled;
 }
 
+int WindowTransparency() {
+	const auto stored = Core::App().settings().readPref<QByteArray>(
+		kTransparencyPref);
+	auto ok = false;
+	const auto value = stored.toInt(&ok);
+	return ok
+		? std::clamp(value, 0, 100)
+		: int(std::lround(kDefaultTransparency * 100));
+}
+
+void SetWindowTransparency(int value) {
+	value = std::clamp(value, 0, 100);
+	Core::App().settings().writePref<QByteArray>(
+		kTransparencyPref,
+		QByteArray::number(value));
+	Core::App().saveSettingsDelayed();
+	SetTransparency(value / 100.);
+	if (Active()) {
+		RecomputeFills(true);
+	}
+}
+
 bool ChatBackgroundActive() {
 	return Active() && ChatBackgroundState.current();
 }
@@ -396,6 +421,7 @@ bool Capable() {
 	if (!StartupCapability.has_value()) {
 		SoftPanels::Initialize();
 		ChatBackgroundState = ChatBackgroundEnabled();
+		SetTransparency(WindowTransparency() / 100.);
 #ifdef Q_OS_WIN
 		StartupCapability = Platform::Material::Decide().backdrop
 			== Backdrop::Acrylic;

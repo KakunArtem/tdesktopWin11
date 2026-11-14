@@ -11,11 +11,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/chat_theme_readability.h"
 #include "base/assertion.h"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
 namespace Window::Material {
 namespace {
+
+auto TransparencyValue = kDefaultTransparency;
 
 [[nodiscard]] float64 ContrastOver(
 		const QColor &text,
@@ -35,6 +38,30 @@ float64 Floor(Surface surface, bool dark) {
 	case Surface::Popup: return 0.97;
 	}
 	Unexpected("Invalid material surface.");
+}
+
+void SetTransparency(float64 value) {
+	TransparencyValue = std::clamp(value, 0., 1.);
+}
+
+float64 Transparency() {
+	return TransparencyValue;
+}
+
+float64 EffectiveFloor(Surface surface, bool dark) {
+	const auto floor = Floor(surface, dark);
+	if (surface == Surface::Popup) {
+		return floor;
+	}
+	const auto value = TransparencyValue;
+	if (value >= kDefaultTransparency) {
+		const auto progress = (value - kDefaultTransparency)
+			/ (1. - kDefaultTransparency);
+		return floor * (1. - 0.5 * progress);
+	}
+	const auto progress = (kDefaultTransparency - value)
+		/ kDefaultTransparency;
+	return floor + (1. - floor) * progress;
 }
 
 BackdropRange AcrylicRange(bool dark) {
@@ -68,7 +95,8 @@ QColor ComputeFill(Surface surface, const FillInputs &inputs) {
 				>= std::min(4.5, secondary);
 	};
 	const auto range = AcrylicRange(inputs.dark);
-	const auto first = int(std::lround(Floor(surface, inputs.dark) * 100));
+	const auto first = int(std::lround(
+		EffectiveFloor(surface, inputs.dark) * 100));
 	for (auto step = first; step <= 100; ++step) {
 		fill.setAlphaF(step / 100.);
 		if (acceptable(Composite(fill, range.darkest))
@@ -123,7 +151,7 @@ QColor ReadableOver(
 		bool dark,
 		float64 target) {
 	auto fill = surface;
-	fill.setAlphaF(Floor(role, dark));
+	fill.setAlphaF(EffectiveFloor(role, dark));
 	const auto range = AcrylicRange(dark);
 	return Ui::EnsureTextContrast(text, {
 		Composite(fill, range.darkest),
