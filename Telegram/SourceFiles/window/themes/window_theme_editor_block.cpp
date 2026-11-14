@@ -13,6 +13,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/effects/ripple_animation.h"
 #include "ui/layers/generic_box.h"
 #include "ui/painter.h"
+#include "ui/ui_material.h"
+#include "ui/ui_material_bars.h"
 #include "ui/widgets/color_editor.h"
 #include "ui/widgets/shadow.h"
 #include "styles/style_widgets.h"
@@ -716,20 +718,57 @@ void EditorBlock::paintRow(Painter &p, int index, const Row &row) {
 	auto rect = QRect(0, row.top(), width(), row.height());
 	auto selected = (_pressed >= 0) ? (index == _pressed) : (index == _selected);
 	auto active = (findRowIndex(&row) == _editing);
-	p.fillRect(rect, active ? st::dialogsBgActive : selected ? st::dialogsBgOver : st::dialogsBg);
+	const auto soft = Ui::Material::SoftPanels();
+	const auto card = rect.marginsRemoved(st::themeEditorSoftRowMargins);
+	const auto cardRadius = st::themeEditorSoftRowRadius;
+	if (soft) {
+		auto hq = PainterHighQualityEnabler(p);
+		if (active || selected) {
+			p.setPen(Qt::NoPen);
+			p.setBrush(active ? st::dialogsBgActive : st::dialogsBgOver);
+			p.drawRoundedRect(card, cardRadius, cardRadius);
+		} else {
+			Ui::Material::PaintListCard(p, QRectF(card), cardRadius);
+		}
+	} else {
+		p.fillRect(rect, active ? st::dialogsBgActive : selected ? st::dialogsBgOver : st::dialogsBg);
+	}
 	if (auto ripple = row.ripple()) {
-		ripple->paint(p, 0, row.top(), width(), &(active ? st::activeButtonBgRipple : st::windowBgRipple)->c);
+		const auto color = &(active ? st::activeButtonBgRipple : st::windowBgRipple)->c;
+		if (soft) {
+			ripple->paint(p, card.x(), card.y(), width(), color);
+		} else {
+			ripple->paint(p, 0, row.top(), width(), color);
+		}
 		if (ripple->empty()) {
 			row.resetRipple();
 		}
 	}
 
 	auto sample = QRect(width() - st::themeEditorMargin.right() - st::themeEditorSampleSize.width(), rowTop, st::themeEditorSampleSize.width(), st::themeEditorSampleSize.height());
-	Ui::Shadow::paint(p, sample, width(), st::defaultRoundShadow);
-	if (row.value().alpha() != 255) {
-		p.fillRect(myrtlrect(sample), _transparent);
+	if (soft) {
+		auto hq = PainterHighQualityEnabler(p);
+		const auto radius = st::themeEditorSoftSampleRadius;
+		auto shape = QPainterPath();
+		shape.addRoundedRect(QRectF(myrtlrect(sample)), radius, radius);
+		if (row.value().alpha() != 255) {
+			p.save();
+			p.setClipPath(shape);
+			p.fillRect(myrtlrect(sample), _transparent);
+			p.restore();
+		}
+		auto border = st::windowFg->c;
+		border.setAlphaF(0.12);
+		p.setPen(QPen(border, st::lineWidth));
+		p.setBrush(row.value());
+		p.drawPath(shape);
+	} else {
+		Ui::Shadow::paint(p, sample, width(), st::defaultRoundShadow);
+		if (row.value().alpha() != 255) {
+			p.fillRect(myrtlrect(sample), _transparent);
+		}
+		p.fillRect(myrtlrect(sample), row.value());
 	}
-	p.fillRect(myrtlrect(sample), row.value());
 
 	auto rowWidth = width() - st::themeEditorMargin.left() - st::themeEditorMargin.right();
 	auto nameWidth = rowWidth - st::themeEditorSampleSize.width() - st::themeEditorDescriptionSkip;
@@ -751,7 +790,14 @@ void EditorBlock::paintRow(Painter &p, int index, const Row &row) {
 	}
 
 	if (isEditing() && !active && (_type == Type::New || (_editing >= 0 && findRowIndex(&row) >= _editing))) {
-		p.fillRect(rect, st::layerBg);
+		if (soft) {
+			auto hq = PainterHighQualityEnabler(p);
+			p.setPen(Qt::NoPen);
+			p.setBrush(st::layerBg);
+			p.drawRoundedRect(card, cardRadius, cardRadius);
+		} else {
+			p.fillRect(rect, st::layerBg);
+		}
 	}
 }
 
@@ -789,12 +835,25 @@ void EditorBlock::addRowRipple(int index) {
 	auto &row = rowAtIndex(index);
 	auto ripple = row.ripple();
 	if (!ripple) {
-		auto mask = Ui::RippleAnimation::RectMask(QSize(width(), row.height()));
+		const auto soft = Ui::Material::SoftPanels();
+		const auto margins = st::themeEditorSoftRowMargins;
+		auto mask = soft
+			? Ui::RippleAnimation::RoundRectMask(
+				QSize(
+					width() - margins.left() - margins.right(),
+					row.height() - margins.top() - margins.bottom()),
+				st::themeEditorSoftRowRadius)
+			: Ui::RippleAnimation::RectMask(QSize(width(), row.height()));
 		ripple = row.setRipple(std::make_unique<Ui::RippleAnimation>(st::defaultRippleAnimation, std::move(mask), [this, index = findRowIndex(&row)] {
 			updateRow(_data[index]);
 		}));
 	}
 	auto origin = mapFromGlobal(QCursor::pos()) - QPoint(0, row.top());
+	if (Ui::Material::SoftPanels()) {
+		origin -= QPoint(
+			st::themeEditorSoftRowMargins.left(),
+			st::themeEditorSoftRowMargins.top());
+	}
 	ripple->add(origin);
 }
 

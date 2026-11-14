@@ -155,6 +155,22 @@ themeEditorMargin: margins(17px, 10px, 17px, 10px);
 themeEditorDescriptionSkip: 10px;
 themeEditorNameFont: font(15px semibold);
 themeEditorCopyNameFont: font(fsize semibold);
+themeEditorSoftCardMargins: margins(4px, 0px, 6px, 6px);
+themeEditorSoftSearch: MultiSelect(defaultMultiSelect) {
+	bg: transparent;
+	padding: margins(14px, 6px, 14px, 6px);
+}
+themeEditorSoftSearchMargins: margins(12px, 4px, 12px, 4px);
+themeEditorSoftSearchRadius: 18px;
+themeEditorSoftRowMargins: margins(6px, 3px, 6px, 3px);
+themeEditorSoftRowRadius: 12px;
+themeEditorSoftSampleRadius: 9px;
+themeEditorSoftSavePadding: 12px;
+themeEditorSoftSave: RoundButton(defaultActiveButton) {
+	height: 40px;
+	textTop: 11px;
+	radius: 20px;
+}
 
 connectingLeftShadow: icon {{ "connecting_left_shadow", windowShadowFg }};
 connectingLeft: icon {{ "connecting_left", windowBg }};

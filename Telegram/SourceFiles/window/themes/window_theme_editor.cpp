@@ -27,6 +27,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/image/image_prepare.h"
 #include "ui/painter.h"
 #include "ui/ui_utility.h"
+#include "ui/ui_material.h"
+#include "ui/widgets/soft_controls.h"
+#include "window/window_soft_panels.h"
 #include "boxes/abstract_box.h"
 #include "base/parse_helper.h"
 #include "base/zlib_help.h"
@@ -672,7 +675,12 @@ Editor::Editor(
 , _scroll(this)
 , _close(this, st::defaultMultiSelect.fieldCancel)
 , _menuToggle(this, st::themesMenuToggle)
-, _select(this, st::defaultMultiSelect, tr::lng_country_ph())
+, _select(
+		this,
+		(Ui::Material::SoftPanels()
+			? st::themeEditorSoftSearch
+			: st::defaultMultiSelect),
+		tr::lng_country_ph())
 , _leftShadow(this)
 , _topShadow(this)
 , _save(
@@ -717,8 +725,29 @@ Editor::Editor(
 	_select->setQueryChangedCallback([this](const QString &query) { _inner->filterRows(query); _scroll->scrollToY(0); });
 	_select->setSubmittedCallback([this](Qt::KeyboardModifiers) { _inner->chooseRow(); });
 
+	if (Ui::Material::SoftPanels()) {
+		setupSoft();
+	}
+
 	_inner->prepare();
 	resizeToWidth(st::windowMinWidth);
+}
+
+void Editor::setupSoft() {
+	_leftShadow->hide();
+	_topShadow->hide();
+	_save->hide();
+	_softSave.create(
+		this,
+		tr::lng_theme_editor_save_button(),
+		st::themeEditorSoftSave);
+	_softSave->setTextTransform(Ui::RoundButtonTextTransform::NoTransform);
+	_softSave->setClickedCallback([=] { save(); });
+	_softSave->show();
+}
+
+QRect Editor::softCard() const {
+	return rect().marginsRemoved(st::themeEditorSoftCardMargins);
 }
 
 void Editor::showMenu() {
@@ -856,6 +885,38 @@ void Editor::resizeEvent(QResizeEvent *e) {
 }
 
 void Editor::updateControlsGeometry() {
+	if (_softSave) {
+		const auto card = softCard();
+		const auto padding = st::themeEditorSoftSavePadding;
+		_close->moveToLeft(
+			card.x() + card.width() - _close->width(),
+			card.y());
+		_menuToggle->moveToLeft(
+			_close->x() - _menuToggle->width(),
+			card.y());
+		_select->resizeToWidth(card.width());
+		_select->moveToLeft(card.x(), card.y() + _close->height());
+		_softSave->setFullWidth(card.width() - 2 * padding);
+		const auto saveTop = card.y()
+			+ card.height()
+			- padding
+			- _softSave->height();
+		_softSave->moveToLeft(card.x() + padding, saveTop);
+		const auto scrollTop = _select->y() + _select->height();
+		const auto scrollSize = QSize(
+			card.width(),
+			std::max(saveTop - padding - scrollTop, 0));
+		if (_scroll->size() != scrollSize) {
+			_scroll->resize(scrollSize);
+		}
+		_inner->resizeToWidth(card.width());
+		_scroll->moveToLeft(card.x(), scrollTop);
+		if (!_scroll->isHidden()) {
+			const auto top = _scroll->scrollTop();
+			_inner->setVisibleTopBottom(top, top + _scroll->height());
+		}
+		return;
+	}
 	_save->resizeToWidth(width());
 	_close->moveToRight(0, 0);
 	_menuToggle->moveToRight(_close->width(), 0);
@@ -907,6 +968,27 @@ void Editor::focusInEvent(QFocusEvent *e) {
 void Editor::paintEvent(QPaintEvent *e) {
 	Painter p(this);
 
+	if (_softSave) {
+		const auto card = softCard();
+		Window::SoftPanels::PaintCard(p, card);
+		auto hq = PainterHighQualityEnabler(p);
+		const auto pill = _select->geometry().marginsRemoved(
+			st::themeEditorSoftSearchMargins);
+		const auto radius = std::min(
+			st::themeEditorSoftSearchRadius,
+			pill.height() / 2);
+		p.setPen(Qt::NoPen);
+		p.setBrush(Ui::ControlFill(st::windowBgOver));
+		p.drawRoundedRect(pill, radius, radius);
+		p.setFont(st::boxTitleFont);
+		p.setPen(st::windowFg);
+		p.drawTextLeft(
+			card.x() + st::themeEditorMargin.left(),
+			card.y() + st::themeEditorMargin.top(),
+			width(),
+			tr::lng_theme_editor_title(tr::now));
+		return;
+	}
 	p.fillRect(e->rect(), st::dialogsBg);
 
 	p.setFont(st::boxTitleFont);

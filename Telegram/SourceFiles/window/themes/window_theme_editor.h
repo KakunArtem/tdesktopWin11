@@ -17,6 +17,7 @@ struct colorizer;
 
 namespace Ui {
 class FlatButton;
+class RoundButton;
 class ScrollArea;
 class CrossButton;
 class MultiSelect;
@@ -73,6 +74,8 @@ private:
 	void closeEditor();
 	void closeWithConfirmation();
 	void updateControlsGeometry();
+	void setupSoft();
+	[[nodiscard]] QRect softCard() const;
 
 	const not_null<Window::Controller*> _window;
 	const Data::CloudTheme _cloud;
@@ -87,6 +90,7 @@ private:
 	object_ptr<Ui::PlainShadow> _leftShadow;
 	object_ptr<Ui::PlainShadow> _topShadow;
 	object_ptr<Ui::FlatButton> _save;
+	object_ptr<Ui::RoundButton> _softSave = { nullptr };
 	bool _saving = false;
 
 };
